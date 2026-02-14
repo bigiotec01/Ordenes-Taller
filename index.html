@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Pedidos Dealer 2.0.2</title>
+    <title>Pedidos Dealer 2.0.3</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Pedidos">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1554/1554401.png?v=2">
-    <link rel="manifest" href="manifest.json?v=2">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1554/1554401.png?v=3">
+    <link rel="manifest" href="manifest.json?v=3">
     <meta name="theme-color" content="#F2F2F7">
 
     <style>
@@ -21,31 +21,23 @@
             --ios-text: #000000;
             --ios-gray: #8E8E93;
             --ios-danger: #FF3B30;
+            --ios-orange: #FF9500;
         }
 
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            margin: 0; 
-            background: var(--ios-bg); 
-            color: var(--ios-text);
-            -webkit-font-smoothing: antialiased;
-            padding-bottom: 120px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            margin: 0; background: var(--ios-bg); color: var(--ios-text);
+            -webkit-font-smoothing: antialiased; padding-bottom: 120px;
         }
 
-        /* Título estilo iOS */
         .header { 
-            background: rgba(242, 242, 247, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 60px 20px 10px 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            background: rgba(242, 242, 247, 0.8); backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px); padding: 60px 20px 10px 20px;
+            position: sticky; top: 0; z-index: 100;
         }
 
-        .header h1 { margin: 0; font-size: 34px; font-weight: 700; letter-spacing: -1px; }
+        h1 { margin: 0; font-size: 34px; font-weight: 700; letter-spacing: -1px; }
 
-        /* Buscador estilo iOS */
         .search-container { padding: 10px 16px; }
         .search-bar {
             background: #E3E3E8; border-radius: 10px; padding: 8px 12px;
@@ -58,65 +50,44 @@
 
         .container { padding: 16px; }
 
-        /* Grupos de Formulario estilo Settings */
         .ios-group {
             background: var(--ios-card); border-radius: 12px;
-            margin-bottom: 25px; overflow: hidden;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            margin-bottom: 25px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
         .ios-row {
-            display: flex; align-items: center;
-            padding: 12px 16px; border-bottom: 0.5px solid #C6C6C8;
+            display: flex; align-items: center; padding: 12px 16px; border-bottom: 0.5px solid #C6C6C8;
         }
 
         .ios-row:last-child { border-bottom: none; }
         .ios-row label { width: 95px; font-size: 15px; color: var(--ios-text); }
         .ios-row input { flex: 1; border: none; font-size: 17px; outline: none; background: transparent; }
 
-        button.main-btn {
-            width: 100%; background: var(--ios-blue); color: white;
-            border: none; padding: 14px; border-radius: 12px;
-            font-size: 17px; font-weight: 600; transition: opacity 0.2s;
+        .main-btn {
+            width: 100%; color: white; border: none; padding: 14px; 
+            border-radius: 12px; font-size: 17px; font-weight: 600; margin-bottom: 10px;
         }
-        button.main-btn:active { opacity: 0.7; }
+        .btn-blue { background: var(--ios-blue); }
+        .btn-orange { background: var(--ios-orange); }
 
-        /* Tarjetas de Órdenes */
         .order-card {
-            background: var(--ios-card); border-radius: 14px;
-            padding: 16px; margin-bottom: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            position: relative;
+            background: var(--ios-card); border-radius: 14px; padding: 16px;
+            margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
 
         .taller-title { font-size: 19px; font-weight: 600; margin-bottom: 5px; }
         .details { font-size: 15px; color: var(--ios-gray); line-height: 1.4; }
-        .details b { color: var(--ios-text); font-weight: 500; }
-
-        .actions { 
-            display: flex; gap: 10px; margin-top: 15px; 
-            border-top: 0.5px solid #E5E5EA; padding-top: 12px; 
+        .badge-today { 
+            background: var(--ios-danger); color: white; padding: 2px 8px; 
+            border-radius: 6px; font-size: 11px; font-weight: 800; margin-left: 8px;
         }
 
-        .btn-action {
-            flex: 1; border: none; padding: 10px; border-radius: 8px;
-            font-size: 14px; font-weight: 600; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-        }
-
+        .actions { display: flex; gap: 10px; margin-top: 15px; border-top: 0.5px solid #E5E5EA; padding-top: 12px; }
+        .btn-action { flex: 1; border: none; padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; }
         .btn-ws { background: #E7F9ED; color: var(--ios-green); }
         .btn-del { background: #FFEBEB; color: var(--ios-danger); }
 
-        .badge-today { 
-            background: var(--ios-danger); color: white; 
-            padding: 2px 8px; border-radius: 6px; 
-            font-size: 11px; font-weight: 800; margin-left: 8px;
-        }
-
-        .footer { 
-            text-align: center; color: var(--ios-gray); 
-            font-size: 12px; padding: 30px 20px; 
-        }
+        .footer { text-align: center; color: var(--ios-gray); font-size: 12px; padding: 30px 20px; }
     </style>
 </head>
 <body>
@@ -133,20 +104,22 @@
 </div>
 
 <div class="container">
+    <button class="main-btn btn-orange" onclick="solicitarPermisos()">🔔 ACTIVAR NOTIFICACIONES</button>
+
     <div class="ios-group">
         <div class="ios-row"><label>Taller</label><input type="text" id="taller" placeholder="Nombre"></div>
         <div class="ios-row"><label>Pedido</label><input type="text" id="pedido" placeholder="Número"></div>
         <div class="ios-row"><label>PO#</label><input type="text" id="po" placeholder="Opcional"></div>
         <div class="ios-row"><label>Entrega</label><input type="date" id="fecha"></div>
     </div>
-    <button class="main-btn" onclick="saveOrder()">Agregar a la Lista</button>
+    <button class="main-btn btn-blue" onclick="saveOrder()">Agregar a la Lista</button>
 
     <h2 style="font-size: 22px; margin: 30px 0 15px 5px;">Órdenes</h2>
     <div id="orderList"></div>
 </div>
 
 <footer class="footer">
-    <span style="background:#ddd; padding:2px 8px; border-radius:10px; font-weight:bold;">v2.0.2</span><br><br>
+    <span style="background:#ddd; padding:2px 8px; border-radius:10px; font-weight:bold;">v2.0.3</span><br><br>
     Creada por <strong>Ismael Bigio</strong> | 2026
 </footer>
 
@@ -154,16 +127,32 @@
     // --- LÓGICA DE NOTIFICACIONES ---
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js?v=2');
+            navigator.serviceWorker.register('sw.js?v=3');
         });
     }
 
     async function solicitarPermisos() {
-        if (!("Notification" in window)) return;
-        if (Notification.permission === "default") {
-            await Notification.requestPermission();
+        if (!("Notification" in window)) {
+            alert("Por favor, instala primero la App en tu pantalla de inicio.");
+            return;
         }
-        verificarEntregasHoy();
+
+        const permiso = await Notification.requestPermission();
+        if (permiso === "granted") {
+            alert("¡Excelente! Notificaciones activadas.");
+            lanzarBienvenida();
+        } else {
+            alert("Permiso denegado. Ve a Ajustes > Notificaciones > Safari.");
+        }
+    }
+
+    function lanzarBienvenida() {
+        navigator.serviceWorker.ready.then(reg => {
+            reg.showNotification("¡Sistema Activado!", {
+                body: "Ismael, recibirás avisos de tus entregas aquí.",
+                icon: "https://cdn-icons-png.flaticon.com/512/1554/1554401.png"
+            });
+        });
     }
 
     function verificarEntregasHoy() {
@@ -174,7 +163,7 @@
         if (pendientes.length > 0 && Notification.permission === "granted") {
             navigator.serviceWorker.ready.then(reg => {
                 reg.showNotification("📦 Entregas para Hoy", {
-                    body: `Ismael, tienes ${pendientes.length} pedido(s) pendientes.`,
+                    body: `Tienes ${pendientes.length} pedido(s) para hoy.`,
                     icon: "https://cdn-icons-png.flaticon.com/512/1554/1554401.png"
                 });
             });
@@ -188,7 +177,7 @@
         const po = document.getElementById('po').value;
         const f = document.getElementById('fecha').value;
 
-        if(!t || !p || !f) return alert("Llena Taller, Pedido y Fecha");
+        if(!t || !p || !f) return alert("Llena los campos obligatorios");
 
         const order = { taller: t, pedido: p, po: po, fecha: f, id: Date.now() };
         let orders = JSON.parse(localStorage.getItem('pwa_orders')) || [];
@@ -208,7 +197,7 @@
                     `PO#: ${po || 'N/A'}%0A` +
                     `Fecha: ${fecha}%0A` +
                     `---------------------------%0A` +
-                    `Ismael Bigio Dealer App`;
+                    `App Control Ismael`;
         window.open(`https://wa.me/?text=${texto}`, '_blank');
     }
 
@@ -219,7 +208,6 @@
         const hoy = new Date().toISOString().split('T')[0];
 
         list.innerHTML = '';
-
         orders.sort((a,b) => new Date(a.fecha) - new Date(b.fecha))
               .filter(o => o.taller.toLowerCase().includes(query) || o.pedido.toLowerCase().includes(query))
               .forEach(o => {
@@ -241,7 +229,7 @@
     }
 
     function deleteOrder(id) {
-        if(confirm("¿Eliminar orden?")) {
+        if(confirm("¿Eliminar?")) {
             let orders = JSON.parse(localStorage.getItem('pwa_orders')).filter(o => o.id !== id);
             localStorage.setItem('pwa_orders', JSON.stringify(orders));
             render();
@@ -250,7 +238,9 @@
 
     window.onload = () => {
         render();
-        solicitarPermisos();
+        if (Notification.permission === "granted") {
+            verificarEntregasHoy();
+        }
     };
 </script>
 </body>
