@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Pedidos Dealer 2.0.9</title>
+    <title>Pedidos Dealer 2.1.0</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1554/1554401.png">
-    <link rel="manifest" href="manifest.json?v=9">
+    <link rel="manifest" href="manifest.json?v=10">
     <meta name="theme-color" content="#F2F2F7">
 
     <style>
@@ -114,83 +114,108 @@
     <div id="orderList" style="margin-top: 20px;"></div>
 </div>
 
-<footer class="footer">v2.0.9 | Ismael Bigio Control</footer>
+<footer class="footer">v2.1.0 | Ismael Bigio Control</footer>
 
 <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js?v=10'); });
+    }
+
+    // Escapar HTML para prevenir XSS
+    function esc(str) {
+        const d = document.createElement('div');
+        d.textContent = str;
+        return d.innerHTML;
+    }
+
+    function getOrders() {
+        try { return JSON.parse(localStorage.getItem('pwa_orders')) || []; }
+        catch { return []; }
+    }
+
+    function setOrders(orders) {
+        localStorage.setItem('pwa_orders', JSON.stringify(orders));
+    }
+
     function saveOrder() {
-        const t = document.getElementById('taller').value;
-        const p = document.getElementById('pedido').value;
-        const po = document.getElementById('po').value;
+        const t = document.getElementById('taller').value.trim();
+        const p = document.getElementById('pedido').value.trim();
+        const po = document.getElementById('po').value.trim();
         const f = document.getElementById('fecha').value;
         const s = document.getElementById('status').value;
 
         if(!t || !p || !f) return alert("Llena Taller, Pedido y Día de Pedido");
 
         const order = { taller: t, pedido: p, po: po, fecha: f, status: s, id: Date.now() };
-        let orders = JSON.parse(localStorage.getItem('pwa_orders')) || [];
+        const orders = getOrders();
         orders.push(order);
-        localStorage.setItem('pwa_orders', JSON.stringify(orders));
-        
+        setOrders(orders);
+
         ['taller','pedido','po','fecha'].forEach(id => document.getElementById(id).value = '');
         render();
     }
 
     function actualizarStatus(id, nuevoStatus) {
-        let orders = JSON.parse(localStorage.getItem('pwa_orders')) || [];
+        const orders = getOrders();
         const index = orders.findIndex(o => o.id === id);
         if (index !== -1) {
             orders[index].status = nuevoStatus;
-            localStorage.setItem('pwa_orders', JSON.stringify(orders));
+            setOrders(orders);
             render();
         }
     }
 
     function enviarWhatsApp(id) {
-        let orders = JSON.parse(localStorage.getItem('pwa_orders')) || [];
+        const orders = getOrders();
         const o = orders.find(item => item.id === id);
-        
-        let mensajeExtra = "";
-        if(o.status === 'Pendiente') mensajeExtra = "Su solicitud ha sido recibida.";
-        if(o.status === 'Ordenado') mensajeExtra = "Su pieza ya ha sido ordenada a fabrica.";
-        if(o.status === 'En Tránsito') mensajeExtra = "Su pieza ya viene de camino al dealer.";
-        if(o.status === 'Listo') mensajeExtra = "La pieza ya llego y esta lista para recoger.";
-        if(o.status === 'Entregado') mensajeExtra = "Confirmamos que la pieza ha sido entregada.";
+        if (!o) return;
 
-        const texto = `*ACTUALIZACION DE PEDIDO*%0A` +
-                      `---------------------------%0A` +
-                      `Taller: ${o.taller}%0A` +
-                      `Pedido: ${o.pedido}%0A` +
-                      `PO#: ${o.po || 'N/A'}%0A` +
-                      `DIA PEDIDO: ${o.fecha}%0A` +
-                      `ESTATUS: ${o.status.toUpperCase()}%0A` +
-                      `---------------------------%0A` +
-                      `${mensajeExtra}%0A%0A` +
+        const mensajes = {
+            'Pendiente': 'Su solicitud ha sido recibida.',
+            'Ordenado': 'Su pieza ya ha sido ordenada a fabrica.',
+            'En Tránsito': 'Su pieza ya viene de camino al dealer.',
+            'Listo': 'La pieza ya llego y esta lista para recoger.',
+            'Entregado': 'Confirmamos que la pieza ha sido entregada.'
+        };
+
+        const texto = `*ACTUALIZACION DE PEDIDO*\n` +
+                      `---------------------------\n` +
+                      `Taller: ${o.taller}\n` +
+                      `Pedido: ${o.pedido}\n` +
+                      `PO#: ${o.po || 'N/A'}\n` +
+                      `DIA PEDIDO: ${o.fecha}\n` +
+                      `ESTATUS: ${o.status.toUpperCase()}\n` +
+                      `---------------------------\n` +
+                      `${mensajes[o.status] || ''}\n\n` +
                       `Enviado desde Control Ismael`;
-        
-        window.open(`https://wa.me/?text=${texto}`, '_blank');
+
+        window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
     }
 
     function render() {
         const list = document.getElementById('orderList');
-        let orders = JSON.parse(localStorage.getItem('pwa_orders')) || [];
+        const orders = getOrders();
         list.innerHTML = '';
 
-        orders.sort((a,b) => new Date(b.id) - new Date(a.id)).forEach(o => {
-            let claseStatus = "";
-            if(o.status === 'Ordenado') claseStatus = "st-ordenado";
-            if(o.status === 'En Tránsito') claseStatus = "st-transito";
-            if(o.status === 'Listo') claseStatus = "st-listo";
-            if(o.status === 'Entregado') claseStatus = "st-entregado";
-            if(o.status === 'Pendiente') claseStatus = "st-pendiente";
+        const statusClases = {
+            'Pendiente': 'st-pendiente',
+            'Ordenado': 'st-ordenado',
+            'En Tránsito': 'st-transito',
+            'Listo': 'st-listo',
+            'Entregado': 'st-entregado'
+        };
+
+        orders.sort((a,b) => b.id - a.id).forEach(o => {
+            const claseStatus = statusClases[o.status] || 'st-pendiente';
 
             list.innerHTML += `
                 <div class="order-card ${claseStatus}">
-                    <span class="taller-title">${o.taller}</span>
+                    <span class="taller-title">${esc(o.taller)}</span>
                     <div class="details">
-                        Pedido: <b>${o.pedido}</b> | PO#: <b>${o.po || '---'}</b><br>
-                        Pedido el: <b>${o.fecha}</b>
+                        Pedido: <b>${esc(o.pedido)}</b> | PO#: <b>${esc(o.po || '---')}</b><br>
+                        Pedido el: <b>${esc(o.fecha)}</b>
                     </div>
-                    
+
                     <select class="status-selector-mini" onchange="actualizarStatus(${o.id}, this.value)">
                         <option value="Pendiente" ${o.status === 'Pendiente' ? 'selected' : ''}>⚪ Pendiente</option>
                         <option value="Ordenado" ${o.status === 'Ordenado' ? 'selected' : ''}>🟡 Ordenado</option>
@@ -210,8 +235,8 @@
 
     function deleteOrder(id) {
         if(confirm("¿Eliminar esta orden?")) {
-            let orders = JSON.parse(localStorage.getItem('pwa_orders')).filter(o => o.id !== id);
-            localStorage.setItem('pwa_orders', JSON.stringify(orders));
+            const orders = getOrders().filter(o => o.id !== id);
+            setOrders(orders);
             render();
         }
     }

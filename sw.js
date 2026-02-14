@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pedidos-v2-notif';
+const CACHE_NAME = 'pedidos-v2.1.0';
 const assets = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', (e) => {
@@ -16,9 +16,23 @@ self.addEventListener('activate', (e) => {
       }));
     })
   );
+  self.clients.claim();
 });
 
-// Esto permite que la app envíe notificaciones incluso si Safari está cerrado
+// Estrategia network-first: intenta red, si falla usa cache
+self.addEventListener('fetch', (e) => {
+  e.respondWith(
+    fetch(e.request)
+      .then((response) => {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
+        return response;
+      })
+      .catch(() => caches.match(e.request))
+  );
+});
+
+// Notificaciones push
 self.addEventListener('push', (event) => {
   const options = {
     body: event.data ? event.data.text() : 'Tienes una entrega pendiente',
