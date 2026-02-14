@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Pedidos Dealer 2.0.5</title>
+    <title>Pedidos Dealer 2.1.0</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Pedidos">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1554/1554401.png?v=5">
-    <link rel="manifest" href="manifest.json?v=5">
+    <link rel="manifest" href="manifest.json?v=6">
     <meta name="theme-color" content="#F2F2F7">
 
     <style>
@@ -102,7 +102,7 @@
 <div class="search-container">
     <div class="search-bar">
         <span>🔍</span>
-        <input type="text" id="searchInput" placeholder="Buscar taller o pedido..." onkeyup="render()">
+        <input type="text" id="searchInput" placeholder="Buscar taller, pedido o PO..." onkeyup="render()">
     </div>
 </div>
 
@@ -122,13 +122,39 @@
 </div>
 
 <footer class="footer">
-    <span style="background:#ddd; padding:2px 8px; border-radius:10px; font-weight:bold;">v2.0.5</span><br><br>
+    <span style="background:#ddd; padding:2px 8px; border-radius:10px; font-weight:bold;">v2.1.0</span><br><br>
     Creada por <strong>Ismael Bigio</strong> | 2026
 </footer>
 
 <script>
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js?v=5'); });
+        window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js?v=6'); });
+    }
+
+    // Escapar HTML para prevenir XSS
+    function esc(str) {
+        const d = document.createElement('div');
+        d.textContent = str;
+        return d.innerHTML;
+    }
+
+    // Escapar para uso seguro dentro de atributos onclick
+    function escAttr(str) {
+        return esc(str).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+    }
+
+    // Codificar texto para URLs de WhatsApp
+    function encWA(str) {
+        return encodeURIComponent(str);
+    }
+
+    function getOrders() {
+        try { return JSON.parse(localStorage.getItem('pwa_orders')) || []; }
+        catch { return []; }
+    }
+
+    function setOrders(orders) {
+        localStorage.setItem('pwa_orders', JSON.stringify(orders));
     }
 
     async function solicitarPermisos() {
@@ -142,79 +168,87 @@
 
     function lanzarBienvenida() {
         navigator.serviceWorker.ready.then(reg => {
-            reg.showNotification("¡Sistema Activado!", { body: "Ismael, recibirás avisos aquí.", icon: "https://cdn-icons-png.flaticon.com/512/1554/1554401.png" });
+            reg.showNotification("¡Sistema Activado!", { body: "Recibirás avisos aquí.", icon: "https://cdn-icons-png.flaticon.com/512/1554/1554401.png" });
         });
     }
 
     function saveOrder() {
-        const t = document.getElementById('taller').value;
-        const p = document.getElementById('pedido').value;
-        const po = document.getElementById('po').value;
+        const t = document.getElementById('taller').value.trim();
+        const p = document.getElementById('pedido').value.trim();
+        const po = document.getElementById('po').value.trim();
         const f = document.getElementById('fecha').value;
         if(!t || !p || !f) return alert("Llena los campos obligatorios");
 
         const order = { taller: t, pedido: p, po: po, fecha: f, id: Date.now(), llego: false };
-        let orders = JSON.parse(localStorage.getItem('pwa_orders')) || [];
+        const orders = getOrders();
         orders.push(order);
-        localStorage.setItem('pwa_orders', JSON.stringify(orders));
+        setOrders(orders);
         ['taller','pedido','po','fecha'].forEach(id => document.getElementById(id).value = '');
         render();
     }
 
-    // --- NUEVA FUNCIÓN: MARCAR COMO LLEGADO Y ENVIAR WS ---
     function confirmarLlegada(id) {
-        let orders = JSON.parse(localStorage.getItem('pwa_orders')) || [];
+        const orders = getOrders();
         const index = orders.findIndex(o => o.id === id);
-        
+
         if (index !== -1) {
             orders[index].llego = true;
-            localStorage.setItem('pwa_orders', JSON.stringify(orders));
+            setOrders(orders);
             render();
 
             const o = orders[index];
-            const texto = `*PIEZA LISTA PARA RECOGER*%0A` +
-                          `---------------------------%0A` +
-                          `🏢 *Taller:* ${o.taller}%0A` +
-                          `📦 *Pedido:* ${o.pedido}%0A` +
-                          `📄 *PO#:* ${o.po || 'N/A'}%0A` +
-                          `---------------------------%0A` +
-                          `✅ La pieza ya llegó al dealer y está disponible para entrega.%0A` +
+            const texto = `*PIEZA LISTA PARA RECOGER*\n` +
+                          `---------------------------\n` +
+                          `🏢 *Taller:* ${o.taller}\n` +
+                          `📦 *Pedido:* ${o.pedido}\n` +
+                          `📄 *PO#:* ${o.po || 'N/A'}\n` +
+                          `---------------------------\n` +
+                          `✅ La pieza ya llegó al dealer y está disponible para entrega.\n` +
                           `Saludos, Ismael Bigio.`;
-            
-            window.open(`https://wa.me/?text=${texto}`, '_blank');
+
+            window.open(`https://wa.me/?text=${encWA(texto)}`, '_blank');
         }
     }
 
     function shareWS(taller, pedido, po, fecha) {
-        let texto = `*ESTADO DE PEDIDO*%0A---------------------------%0ATaller: ${taller}%0APedido: ${pedido}%0AFec. Entrega: ${fecha}%0A---------------------------%0AEstamos trabajando su orden.`;
-        window.open(`https://wa.me/?text=${texto}`, '_blank');
+        const texto = `*ESTADO DE PEDIDO*\n` +
+                      `---------------------------\n` +
+                      `🏢 Taller: ${taller}\n` +
+                      `📦 Pedido: ${pedido}\n` +
+                      `📄 PO#: ${po || 'N/A'}\n` +
+                      `📅 Fec. Entrega: ${fecha}\n` +
+                      `---------------------------\n` +
+                      `Estamos trabajando su orden.`;
+        window.open(`https://wa.me/?text=${encWA(texto)}`, '_blank');
     }
 
     function render() {
         const list = document.getElementById('orderList');
         const query = document.getElementById('searchInput').value.toLowerCase();
-        let orders = JSON.parse(localStorage.getItem('pwa_orders')) || [];
+        const orders = getOrders();
         const hoy = new Date().toISOString().split('T')[0];
 
         list.innerHTML = '';
         orders.sort((a,b) => new Date(a.fecha) - new Date(b.fecha))
-              .filter(o => o.taller.toLowerCase().includes(query) || o.pedido.toLowerCase().includes(query))
+              .filter(o => o.taller.toLowerCase().includes(query) ||
+                           o.pedido.toLowerCase().includes(query) ||
+                           (o.po && o.po.toLowerCase().includes(query)))
               .forEach(o => {
                   const esHoy = o.fecha === hoy;
                   list.innerHTML += `
                     <div class="order-card ${o.llego ? 'llego' : ''}" style="border-left: 6px solid ${esHoy ? 'var(--ios-danger)' : 'var(--ios-green)'}">
                         <div class="taller-title">
-                            ${o.taller} 
+                            ${esc(o.taller)}
                             ${esHoy && !o.llego ? '<span class="badge-today">HOY</span>' : ''}
                             ${o.llego ? '<span class="badge-ready">LISTO</span>' : ''}
                         </div>
                         <div class="details">
-                            Pedido: <b>${o.pedido}</b> | PO#: <b>${o.po || '---'}</b><br>
-                            Entrega: <b>${o.fecha}</b>
+                            Pedido: <b>${esc(o.pedido)}</b> | PO#: <b>${esc(o.po || '---')}</b><br>
+                            Entrega: <b>${esc(o.fecha)}</b>
                         </div>
                         <div class="actions">
                             ${!o.llego ? `<button class="btn-action btn-ready" onclick="confirmarLlegada(${o.id})">✅ ¡YA LLEGÓ! (Enviar aviso)</button>` : ''}
-                            <button class="btn-action btn-ws" onclick="shareWS('${o.taller}', '${o.pedido}', '${o.po}', '${o.fecha}')">💬 Estado</button>
+                            <button class="btn-action btn-ws" onclick="shareWS('${escAttr(o.taller)}', '${escAttr(o.pedido)}', '${escAttr(o.po)}', '${escAttr(o.fecha)}')">💬 Estado</button>
                             <button class="btn-action btn-del" onclick="deleteOrder(${o.id})">🗑️ Borrar</button>
                         </div>
                     </div>
@@ -223,9 +257,9 @@
     }
 
     function deleteOrder(id) {
-        if(confirm("¿Eliminar?")) {
-            let orders = JSON.parse(localStorage.getItem('pwa_orders')).filter(o => o.id !== id);
-            localStorage.setItem('pwa_orders', JSON.stringify(orders));
+        if(confirm("¿Eliminar esta orden?")) {
+            const orders = getOrders().filter(o => o.id !== id);
+            setOrders(orders);
             render();
         }
     }
@@ -233,7 +267,9 @@
     window.onload = () => {
         render();
         const btn = document.getElementById('btnNotif');
-        if (Notification.permission !== "granted") btn.style.display = "block";
+        if ("Notification" in window && Notification.permission !== "granted") {
+            btn.style.display = "block";
+        }
     };
 </script>
 </body>
