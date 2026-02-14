@@ -7,46 +7,27 @@
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Pedidos">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1554/1554401.png?v=5">
-    <link rel="manifest" href="manifest.json?v=6">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1554/1554401.png">
+    <link rel="manifest" href="manifest.json?v=10">
     <meta name="theme-color" content="#F2F2F7">
 
     <style>
         :root {
-            --ios-blue: #007AFF;
-            --ios-green: #34C759;
-            --ios-bg: #F2F2F7;
-            --ios-card: #FFFFFF;
-            --ios-text: #000000;
-            --ios-gray: #8E8E93;
-            --ios-danger: #FF3B30;
-            --ios-orange: #FF9500;
-            --ios-purple: #5856D6;
+            --ios-blue: #007AFF; --ios-green: #34C759; --ios-bg: #F2F2F7;
+            --ios-card: #FFFFFF; --ios-text: #000000; --ios-gray: #8E8E93;
+            --ios-danger: #FF3B30; --ios-orange: #FF9500; --ios-purple: #5856D6;
+            --ios-yellow: #FFCC00;
         }
 
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            font-family: -apple-system, sans-serif; 
             margin: 0; background: var(--ios-bg); color: var(--ios-text);
             -webkit-font-smoothing: antialiased; padding-bottom: 120px;
         }
 
         .header { 
             background: rgba(242, 242, 247, 0.8); backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px); padding: 60px 20px 10px 20px;
-            position: sticky; top: 0; z-index: 100;
-        }
-
-        h1 { margin: 0; font-size: 34px; font-weight: 700; letter-spacing: -1px; }
-
-        .search-container { padding: 10px 16px; }
-        .search-bar {
-            background: #E3E3E8; border-radius: 10px; padding: 8px 12px;
-            display: flex; align-items: center;
-        }
-        .search-bar input {
-            border: none; background: transparent; width: 100%; font-size: 16px; 
-            outline: none; margin-left: 8px; color: black;
+            padding: 60px 20px 10px 20px; position: sticky; top: 0; z-index: 100;
         }
 
         .container { padding: 16px; }
@@ -61,33 +42,45 @@
         }
 
         .ios-row:last-child { border-bottom: none; }
-        .ios-row label { width: 95px; font-size: 15px; color: var(--ios-text); }
-        .ios-row input { flex: 1; border: none; font-size: 17px; outline: none; background: transparent; }
+        .ios-row label { width: 110px; font-size: 15px; color: var(--ios-text); }
+        .ios-row input, .ios-row select { 
+            flex: 1; border: none; font-size: 17px; outline: none; 
+            background: transparent; color: var(--ios-blue); font-weight: 500;
+        }
 
         .main-btn {
             width: 100%; color: white; border: none; padding: 14px; 
             border-radius: 12px; font-size: 17px; font-weight: 600; margin-bottom: 10px;
         }
         .btn-blue { background: var(--ios-blue); }
-        .btn-orange { background: var(--ios-orange); display: none; }
 
         .order-card {
             background: var(--ios-card); border-radius: 14px; padding: 16px;
             margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            transition: all 0.3s ease;
+            border-left: 6px solid #ddd;
         }
 
-        .order-card.llego { background: #F0F9FF; border-left: 6px solid var(--ios-blue) !important; opacity: 0.9; }
+        /* Colores de Borde por Estatus */
+        .st-pendiente { border-left-color: var(--ios-gray) !important; }
+        .st-ordenado { border-left-color: var(--ios-yellow) !important; }
+        .st-transito { border-left-color: var(--ios-purple) !important; }
+        .st-listo { border-left-color: var(--ios-blue) !important; background: #F0F9FF; }
+        .st-entregado { border-left-color: var(--ios-green) !important; opacity: 0.6; }
 
-        .taller-title { font-size: 19px; font-weight: 600; margin-bottom: 5px; }
-        .details { font-size: 15px; color: var(--ios-gray); line-height: 1.4; }
-        .badge-today { background: var(--ios-danger); color: white; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; margin-left: 8px; }
-        .badge-ready { background: var(--ios-blue); color: white; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; margin-left: 8px; }
+        .taller-title { font-size: 19px; font-weight: 600; margin-bottom: 8px; display: block; }
+        
+        .status-selector-mini {
+            width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #E5E5EA;
+            background: #F2F2F7; font-size: 14px; font-weight: 600; margin-top: 10px;
+            color: var(--ios-text);
+        }
 
-        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 15px; border-top: 0.5px solid #E5E5EA; padding-top: 12px; }
-        .btn-action { border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; text-align: center; }
+        .details { font-size: 14px; color: var(--ios-gray); line-height: 1.4; }
+        .details b { color: #333; }
+
+        .actions { display: flex; gap: 10px; margin-top: 15px; border-top: 0.5px solid #E5E5EA; padding-top: 12px; }
+        .btn-action { flex: 1; border: none; padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; }
         .btn-ws { background: #E7F9ED; color: var(--ios-green); }
-        .btn-ready { background: #E9F2FF; color: var(--ios-blue); grid-column: span 2; margin-bottom: 5px; }
         .btn-del { background: #FFEBEB; color: var(--ios-danger); }
 
         .footer { text-align: center; color: var(--ios-gray); font-size: 12px; padding: 30px 20px; }
@@ -96,39 +89,36 @@
 <body>
 
 <div class="header">
-    <h1>Entregas</h1>
-</div>
-
-<div class="search-container">
-    <div class="search-bar">
-        <span>🔍</span>
-        <input type="text" id="searchInput" placeholder="Buscar taller, pedido o PO..." onkeyup="render()">
-    </div>
+    <h1>Órdenes</h1>
 </div>
 
 <div class="container">
-    <button id="btnNotif" class="main-btn btn-orange" onclick="solicitarPermisos()">🔔 ACTIVAR NOTIFICACIONES</button>
-
     <div class="ios-group">
-        <div class="ios-row"><label>Taller</label><input type="text" id="taller" placeholder="Nombre"></div>
-        <div class="ios-row"><label>Pedido</label><input type="text" id="pedido" placeholder="Número"></div>
+        <div class="ios-row"><label>Taller</label><input type="text" id="taller" placeholder="Ej. Morales"></div>
+        <div class="ios-row"><label>Pedido</label><input type="text" id="pedido" placeholder="Ej. M-100"></div>
         <div class="ios-row"><label>PO#</label><input type="text" id="po" placeholder="Opcional"></div>
-        <div class="ios-row"><label>Entrega</label><input type="date" id="fecha"></div>
+        <div class="ios-row"><label>Día de Pedido</label><input type="date" id="fecha"></div>
+        <div class="ios-row">
+            <label>Estatus Inicial</label>
+            <select id="status">
+                <option value="Pendiente">Pendiente</option>
+                <option value="Ordenado">Ordenado</option>
+                <option value="En Tránsito">En Tránsito</option>
+                <option value="Listo">Listo para Recoger</option>
+                <option value="Entregado">Entregado</option>
+            </select>
+        </div>
     </div>
-    <button class="main-btn btn-blue" onclick="saveOrder()">Agregar a la Lista</button>
+    <button class="main-btn btn-blue" onclick="saveOrder()">Guardar Nueva Orden</button>
 
-    <h2 style="font-size: 22px; margin: 30px 0 15px 5px;">Órdenes</h2>
-    <div id="orderList"></div>
+    <div id="orderList" style="margin-top: 20px;"></div>
 </div>
 
-<footer class="footer">
-    <span style="background:#ddd; padding:2px 8px; border-radius:10px; font-weight:bold;">v2.1.0</span><br><br>
-    Creada por <strong>Ismael Bigio</strong> | 2026
-</footer>
+<footer class="footer">v2.1.0 | Ismael Bigio Control</footer>
 
 <script>
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js?v=6'); });
+        window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js?v=10'); });
     }
 
     // Escapar HTML para prevenir XSS
@@ -136,16 +126,6 @@
         const d = document.createElement('div');
         d.textContent = str;
         return d.innerHTML;
-    }
-
-    // Escapar para uso seguro dentro de atributos onclick
-    function escAttr(str) {
-        return esc(str).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
-    }
-
-    // Codificar texto para URLs de WhatsApp
-    function encWA(str) {
-        return encodeURIComponent(str);
     }
 
     function getOrders() {
@@ -157,103 +137,100 @@
         localStorage.setItem('pwa_orders', JSON.stringify(orders));
     }
 
-    async function solicitarPermisos() {
-        if (!("Notification" in window)) return;
-        const permiso = await Notification.requestPermission();
-        if (permiso === "granted") {
-            document.getElementById('btnNotif').style.display = 'none';
-            lanzarBienvenida();
-        }
-    }
-
-    function lanzarBienvenida() {
-        navigator.serviceWorker.ready.then(reg => {
-            reg.showNotification("¡Sistema Activado!", { body: "Recibirás avisos aquí.", icon: "https://cdn-icons-png.flaticon.com/512/1554/1554401.png" });
-        });
-    }
-
     function saveOrder() {
         const t = document.getElementById('taller').value.trim();
         const p = document.getElementById('pedido').value.trim();
         const po = document.getElementById('po').value.trim();
         const f = document.getElementById('fecha').value;
-        if(!t || !p || !f) return alert("Llena los campos obligatorios");
+        const s = document.getElementById('status').value;
 
-        const order = { taller: t, pedido: p, po: po, fecha: f, id: Date.now(), llego: false };
+        if(!t || !p || !f) return alert("Llena Taller, Pedido y Día de Pedido");
+
+        const order = { taller: t, pedido: p, po: po, fecha: f, status: s, id: Date.now() };
         const orders = getOrders();
         orders.push(order);
         setOrders(orders);
+
         ['taller','pedido','po','fecha'].forEach(id => document.getElementById(id).value = '');
         render();
     }
 
-    function confirmarLlegada(id) {
+    function actualizarStatus(id, nuevoStatus) {
         const orders = getOrders();
         const index = orders.findIndex(o => o.id === id);
-
         if (index !== -1) {
-            orders[index].llego = true;
+            orders[index].status = nuevoStatus;
             setOrders(orders);
             render();
-
-            const o = orders[index];
-            const texto = `*PIEZA LISTA PARA RECOGER*\n` +
-                          `---------------------------\n` +
-                          `🏢 *Taller:* ${o.taller}\n` +
-                          `📦 *Pedido:* ${o.pedido}\n` +
-                          `📄 *PO#:* ${o.po || 'N/A'}\n` +
-                          `---------------------------\n` +
-                          `✅ La pieza ya llegó al dealer y está disponible para entrega.\n` +
-                          `Saludos, Ismael Bigio.`;
-
-            window.open(`https://wa.me/?text=${encWA(texto)}`, '_blank');
         }
     }
 
-    function shareWS(taller, pedido, po, fecha) {
-        const texto = `*ESTADO DE PEDIDO*\n` +
+    function enviarWhatsApp(id) {
+        const orders = getOrders();
+        const o = orders.find(item => item.id === id);
+        if (!o) return;
+
+        const mensajes = {
+            'Pendiente': 'Su solicitud ha sido recibida.',
+            'Ordenado': 'Su pieza ya ha sido ordenada a fabrica.',
+            'En Tránsito': 'Su pieza ya viene de camino al dealer.',
+            'Listo': 'La pieza ya llego y esta lista para recoger.',
+            'Entregado': 'Confirmamos que la pieza ha sido entregada.'
+        };
+
+        const texto = `*ACTUALIZACION DE PEDIDO*\n` +
                       `---------------------------\n` +
-                      `🏢 Taller: ${taller}\n` +
-                      `📦 Pedido: ${pedido}\n` +
-                      `📄 PO#: ${po || 'N/A'}\n` +
-                      `📅 Fec. Entrega: ${fecha}\n` +
+                      `Taller: ${o.taller}\n` +
+                      `Pedido: ${o.pedido}\n` +
+                      `PO#: ${o.po || 'N/A'}\n` +
+                      `DIA PEDIDO: ${o.fecha}\n` +
+                      `ESTATUS: ${o.status.toUpperCase()}\n` +
                       `---------------------------\n` +
-                      `Estamos trabajando su orden.`;
-        window.open(`https://wa.me/?text=${encWA(texto)}`, '_blank');
+                      `${mensajes[o.status] || ''}\n\n` +
+                      `Enviado desde Control Ismael`;
+
+        window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
     }
 
     function render() {
         const list = document.getElementById('orderList');
-        const query = document.getElementById('searchInput').value.toLowerCase();
         const orders = getOrders();
-        const hoy = new Date().toISOString().split('T')[0];
-
         list.innerHTML = '';
-        orders.sort((a,b) => new Date(a.fecha) - new Date(b.fecha))
-              .filter(o => o.taller.toLowerCase().includes(query) ||
-                           o.pedido.toLowerCase().includes(query) ||
-                           (o.po && o.po.toLowerCase().includes(query)))
-              .forEach(o => {
-                  const esHoy = o.fecha === hoy;
-                  list.innerHTML += `
-                    <div class="order-card ${o.llego ? 'llego' : ''}" style="border-left: 6px solid ${esHoy ? 'var(--ios-danger)' : 'var(--ios-green)'}">
-                        <div class="taller-title">
-                            ${esc(o.taller)}
-                            ${esHoy && !o.llego ? '<span class="badge-today">HOY</span>' : ''}
-                            ${o.llego ? '<span class="badge-ready">LISTO</span>' : ''}
-                        </div>
-                        <div class="details">
-                            Pedido: <b>${esc(o.pedido)}</b> | PO#: <b>${esc(o.po || '---')}</b><br>
-                            Entrega: <b>${esc(o.fecha)}</b>
-                        </div>
-                        <div class="actions">
-                            ${!o.llego ? `<button class="btn-action btn-ready" onclick="confirmarLlegada(${o.id})">✅ ¡YA LLEGÓ! (Enviar aviso)</button>` : ''}
-                            <button class="btn-action btn-ws" onclick="shareWS('${escAttr(o.taller)}', '${escAttr(o.pedido)}', '${escAttr(o.po)}', '${escAttr(o.fecha)}')">💬 Estado</button>
-                            <button class="btn-action btn-del" onclick="deleteOrder(${o.id})">🗑️ Borrar</button>
-                        </div>
+
+        const statusClases = {
+            'Pendiente': 'st-pendiente',
+            'Ordenado': 'st-ordenado',
+            'En Tránsito': 'st-transito',
+            'Listo': 'st-listo',
+            'Entregado': 'st-entregado'
+        };
+
+        orders.sort((a,b) => b.id - a.id).forEach(o => {
+            const claseStatus = statusClases[o.status] || 'st-pendiente';
+
+            list.innerHTML += `
+                <div class="order-card ${claseStatus}">
+                    <span class="taller-title">${esc(o.taller)}</span>
+                    <div class="details">
+                        Pedido: <b>${esc(o.pedido)}</b> | PO#: <b>${esc(o.po || '---')}</b><br>
+                        Pedido el: <b>${esc(o.fecha)}</b>
                     </div>
-                  `;
-              });
+
+                    <select class="status-selector-mini" onchange="actualizarStatus(${o.id}, this.value)">
+                        <option value="Pendiente" ${o.status === 'Pendiente' ? 'selected' : ''}>⚪ Pendiente</option>
+                        <option value="Ordenado" ${o.status === 'Ordenado' ? 'selected' : ''}>🟡 Ordenado</option>
+                        <option value="En Tránsito" ${o.status === 'En Tránsito' ? 'selected' : ''}>🟣 En Tránsito</option>
+                        <option value="Listo" ${o.status === 'Listo' ? 'selected' : ''}>🔵 Listo para Recoger</option>
+                        <option value="Entregado" ${o.status === 'Entregado' ? 'selected' : ''}>✅ Entregado</option>
+                    </select>
+
+                    <div class="actions">
+                        <button class="btn-action btn-ws" onclick="enviarWhatsApp(${o.id})">💬 WhatsApp</button>
+                        <button class="btn-action btn-del" onclick="deleteOrder(${o.id})">🗑️ Borrar</button>
+                    </div>
+                </div>
+            `;
+        });
     }
 
     function deleteOrder(id) {
@@ -264,13 +241,7 @@
         }
     }
 
-    window.onload = () => {
-        render();
-        const btn = document.getElementById('btnNotif');
-        if ("Notification" in window && Notification.permission !== "granted") {
-            btn.style.display = "block";
-        }
-    };
+    window.onload = render;
 </script>
 </body>
 </html>
