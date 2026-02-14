@@ -1,19 +1,15 @@
-const CACHE_NAME = 'pedidos-v1.0.4'; // Cambia el número de versión aquí para forzar actualización
-const assets = [
-  './',
-  './index.html',
-  './manifest.json'
-];
+const CACHE_NAME = 'pedidos-v2-notificaciones';
+const assets = ['./', './index.html', './manifest.json'];
 
-// Instalar y guardar en caché
+// Instalación
 self.addEventListener('install', e => {
-  self.skipWaiting(); // Fuerza a la nueva versión a activarse
+  self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(assets))
   );
 });
 
-// Borrar cachés viejos al activar
+// Activación y limpieza
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys => {
@@ -24,8 +20,11 @@ self.addEventListener('activate', e => {
   );
 });
 
-self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(res => res || fetch(e.request))
-  );
+// Escuchar evento de notificación
+self.addEventListener('push', (event) => {
+  const data = event.data.json();
+  self.registration.showNotification(data.title, {
+    body: data.body,
+    icon: 'https://cdn-icons-png.flaticon.com/512/1554/1554401.png'
+  });
 });
