@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Pedidos Dealer 2.0.8</title>
+    <title>Pedidos Dealer 2.0.9</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1554/1554401.png">
-    <link rel="manifest" href="manifest.json?v=8">
+    <link rel="manifest" href="manifest.json?v=9">
     <meta name="theme-color" content="#F2F2F7">
 
     <style>
@@ -16,6 +16,7 @@
             --ios-blue: #007AFF; --ios-green: #34C759; --ios-bg: #F2F2F7;
             --ios-card: #FFFFFF; --ios-text: #000000; --ios-gray: #8E8E93;
             --ios-danger: #FF3B30; --ios-orange: #FF9500; --ios-purple: #5856D6;
+            --ios-yellow: #FFCC00;
         }
 
         body { 
@@ -59,7 +60,9 @@
             border-left: 6px solid #ddd;
         }
 
-        .st-pendiente { border-left-color: var(--ios-orange) !important; }
+        /* Colores de Borde por Estatus */
+        .st-pendiente { border-left-color: var(--ios-gray) !important; }
+        .st-ordenado { border-left-color: var(--ios-yellow) !important; }
         .st-transito { border-left-color: var(--ios-purple) !important; }
         .st-listo { border-left-color: var(--ios-blue) !important; background: #F0F9FF; }
         .st-entregado { border-left-color: var(--ios-green) !important; opacity: 0.6; }
@@ -99,6 +102,7 @@
             <label>Estatus Inicial</label>
             <select id="status">
                 <option value="Pendiente">Pendiente</option>
+                <option value="Ordenado">Ordenado</option>
                 <option value="En Tránsito">En Tránsito</option>
                 <option value="Listo">Listo para Recoger</option>
                 <option value="Entregado">Entregado</option>
@@ -110,7 +114,7 @@
     <div id="orderList" style="margin-top: 20px;"></div>
 </div>
 
-<footer class="footer">v2.0.8 | Ismael Bigio Control</footer>
+<footer class="footer">v2.0.9 | Ismael Bigio Control</footer>
 
 <script>
     function saveOrder() {
@@ -146,7 +150,8 @@
         const o = orders.find(item => item.id === id);
         
         let mensajeExtra = "";
-        if(o.status === 'Pendiente') mensajeExtra = "Su pedido ha sido procesado y esta pendiente de envio.";
+        if(o.status === 'Pendiente') mensajeExtra = "Su solicitud ha sido recibida.";
+        if(o.status === 'Ordenado') mensajeExtra = "Su pieza ya ha sido ordenada a fabrica.";
         if(o.status === 'En Tránsito') mensajeExtra = "Su pieza ya viene de camino al dealer.";
         if(o.status === 'Listo') mensajeExtra = "La pieza ya llego y esta lista para recoger.";
         if(o.status === 'Entregado') mensajeExtra = "Confirmamos que la pieza ha sido entregada.";
@@ -172,6 +177,7 @@
 
         orders.sort((a,b) => new Date(b.id) - new Date(a.id)).forEach(o => {
             let claseStatus = "";
+            if(o.status === 'Ordenado') claseStatus = "st-ordenado";
             if(o.status === 'En Tránsito') claseStatus = "st-transito";
             if(o.status === 'Listo') claseStatus = "st-listo";
             if(o.status === 'Entregado') claseStatus = "st-entregado";
@@ -186,7 +192,8 @@
                     </div>
                     
                     <select class="status-selector-mini" onchange="actualizarStatus(${o.id}, this.value)">
-                        <option value="Pendiente" ${o.status === 'Pendiente' ? 'selected' : ''}>🟠 Pendiente</option>
+                        <option value="Pendiente" ${o.status === 'Pendiente' ? 'selected' : ''}>⚪ Pendiente</option>
+                        <option value="Ordenado" ${o.status === 'Ordenado' ? 'selected' : ''}>🟡 Ordenado</option>
                         <option value="En Tránsito" ${o.status === 'En Tránsito' ? 'selected' : ''}>🟣 En Tránsito</option>
                         <option value="Listo" ${o.status === 'Listo' ? 'selected' : ''}>🔵 Listo para Recoger</option>
                         <option value="Entregado" ${o.status === 'Entregado' ? 'selected' : ''}>✅ Entregado</option>
