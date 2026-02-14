@@ -7,23 +7,43 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f4f7f9; padding-bottom: 50px; }
-        .header { background: #1a73e8; color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; }
+        /* --- Estilos anteriores --- */
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f4f7f9; padding-bottom: 80px; min-height: 100vh; position: relative; }
+        .header { background: #1a73e8; color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .container { padding: 15px; max-width: 500px; margin: auto; }
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
         input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
-        button.add-btn { width: 100%; padding: 15px; background: #1a73e8; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; }
+        button.add-btn { width: 100%; padding: 15px; background: #1a73e8; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
         
-        .order-card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 12px; border-left: 8px solid #ccc; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        /* Colores por estado */
-        .hoy { border-left-color: #d93025; background: #fff5f5; } /* Rojo si es hoy */
-        .futuro { border-left-color: #34a853; } /* Verde si es futuro */
-        
-        .order-card h3 { margin: 0 0 5px 0; color: #1a73e8; }
+        /* --- Tarjetas de Órdenes --- */
+        .order-card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 12px; border-left: 8px solid #ccc; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.3s; }
+        .hoy { border-left-color: #d93025; background: #fff5f5; } 
+        .futuro { border-left-color: #34a853; } 
+        .order-card h3 { margin: 0 0 5px 0; color: #1a73e8; font-size: 1.1rem; }
         .info { font-size: 0.9rem; color: #555; margin: 3px 0; }
-        .date-label { display: inline-block; padding: 3px 8px; border-radius: 4px; font-weight: bold; margin-top: 5px; }
+        .date-label { display: inline-block; padding: 3px 8px; border-radius: 4px; font-weight: bold; margin-top: 5px; font-size: 0.85rem; }
         .hoy .date-label { background: #d93025; color: white; }
-        .del-btn { position: absolute; right: 10px; top: 10px; color: #999; border: none; background: none; font-size: 1.2rem; }
+        .futuro .date-label { background: #e8f5e9; color: #2e7d32; }
+        .del-btn { position: absolute; right: 10px; top: 10px; color: #999; border: none; background: none; font-size: 1.5rem; cursor: pointer; }
+
+        /* --- NUEVO: Footer con Versión y Créditos --- */
+        .footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 0.75rem;
+            color: #888;
+            width: 100%;
+            position: absolute;
+            bottom: 0;
+            background: #f4f7f9;
+        }
+        .v-badge {
+            background: #ddd;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: bold;
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
@@ -36,55 +56,44 @@
         <input type="text" id="pedido" placeholder="Número de Pedido">
         <input type="text" id="po" placeholder="Número de PO#">
         <input type="date" id="fecha">
-        <button class="add-btn" onclick="saveOrder()">Guardar y Programar Aviso</button>
+        <button class="add-btn" onclick="saveOrder()">Guardar Orden</button>
     </div>
 
     <div id="orderList"></div>
 </div>
 
+<footer class="footer">
+    <span class="v-badge">v1.0.2</span> 
+    Creada por <strong>Ismael Bigio</strong> | 2026
+</footer>
+
 <script>
-    // Solicitar permiso de notificaciones al cargar
-    if ("Notification" in window) {
-        Notification.requestPermission();
-    }
+    // Sistema de Notificaciones y LocalStorage
+    if ("Notification" in window) { Notification.requestPermission(); }
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); });
     }
 
     function saveOrder() {
-        const taller = document.getElementById('taller').value;
-        const pedido = document.getElementById('pedido').value;
+        const t = document.getElementById('taller').value;
+        const p = document.getElementById('pedido').value;
         const po = document.getElementById('po').value;
-        const fecha = document.getElementById('fecha').value;
+        const f = document.getElementById('fecha').value;
 
-        if(!taller || !pedido || !fecha) return alert("Completa los datos");
+        if(!t || !p || !f) return alert("Faltan datos");
 
-        const order = { taller, pedido, po, fecha, id: Date.now() };
+        const order = { taller: t, pedido: p, po: po, fecha: f, id: Date.now() };
         let orders = JSON.parse(localStorage.getItem('pwa_orders')) || [];
         orders.push(order);
         localStorage.setItem('pwa_orders', JSON.stringify(orders));
         
+        // Limpiar campos
         document.getElementById('taller').value = '';
         document.getElementById('pedido').value = '';
         document.getElementById('po').value = '';
         
         render();
-        alert("Orden guardada. La app te avisará el día de la entrega si está abierta.");
-    }
-
-    function checkNotifications(orders) {
-        const hoy = new Date().toISOString().split('T')[0];
-        orders.forEach(o => {
-            if (o.fecha === hoy) {
-                if (Notification.permission === "granted") {
-                    new Notification("¡Entrega para HOY!", {
-                        body: `Taller: ${o.taller} | Orden: ${o.pedido}`,
-                        icon: "https://cdn-icons-png.flaticon.com/512/1554/1554401.png"
-                    });
-                }
-            }
-        });
     }
 
     function render() {
@@ -92,7 +101,7 @@
         const orders = JSON.parse(localStorage.getItem('pwa_orders')) || [];
         const hoyStr = new Date().toISOString().split('T')[0];
         
-        list.innerHTML = '<h4>Lista de Órdenes</h4>';
+        list.innerHTML = '<h4>Pendientes</h4>';
         
         orders.sort((a,b) => new Date(a.fecha) - new Date(b.fecha)).forEach(o => {
             const esHoy = o.fecha === hoyStr;
@@ -104,16 +113,24 @@
                     <h3>${o.taller}</h3>
                     <div class="info"><b>Pedido:</b> ${o.pedido}</div>
                     <div class="info"><b>PO#:</b> ${o.po}</div>
-                    <div class="date-label">📅 Entrega: ${o.fecha} ${esHoy ? '- ¡ES HOY!' : ''}</div>
+                    <div class="date-label">📅 Entrega: ${o.fecha} ${esHoy ? ' (¡HOY!)' : ''}</div>
                 </div>
             `;
         });
         
-        if(orders.length > 0) checkNotifications(orders);
+        if(orders.length > 0) checkNotify(orders, hoyStr);
+    }
+
+    function checkNotify(orders, hoy) {
+        orders.forEach(o => {
+            if (o.fecha === hoy && Notification.permission === "granted") {
+                new Notification("Entrega Hoy: " + o.taller, { body: "Orden " + o.pedido });
+            }
+        });
     }
 
     function deleteOrder(id) {
-        if(confirm("¿Borrar orden?")){
+        if(confirm("¿Borrar?")){
             let orders = JSON.parse(localStorage.getItem('pwa_orders')).filter(o => o.id !== id);
             localStorage.setItem('pwa_orders', JSON.stringify(orders));
             render();
