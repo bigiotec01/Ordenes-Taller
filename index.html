@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dealer Piezas PWA</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a73e8">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1554/1554401.png">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f4f7f9; padding-bottom: 50px; }
+        .header { background: #1a73e8; color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .container { padding: 15px; max-width: 500px; margin: auto; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        button.add-btn { width: 100%; padding: 15px; background: #1a73e8; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .order-card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 12px; border-left: 5px solid #34a853; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .order-card h3 { margin: 0 0 5px 0; font-size: 1.1rem; color: #1a73e8; }
+        .info { font-size: 0.9rem; color: #555; margin: 3px 0; }
+        .date-label { display: inline-block; background: #e8f0fe; color: #1a73e8; padding: 3px 8px; border-radius: 4px; font-weight: bold; margin-top: 5px; }
+        .del-btn { position: absolute; right: 10px; top: 10px; color: #d93025; border: none; background: none; font-size: 1.2rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="header">CONTROL DE ENTREGAS</div>
+
+<div class="container">
+    <div class="card">
+        <input type="text" id="taller" placeholder="Nombre del Taller">
+        <input type="text" id="pedido" placeholder="Número de Pedido">
+        <input type="text" id="po" placeholder="Número de PO#">
+        <input type="date" id="fecha">
+        <button class="add-btn" onclick="saveOrder()">Guardar Orden</button>
+    </div>
+
+    <div id="orderList"></div>
+</div>
+
+<script>
+    // Registrar el Service Worker para que sea PWA
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js');
+        });
+    }
+
+    function saveOrder() {
+        const order = {
+            taller: document.getElementById('taller').value,
+            pedido: document.getElementById('pedido').value,
+            po: document.getElementById('po').value,
+            fecha: document.getElementById('fecha').value,
+            id: Date.now()
+        };
+
+        if(!order.taller || !order.pedido || !order.fecha) return alert("Completa los datos");
+
+        let orders = JSON.parse(localStorage.getItem('pwa_orders')) || [];
+        orders.push(order);
+        localStorage.setItem('pwa_orders', JSON.stringify(orders));
+        
+        // Limpiar inputs
+        ['taller','pedido','po'].forEach(id => document.getElementById(id).value = '');
+        render();
+    }
+
+    function render() {
+        const list = document.getElementById('orderList');
+        const orders = JSON.parse(localStorage.getItem('pwa_orders')) || [];
+        list.innerHTML = '<h4>Pendientes</h4>';
+        
+        orders.sort((a,b) => new Date(a.fecha) - new Date(b.fecha)).forEach(o => {
+            list.innerHTML += `
+                <div class="order-card">
+                    <button class="del-btn" onclick="deleteOrder(${o.id})">×</button>
+                    <h3>${o.taller}</h3>
+                    <div class="info"><b>Pedido:</b> ${o.pedido}</div>
+                    <div class="info"><b>PO#:</b> ${o.po}</div>
+                    <div class="date-label">📅 ${o.fecha}</div>
+                </div>
+            `;
+        });
+    }
+
+    function deleteOrder(id) {
+        let orders = JSON.parse(localStorage.getItem('pwa_orders')).filter(o => o.id !== id);
+        localStorage.setItem('pwa_orders', JSON.stringify(orders));
+        render();
+    }
+
+    window.onload = render;
+</script>
+</body>
+</html>
