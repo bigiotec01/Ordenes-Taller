@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Pedidos Dealer 2.0.3</title>
+    <title>Pedidos Dealer 2.0.4</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Pedidos">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1554/1554401.png?v=3">
-    <link rel="manifest" href="manifest.json?v=3">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1554/1554401.png?v=4">
+    <link rel="manifest" href="manifest.json?v=4">
     <meta name="theme-color" content="#F2F2F7">
 
     <style>
@@ -68,7 +68,7 @@
             border-radius: 12px; font-size: 17px; font-weight: 600; margin-bottom: 10px;
         }
         .btn-blue { background: var(--ios-blue); }
-        .btn-orange { background: var(--ios-orange); }
+        .btn-orange { background: var(--ios-orange); display: none; } /* Oculto por defecto */
 
         .order-card {
             background: var(--ios-card); border-radius: 14px; padding: 16px;
@@ -104,7 +104,7 @@
 </div>
 
 <div class="container">
-    <button class="main-btn btn-orange" onclick="solicitarPermisos()">🔔 ACTIVAR NOTIFICACIONES</button>
+    <button id="btnNotif" class="main-btn btn-orange" onclick="solicitarPermisos()">🔔 ACTIVAR NOTIFICACIONES</button>
 
     <div class="ios-group">
         <div class="ios-row"><label>Taller</label><input type="text" id="taller" placeholder="Nombre"></div>
@@ -119,7 +119,7 @@
 </div>
 
 <footer class="footer">
-    <span style="background:#ddd; padding:2px 8px; border-radius:10px; font-weight:bold;">v2.0.3</span><br><br>
+    <span style="background:#ddd; padding:2px 8px; border-radius:10px; font-weight:bold;">v2.0.4</span><br><br>
     Creada por <strong>Ismael Bigio</strong> | 2026
 </footer>
 
@@ -127,7 +127,7 @@
     // --- LÓGICA DE NOTIFICACIONES ---
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js?v=3');
+            navigator.serviceWorker.register('sw.js?v=4');
         });
     }
 
@@ -139,7 +139,7 @@
 
         const permiso = await Notification.requestPermission();
         if (permiso === "granted") {
-            alert("¡Excelente! Notificaciones activadas.");
+            document.getElementById('btnNotif').style.display = 'none';
             lanzarBienvenida();
         } else {
             alert("Permiso denegado. Ve a Ajustes > Notificaciones > Safari.");
@@ -236,8 +236,16 @@
         }
     }
 
+    // --- INICIO ---
     window.onload = () => {
         render();
+        
+        // El botón naranja solo aparece si el permiso no ha sido concedido
+        const btn = document.getElementById('btnNotif');
+        if (Notification.permission !== "granted") {
+            btn.style.display = "block";
+        }
+
         if (Notification.permission === "granted") {
             verificarEntregasHoy();
         }
