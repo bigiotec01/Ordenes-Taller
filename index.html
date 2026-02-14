@@ -2,75 +2,191 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dealer Piezas PWA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Pedidos Dealer</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Pedidos">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1554/1554401.png">
+    
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1a73e8">
-    <style>
-        /* --- Estilos anteriores --- */
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f4f7f9; padding-bottom: 80px; min-height: 100vh; position: relative; }
-        .header { background: #1a73e8; color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .container { padding: 15px; max-width: 500px; margin: auto; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
-        button.add-btn { width: 100%; padding: 15px; background: #1a73e8; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        
-        /* --- Tarjetas de Órdenes --- */
-        .order-card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 12px; border-left: 8px solid #ccc; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.3s; }
-        .hoy { border-left-color: #d93025; background: #fff5f5; } 
-        .futuro { border-left-color: #34a853; } 
-        .order-card h3 { margin: 0 0 5px 0; color: #1a73e8; font-size: 1.1rem; }
-        .info { font-size: 0.9rem; color: #555; margin: 3px 0; }
-        .date-label { display: inline-block; padding: 3px 8px; border-radius: 4px; font-weight: bold; margin-top: 5px; font-size: 0.85rem; }
-        .hoy .date-label { background: #d93025; color: white; }
-        .futuro .date-label { background: #e8f5e9; color: #2e7d32; }
-        .del-btn { position: absolute; right: 10px; top: 10px; color: #999; border: none; background: none; font-size: 1.5rem; cursor: pointer; }
 
-        /* --- NUEVO: Footer con Versión y Créditos --- */
+    <style>
+        :root {
+            --ios-blue: #007AFF;
+            --ios-bg: #F2F2F7;
+            --ios-card: #FFFFFF;
+            --ios-text: #000000;
+            --ios-gray: #8E8E93;
+            --ios-danger: #FF3B30;
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            margin: 0; 
+            background: var(--ios-bg); 
+            color: var(--ios-text);
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: constant(safe-area-inset-bottom);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* Título estilo iOS */
+        .header { 
+            background: rgba(242, 242, 247, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 60px 20px 10px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 34px;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        .container { padding: 16px; }
+
+        /* Formulario agrupado estilo iOS Settings */
+        .ios-group {
+            background: var(--ios-card);
+            border-radius: 12px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .ios-row {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 0.5px solid #C6C6C8;
+        }
+
+        .ios-row:last-child { border-bottom: none; }
+
+        .ios-row label {
+            width: 110px;
+            font-size: 15px;
+            color: var(--ios-text);
+        }
+
+        .ios-row input {
+            flex: 1;
+            border: none;
+            font-size: 17px;
+            outline: none;
+            background: transparent;
+            padding: 0;
+        }
+
+        button.ios-btn {
+            width: 100%;
+            background: var(--ios-blue);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: opacity 0.2s;
+        }
+
+        button.ios-btn:active { opacity: 0.6; }
+
+        /* Tarjetas de órdenes estilo Apple */
+        .order-card {
+            background: var(--ios-card);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .taller-title { font-size: 19px; font-weight: 600; color: var(--ios-text); }
+
+        .info-grid { font-size: 15px; color: var(--ios-gray); line-height: 1.4; }
+        .info-grid span { color: var(--ios-text); font-weight: 500; }
+
+        .badge {
+            display: inline-block;
+            margin-top: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .badge-today { background: #FFD6D6; color: var(--ios-danger); }
+        .badge-future { background: #D6F5D6; color: #248A3D; }
+
+        /* Footer discreto */
         .footer {
             text-align: center;
-            padding: 15px;
-            font-size: 0.75rem;
-            color: #888;
-            width: 100%;
-            position: absolute;
-            bottom: 0;
-            background: #f4f7f9;
+            padding: 30px 0 50px 0;
+            font-size: 13px;
+            color: var(--ios-gray);
         }
-        .v-badge {
-            background: #ddd;
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-weight: bold;
-            margin-right: 5px;
+
+        .del-action {
+            color: var(--ios-danger);
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            background: none;
+            padding: 0;
         }
     </style>
 </head>
 <body>
 
-<div class="header">CONTROL DE ENTREGAS</div>
+<div class="header">
+    <h1>Entregas</h1>
+</div>
 
 <div class="container">
-    <div class="card">
-        <input type="text" id="taller" placeholder="Nombre del Taller">
-        <input type="text" id="pedido" placeholder="Número de Pedido">
-        <input type="text" id="po" placeholder="Número de PO#">
-        <input type="date" id="fecha">
-        <button class="add-btn" onclick="saveOrder()">Guardar Orden</button>
+    <div class="ios-group">
+        <div class="ios-row">
+            <label>Taller</label>
+            <input type="text" id="taller" placeholder="Nombre">
+        </div>
+        <div class="ios-row">
+            <label>Pedido</label>
+            <input type="text" id="pedido" placeholder="Número">
+        </div>
+        <div class="ios-row">
+            <label>PO#</label>
+            <input type="text" id="po" placeholder="Opcional">
+        </div>
+        <div class="ios-row">
+            <label>Fecha</label>
+            <input type="date" id="fecha">
+        </div>
     </div>
+    <button class="ios-btn" onclick="saveOrder()">Agregar Pedido</button>
 
+    <h2 style="font-size: 22px; margin: 30px 0 15px 5px;">Órdenes</h2>
     <div id="orderList"></div>
 </div>
 
 <footer class="footer">
-    <span class="v-badge">v1.0.2</span> 
-    Creada por <strong>Ismael Bigio</strong> | 2026
+    Versión 1.0.4<br>
+    Creada por <strong>Ismael Bigio</strong>
 </footer>
 
 <script>
-    // Sistema de Notificaciones y LocalStorage
-    if ("Notification" in window) { Notification.requestPermission(); }
-
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); });
     }
@@ -81,60 +197,48 @@
         const po = document.getElementById('po').value;
         const f = document.getElementById('fecha').value;
 
-        if(!t || !p || !f) return alert("Faltan datos");
+        if(!t || !p || !f) return;
 
         const order = { taller: t, pedido: p, po: po, fecha: f, id: Date.now() };
         let orders = JSON.parse(localStorage.getItem('pwa_orders')) || [];
         orders.push(order);
         localStorage.setItem('pwa_orders', JSON.stringify(orders));
         
-        // Limpiar campos
-        document.getElementById('taller').value = '';
-        document.getElementById('pedido').value = '';
-        document.getElementById('po').value = '';
-        
+        ['taller','pedido','po','fecha'].forEach(id => document.getElementById(id).value = '');
         render();
     }
 
     function render() {
         const list = document.getElementById('orderList');
         const orders = JSON.parse(localStorage.getItem('pwa_orders')) || [];
-        const hoyStr = new Date().toISOString().split('T')[0];
+        const hoy = new Date().toISOString().split('T')[0];
         
-        list.innerHTML = '<h4>Pendientes</h4>';
+        list.innerHTML = '';
         
         orders.sort((a,b) => new Date(a.fecha) - new Date(b.fecha)).forEach(o => {
-            const esHoy = o.fecha === hoyStr;
-            const claseColor = esHoy ? 'hoy' : 'futuro';
-
+            const esHoy = o.fecha === hoy;
             list.innerHTML += `
-                <div class="order-card ${claseColor}">
-                    <button class="del-btn" onclick="deleteOrder(${o.id})">×</button>
-                    <h3>${o.taller}</h3>
-                    <div class="info"><b>Pedido:</b> ${o.pedido}</div>
-                    <div class="info"><b>PO#:</b> ${o.po}</div>
-                    <div class="date-label">📅 Entrega: ${o.fecha} ${esHoy ? ' (¡HOY!)' : ''}</div>
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="taller-title">${o.taller}</div>
+                        <button class="del-action" onclick="deleteOrder(${o.id})">Eliminar</button>
+                    </div>
+                    <div class="info-grid">
+                        Pedido: <span>${o.pedido}</span><br>
+                        PO#: <span>${o.po || 'N/A'}</span>
+                    </div>
+                    <div class="badge ${esHoy ? 'badge-today' : 'badge-future'}">
+                        ${esHoy ? '● Toca Hoy' : '📅 ' + o.fecha}
+                    </div>
                 </div>
             `;
-        });
-        
-        if(orders.length > 0) checkNotify(orders, hoyStr);
-    }
-
-    function checkNotify(orders, hoy) {
-        orders.forEach(o => {
-            if (o.fecha === hoy && Notification.permission === "granted") {
-                new Notification("Entrega Hoy: " + o.taller, { body: "Orden " + o.pedido });
-            }
         });
     }
 
     function deleteOrder(id) {
-        if(confirm("¿Borrar?")){
-            let orders = JSON.parse(localStorage.getItem('pwa_orders')).filter(o => o.id !== id);
-            localStorage.setItem('pwa_orders', JSON.stringify(orders));
-            render();
-        }
+        let orders = JSON.parse(localStorage.getItem('pwa_orders')).filter(o => o.id !== id);
+        localStorage.setItem('pwa_orders', JSON.stringify(orders));
+        render();
     }
 
     window.onload = render;
