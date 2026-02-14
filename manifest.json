@@ -1,15 +1,15 @@
 {
-  "name": "Dealer Piezas App",
-  "short_name": "Piezas",
-  "start_url": "index.html",
+  "name": "Pedidos Dealer",
+  "short_name": "Pedidos",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#1a73e8",
+  "background_color": "#F2F2F7",
+  "theme_color": "#007AFF",
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/1554/1554401.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
-}
