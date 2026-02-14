@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Pedidos Dealer 2.1.5</title>
-    
+    <title>Pedidos Dealer 3.0.0</title>
+
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1554/1554401.png">
-    <link rel="manifest" href="manifest.json?v=15">
+    <link rel="manifest" href="manifest.json?v=16">
     <meta name="theme-color" content="#F2F2F7">
 
     <style>
@@ -19,19 +19,36 @@
             --ios-yellow: #FFCC00; --ios-lightblue: #5AC8FA;
         }
 
-        body { 
-            font-family: -apple-system, sans-serif; 
+        body {
+            font-family: -apple-system, sans-serif;
             margin: 0; background: var(--ios-bg); color: var(--ios-text);
             -webkit-font-smoothing: antialiased; padding-bottom: 120px;
         }
 
-        .header { 
+        .header {
             background: rgba(242, 242, 247, 0.8); backdrop-filter: blur(20px);
             padding: 60px 20px 10px 20px; position: sticky; top: 0; z-index: 100;
             text-align: center;
         }
 
         h1 { margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -1px; }
+
+        .search-container { padding: 10px 16px 0; }
+        .search-bar {
+            background: #E3E3E8; border-radius: 10px; padding: 8px 12px;
+            display: flex; align-items: center;
+        }
+        .search-bar input {
+            border: none; background: transparent; width: 100%; font-size: 16px;
+            outline: none; margin-left: 8px; color: black;
+        }
+
+        .sync-badge {
+            display: inline-block; padding: 2px 8px; border-radius: 6px;
+            font-size: 11px; font-weight: 700; margin-left: 8px; vertical-align: middle;
+        }
+        .sync-online { background: #D1FAE5; color: #065F46; }
+        .sync-offline { background: #FEE2E2; color: #991B1B; }
 
         .container { padding: 16px; }
 
@@ -46,13 +63,13 @@
 
         .ios-row:last-child { border-bottom: none; }
         .ios-row label { width: 125px; font-size: 15px; color: var(--ios-text); }
-        .ios-row input, .ios-row select { 
-            flex: 1; border: none; font-size: 17px; outline: none; 
+        .ios-row input, .ios-row select {
+            flex: 1; border: none; font-size: 17px; outline: none;
             background: transparent; color: var(--ios-blue); font-weight: 500;
         }
 
         .main-btn {
-            width: 100%; color: white; border: none; padding: 14px; 
+            width: 100%; color: white; border: none; padding: 14px;
             border-radius: 12px; font-size: 17px; font-weight: 600; margin-bottom: 10px;
         }
         .btn-blue { background: var(--ios-blue); }
@@ -72,7 +89,7 @@
         .st-entregado { border-left-color: var(--ios-green) !important; opacity: 0.6; }
 
         .taller-title { font-size: 19px; font-weight: 600; margin-bottom: 8px; display: block; }
-        
+
         .status-selector-mini {
             width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #E5E5EA;
             background: #F2F2F7; font-size: 14px; font-weight: 600; margin-top: 10px;
@@ -87,13 +104,42 @@
         .btn-ws { background: #E7F9ED; color: var(--ios-green); }
         .btn-del { background: #FFEBEB; color: var(--ios-danger); }
 
+        .empty-state {
+            text-align: center; padding: 40px 20px; color: var(--ios-gray);
+        }
+        .empty-state .icon { font-size: 48px; margin-bottom: 10px; }
+        .empty-state p { font-size: 15px; margin: 0; }
+
+        .toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: #333; color: white; padding: 12px 24px; border-radius: 10px;
+            font-size: 15px; font-weight: 600; z-index: 200; opacity: 0;
+            transition: opacity 0.3s ease; pointer-events: none;
+        }
+        .toast.show { opacity: 1; }
+
+        .backup-row {
+            display: flex; gap: 8px; margin-bottom: 20px;
+        }
+        .btn-backup {
+            flex: 1; border: none; padding: 10px; border-radius: 10px;
+            font-size: 13px; font-weight: 600; background: #E9E9EB; color: var(--ios-text);
+        }
+
         .footer { text-align: center; color: var(--ios-gray); font-size: 12px; padding: 30px 20px; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>📋 Mis Órdenes</h1>
+    <h1>Mis Ordenes <span id="syncBadge" class="sync-badge sync-offline">offline</span></h1>
+</div>
+
+<div class="search-container">
+    <div class="search-bar">
+        <span>🔍</span>
+        <input type="text" id="searchInput" placeholder="Buscar taller, pedido o PO..." oninput="render()">
+    </div>
 </div>
 
 <div class="container">
@@ -101,8 +147,8 @@
         <div class="ios-row"><label>Taller</label><input type="text" id="taller" placeholder="Ej. Morales"></div>
         <div class="ios-row"><label>Pedido</label><input type="text" id="pedido" placeholder="Ej. M-100"></div>
         <div class="ios-row"><label>PO#</label><input type="text" id="po" placeholder="Opcional"></div>
-        <div class="ios-row"><label>Día de Entrega</label><input type="date" id="fechaEntrega"></div>
-        <div class="ios-row"><label>Día de Pedido</label><input type="date" id="fecha"></div>
+        <div class="ios-row"><label>Dia de Entrega</label><input type="date" id="fechaEntrega"></div>
+        <div class="ios-row"><label>Dia de Pedido</label><input type="date" id="fecha"></div>
         <div class="ios-row">
             <label>Estatus Inicial</label>
             <select id="status">
@@ -116,34 +162,76 @@
             </select>
         </div>
     </div>
-    <button class="main-btn btn-blue" onclick="saveOrder()">Guardar Nueva Orden</button>
+    <button class="main-btn btn-blue" onclick="guardarOrden()">Guardar Nueva Orden</button>
 
     <div id="orderList" style="margin-top: 20px;"></div>
+
+    <div class="backup-row">
+        <button class="btn-backup" onclick="exportarDatos()">📥 Exportar Respaldo</button>
+        <button class="btn-backup" onclick="document.getElementById('importFile').click()">📤 Importar Respaldo</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importarDatos(event)">
+    </div>
 </div>
 
-<footer class="footer">v2.1.5 | Ismael Bigio Control</footer>
+<div id="toast" class="toast"></div>
 
-<script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js?v=15'); });
-    }
+<footer class="footer">v3.0.0 | Ismael Bigio Control</footer>
 
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import {
+        getFirestore, collection, doc, setDoc, deleteDoc, updateDoc,
+        onSnapshot, getDocs, writeBatch, enableIndexedDbPersistence
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // --- Firebase ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyA84JgJHrziYRF90W6kpilfEKwGtqOf_6A",
+        authDomain: "ordenes-taller-f35bb.firebaseapp.com",
+        projectId: "ordenes-taller-f35bb",
+        storageBucket: "ordenes-taller-f35bb.firebasestorage.app",
+        messagingSenderId: "444016011348",
+        appId: "1:444016011348:web:26d9a64d3accffd5e1e5c1"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    enableIndexedDbPersistence(db).catch(() => {});
+    const ordersCol = collection(db, 'orders');
+
+    // --- Estado en memoria ---
+    let orders = [];
+
+    // --- Utilidades ---
     function esc(str) {
         const d = document.createElement('div');
         d.textContent = str;
         return d.innerHTML;
     }
 
-    function getOrders() {
-        try { return JSON.parse(localStorage.getItem('pwa_orders')) || []; }
-        catch { return []; }
+    const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    function fechaEs(str) {
+        if (!str) return '---';
+        const [y, m, d] = str.split('-');
+        if (!y || !m || !d) return str;
+        return `${parseInt(d)}/${MESES[parseInt(m)-1]}/${y}`;
     }
 
-    function setOrders(orders) {
-        localStorage.setItem('pwa_orders', JSON.stringify(orders));
+    function mostrarToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2000);
     }
 
-    function saveOrder() {
+    function setSyncBadge(online) {
+        const b = document.getElementById('syncBadge');
+        b.textContent = online ? 'sync' : 'offline';
+        b.className = 'sync-badge ' + (online ? 'sync-online' : 'sync-offline');
+    }
+
+    // --- CRUD (Firestore) ---
+    window.guardarOrden = async function() {
         const t = document.getElementById('taller').value.trim();
         const p = document.getElementById('pedido').value.trim();
         const po = document.getElementById('po').value.trim();
@@ -151,37 +239,35 @@
         const f = document.getElementById('fecha').value;
         const s = document.getElementById('status').value;
 
-        if(!t || !p || !f) return alert("Llena Taller, Pedido y Día de Pedido");
+        if(!t || !p || !f) return alert("Llena Taller, Pedido y Dia de Pedido");
 
         const order = { taller: t, pedido: p, po: po, fechaEntrega: fe, fecha: f, status: s, id: Date.now() };
-        const orders = getOrders();
-        orders.push(order);
-        setOrders(orders);
+        await setDoc(doc(db, 'orders', String(order.id)), order);
 
         ['taller','pedido','po','fechaEntrega','fecha'].forEach(id => document.getElementById(id).value = '');
-        render();
-    }
+        mostrarToast('Orden guardada');
+    };
 
-    function actualizarStatus(id, nuevoStatus) {
-        const orders = getOrders();
-        const index = orders.findIndex(o => o.id === id);
-        if (index !== -1) {
-            orders[index].status = nuevoStatus;
-            setOrders(orders);
-            render();
+    window.actualizarStatus = async function(id, nuevoStatus) {
+        await updateDoc(doc(db, 'orders', String(id)), { status: nuevoStatus });
+    };
+
+    window.deleteOrder = async function(id) {
+        if(confirm("¿Eliminar esta orden?")) {
+            await deleteDoc(doc(db, 'orders', String(id)));
+            mostrarToast('Orden eliminada');
         }
-    }
+    };
 
-    function enviarWhatsApp(id) {
-        const orders = getOrders();
+    window.enviarWhatsApp = function(id) {
         const o = orders.find(item => item.id === id);
         if (!o) return;
 
         const configStatus = {
             'Pendiente': { bolita: '\u26AA', msg: 'Su solicitud ha sido recibida.' },
             'Ordenado': { bolita: '\uD83D\uDFE1', msg: 'Su pieza ya ha sido ordenada a fabrica.' },
-            'Piezas en Tienda': { bolita: '\uD83D\uDCE2', msg: 'Las piezas ya se encuentran físicamente en la tienda.' },
-            'En Tránsito': { bolita: '\uD83D\uDCCA', msg: 'Su pieza ya viene de camino al dealer.' },
+            'Piezas en Tienda': { bolita: '\uD83D\uDFE0', msg: 'Las piezas ya se encuentran fisicamente en la tienda.' },
+            'En Tránsito': { bolita: '\uD83D\uDFE3', msg: 'Su pieza ya viene de camino al dealer.' },
             'Listo para Recoger': { bolita: '\uD83D\uDD35', msg: 'La pieza ya llego y esta lista para recoger.' },
             'Listo para Entrega': { bolita: '\uD83D\uDCE6', msg: 'La pieza esta lista para ser entregada.' },
             'Entregado': { bolita: '\u2705', msg: 'Confirmamos que la pieza ha sido entregada.' }
@@ -194,21 +280,22 @@
                       `Taller: ${o.taller}\n` +
                       `Pedido: ${o.pedido}\n` +
                       `PO#: ${o.po || 'N/A'}\n`;
-        
-        if(o.fechaEntrega) texto += `ENTREGA: ${o.fechaEntrega}\n`;
-        
-        texto += `DIA PEDIDO: ${o.fecha}\n` +
+
+        if(o.fechaEntrega) texto += `ENTREGA: ${fechaEs(o.fechaEntrega)}\n`;
+
+        texto += `DIA PEDIDO: ${fechaEs(o.fecha)}\n` +
                       `ESTATUS: ${info.bolita} ${o.status.toUpperCase()}\n` +
                       `---------------------------\n` +
                       `${info.msg}\n\n` +
                       `Enviado desde Control Ismael`;
 
         window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
-    }
+    };
 
+    // --- Render ---
     function render() {
         const list = document.getElementById('orderList');
-        const orders = getOrders();
+        const query = document.getElementById('searchInput').value.toLowerCase();
         list.innerHTML = '';
 
         const statusClases = {
@@ -221,16 +308,31 @@
             'Entregado': 'st-entregado'
         };
 
-        orders.sort((a,b) => b.id - a.id).forEach(o => {
+        const filtradas = orders
+            .filter(o => o.taller.toLowerCase().includes(query) ||
+                         o.pedido.toLowerCase().includes(query) ||
+                         (o.po && o.po.toLowerCase().includes(query)))
+            .sort((a,b) => b.id - a.id);
+
+        if (filtradas.length === 0) {
+            list.innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">📋</div>
+                    <p>${query ? 'Sin resultados para esa busqueda' : 'No hay ordenes todavia'}</p>
+                </div>`;
+            return;
+        }
+
+        filtradas.forEach(o => {
             const claseStatus = statusClases[o.status] || 'st-pendiente';
-            const entregaInfo = o.fechaEntrega ? ` | Entrega: <b>${esc(o.fechaEntrega)}</b>` : '';
+            const entregaInfo = o.fechaEntrega ? ` | Entrega: <b>${fechaEs(o.fechaEntrega)}</b>` : '';
 
             list.innerHTML += `
                 <div class="order-card ${claseStatus}">
                     <span class="taller-title">${esc(o.taller)}</span>
                     <div class="details">
                         Pedido: <b>${esc(o.pedido)}</b> | PO#: <b>${esc(o.po || '---')}</b><br>
-                        Pedido el: <b>${esc(o.fecha)}</b>${entregaInfo}
+                        Pedido el: <b>${fechaEs(o.fecha)}</b>${entregaInfo}
                     </div>
 
                     <select class="status-selector-mini" onchange="actualizarStatus(${o.id}, this.value)">
@@ -251,16 +353,86 @@
             `;
         });
     }
+    window.render = render;
 
-    function deleteOrder(id) {
-        if(confirm("¿Eliminar esta orden?")) {
-            const orders = getOrders().filter(o => o.id !== id);
-            setOrders(orders);
-            render();
-        }
+    // --- Respaldo ---
+    window.exportarDatos = function() {
+        if (orders.length === 0) return mostrarToast('No hay ordenes para exportar');
+        const blob = new Blob([JSON.stringify(orders, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `pedidos_respaldo_${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        mostrarToast(`${orders.length} ordenes exportadas`);
+    };
+
+    window.importarDatos = async function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            try {
+                const datos = JSON.parse(e.target.result);
+                if (!Array.isArray(datos)) throw new Error();
+                const idsExistentes = new Set(orders.map(o => o.id));
+                const nuevas = datos.filter(o => o.taller && o.pedido && !idsExistentes.has(o.id));
+                if (nuevas.length === 0) return mostrarToast('No hay ordenes nuevas para importar');
+
+                for (const o of nuevas) {
+                    if (!o.status) o.status = o.llego ? 'Listo para Recoger' : 'Pendiente';
+                    delete o.llego;
+                    await setDoc(doc(db, 'orders', String(o.id)), o);
+                }
+                mostrarToast(`${nuevas.length} ordenes importadas`);
+            } catch {
+                alert('Archivo no valido');
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    };
+
+    // --- Sync en tiempo real (Firestore → UI) ---
+    onSnapshot(ordersCol, (snapshot) => {
+        orders = snapshot.docs.map(d => d.data());
+        setSyncBadge(!snapshot.metadata.fromCache);
+        render();
+    }, () => {
+        setSyncBadge(false);
+    });
+
+    // --- Migrar localStorage → Firestore (una sola vez) ---
+    async function migrarLocalAFirestore() {
+        let local = [];
+        try { local = JSON.parse(localStorage.getItem('pwa_orders')) || []; } catch {}
+        if (local.length === 0) return;
+
+        const snapshot = await getDocs(ordersCol);
+        const idsFirestore = new Set(snapshot.docs.map(d => d.data().id));
+
+        const nuevas = local.filter(o => !idsFirestore.has(o.id));
+        if (nuevas.length === 0) return;
+
+        const batch = writeBatch(db);
+        nuevas.forEach(o => {
+            if (!o.status) o.status = o.llego ? 'Listo para Recoger' : 'Pendiente';
+            delete o.llego;
+            if (!o.fechaEntrega) o.fechaEntrega = '';
+            batch.set(doc(db, 'orders', String(o.id)), o);
+        });
+        await batch.commit();
+        mostrarToast(`${nuevas.length} ordenes migradas a la nube`);
     }
 
-    window.onload = render;
+    // --- Service Worker ---
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js?v=16');
+    }
+
+    // --- Init ---
+    migrarLocalAFirestore();
 </script>
 </body>
 </html>
