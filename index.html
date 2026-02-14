@@ -170,24 +170,27 @@
         const o = orders.find(item => item.id === id);
         if (!o) return;
 
-        const mensajes = {
-            'Pendiente': 'Su solicitud ha sido recibida.',
-            'Ordenado': 'Su pieza ya ha sido ordenada a fabrica.',
-            'En Tránsito': 'Su pieza ya viene de camino al dealer.',
-            'Listo': 'La pieza ya llego y esta lista para recoger.',
-            'Entregado': 'Confirmamos que la pieza ha sido entregada.'
+        // Configuración de bolitas y mensajes dinámicos
+        const configStatus = {
+            'Pendiente': { bolita: '⚪', msg: 'Su solicitud ha sido recibida.' },
+            'Ordenado': { bolita: '🟡', msg: 'Su pieza ya ha sido ordenada a fabrica.' },
+            'En Tránsito': { bolita: '🟣', msg: 'Su pieza ya viene de camino al dealer.' },
+            'Listo': { bolita: '🔵', msg: 'La pieza ya llego y esta lista para recoger.' },
+            'Entregado': { bolita: '✅', msg: 'Confirmamos que la pieza ha sido entregada.' }
         };
+
+        const info = configStatus[o.status] || { bolita: '⚪', msg: '' };
 
         const texto = `*ACTUALIZACION DE PEDIDO*\n` +
                       `---------------------------\n` +
-                      `Taller: ${o.taller}\n` +
-                      `Pedido: ${o.pedido}\n` +
-                      `PO#: ${o.po || 'N/A'}\n` +
-                      `DIA PEDIDO: ${o.fecha}\n` +
-                      `ESTATUS: ${o.status.toUpperCase()}\n` +
+                      `🏢 Taller: ${o.taller}\n` +
+                      `📦 Pedido: ${o.pedido}\n` +
+                      `📄 PO#: ${o.po || 'N/A'}\n` +
+                      `📅 DIA PEDIDO: ${o.fecha}\n` +
+                      `📍 ESTATUS: ${info.bolita} ${o.status.toUpperCase()}\n` +
                       `---------------------------\n` +
-                      `${mensajes[o.status] || ''}\n\n` +
-                      `Enviado desde Control Ismael`;
+                      `${info.msg}\n\n` +
+                      `_Enviado desde Control Ismael_`;
 
         window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
     }
