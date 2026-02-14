@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Pedidos Dealer 2.0.4</title>
+    <title>Pedidos Dealer 2.0.5</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Pedidos">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1554/1554401.png?v=4">
-    <link rel="manifest" href="manifest.json?v=4">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1554/1554401.png?v=5">
+    <link rel="manifest" href="manifest.json?v=5">
     <meta name="theme-color" content="#F2F2F7">
 
     <style>
@@ -22,6 +22,7 @@
             --ios-gray: #8E8E93;
             --ios-danger: #FF3B30;
             --ios-orange: #FF9500;
+            --ios-purple: #5856D6;
         }
 
         body { 
@@ -68,23 +69,25 @@
             border-radius: 12px; font-size: 17px; font-weight: 600; margin-bottom: 10px;
         }
         .btn-blue { background: var(--ios-blue); }
-        .btn-orange { background: var(--ios-orange); display: none; } /* Oculto por defecto */
+        .btn-orange { background: var(--ios-orange); display: none; }
 
         .order-card {
             background: var(--ios-card); border-radius: 14px; padding: 16px;
             margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: all 0.3s ease;
         }
+
+        .order-card.llego { background: #F0F9FF; border-left: 6px solid var(--ios-blue) !important; opacity: 0.9; }
 
         .taller-title { font-size: 19px; font-weight: 600; margin-bottom: 5px; }
         .details { font-size: 15px; color: var(--ios-gray); line-height: 1.4; }
-        .badge-today { 
-            background: var(--ios-danger); color: white; padding: 2px 8px; 
-            border-radius: 6px; font-size: 11px; font-weight: 800; margin-left: 8px;
-        }
+        .badge-today { background: var(--ios-danger); color: white; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; margin-left: 8px; }
+        .badge-ready { background: var(--ios-blue); color: white; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; margin-left: 8px; }
 
-        .actions { display: flex; gap: 10px; margin-top: 15px; border-top: 0.5px solid #E5E5EA; padding-top: 12px; }
-        .btn-action { flex: 1; border: none; padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; }
+        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 15px; border-top: 0.5px solid #E5E5EA; padding-top: 12px; }
+        .btn-action { border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; text-align: center; }
         .btn-ws { background: #E7F9ED; color: var(--ios-green); }
+        .btn-ready { background: #E9F2FF; color: var(--ios-blue); grid-column: span 2; margin-bottom: 5px; }
         .btn-del { background: #FFEBEB; color: var(--ios-danger); }
 
         .footer { text-align: center; color: var(--ios-gray); font-size: 12px; padding: 30px 20px; }
@@ -119,85 +122,71 @@
 </div>
 
 <footer class="footer">
-    <span style="background:#ddd; padding:2px 8px; border-radius:10px; font-weight:bold;">v2.0.4</span><br><br>
+    <span style="background:#ddd; padding:2px 8px; border-radius:10px; font-weight:bold;">v2.0.5</span><br><br>
     Creada por <strong>Ismael Bigio</strong> | 2026
 </footer>
 
 <script>
-    // --- LÓGICA DE NOTIFICACIONES ---
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js?v=4');
-        });
+        window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js?v=5'); });
     }
 
     async function solicitarPermisos() {
-        if (!("Notification" in window)) {
-            alert("Por favor, instala primero la App en tu pantalla de inicio.");
-            return;
-        }
-
+        if (!("Notification" in window)) return;
         const permiso = await Notification.requestPermission();
         if (permiso === "granted") {
             document.getElementById('btnNotif').style.display = 'none';
             lanzarBienvenida();
-        } else {
-            alert("Permiso denegado. Ve a Ajustes > Notificaciones > Safari.");
         }
     }
 
     function lanzarBienvenida() {
         navigator.serviceWorker.ready.then(reg => {
-            reg.showNotification("¡Sistema Activado!", {
-                body: "Ismael, recibirás avisos de tus entregas aquí.",
-                icon: "https://cdn-icons-png.flaticon.com/512/1554/1554401.png"
-            });
+            reg.showNotification("¡Sistema Activado!", { body: "Ismael, recibirás avisos aquí.", icon: "https://cdn-icons-png.flaticon.com/512/1554/1554401.png" });
         });
     }
 
-    function verificarEntregasHoy() {
-        const orders = JSON.parse(localStorage.getItem('pwa_orders')) || [];
-        const hoy = new Date().toISOString().split('T')[0];
-        const pendientes = orders.filter(o => o.fecha === hoy);
-        
-        if (pendientes.length > 0 && Notification.permission === "granted") {
-            navigator.serviceWorker.ready.then(reg => {
-                reg.showNotification("📦 Entregas para Hoy", {
-                    body: `Tienes ${pendientes.length} pedido(s) para hoy.`,
-                    icon: "https://cdn-icons-png.flaticon.com/512/1554/1554401.png"
-                });
-            });
-        }
-    }
-
-    // --- FUNCIONES DE LA APP ---
     function saveOrder() {
         const t = document.getElementById('taller').value;
         const p = document.getElementById('pedido').value;
         const po = document.getElementById('po').value;
         const f = document.getElementById('fecha').value;
-
         if(!t || !p || !f) return alert("Llena los campos obligatorios");
 
-        const order = { taller: t, pedido: p, po: po, fecha: f, id: Date.now() };
+        const order = { taller: t, pedido: p, po: po, fecha: f, id: Date.now(), llego: false };
         let orders = JSON.parse(localStorage.getItem('pwa_orders')) || [];
         orders.push(order);
         localStorage.setItem('pwa_orders', JSON.stringify(orders));
-        
         ['taller','pedido','po','fecha'].forEach(id => document.getElementById(id).value = '');
         render();
-        verificarEntregasHoy();
+    }
+
+    // --- NUEVA FUNCIÓN: MARCAR COMO LLEGADO Y ENVIAR WS ---
+    function confirmarLlegada(id) {
+        let orders = JSON.parse(localStorage.getItem('pwa_orders')) || [];
+        const index = orders.findIndex(o => o.id === id);
+        
+        if (index !== -1) {
+            orders[index].llego = true;
+            localStorage.setItem('pwa_orders', JSON.stringify(orders));
+            render();
+
+            const o = orders[index];
+            const texto = `*PIEZA LISTA PARA RECOGER*%0A` +
+                          `---------------------------%0A` +
+                          `🏢 *Taller:* ${o.taller}%0A` +
+                          `📦 *Pedido:* ${o.pedido}%0A` +
+                          `📄 *PO#:* ${o.po || 'N/A'}%0A` +
+                          `---------------------------%0A` +
+                          `✅ La pieza ya llegó al dealer y está disponible para entrega.%0A` +
+                          `Saludos, Ismael Bigio.`;
+            
+            window.open(`https://wa.me/?text=${texto}`, '_blank');
+        }
     }
 
     function shareWS(taller, pedido, po, fecha) {
-        let texto = `*CONFIRMACION DE ENTREGA*%0A` +
-                    `---------------------------%0A` +
-                    `Taller: ${taller}%0A` +
-                    `Pedido: ${pedido}%0A` +
-                    `PO#: ${po || 'N/A'}%0A` +
-                    `Fecha: ${fecha}%0A` +
-                    `---------------------------%0A` +
-                    `App Control Ismael`;
+        let texto = `*ESTADO DE PEDIDO*%0A---------------------------%0ATaller: ${taller}%0APedido: ${pedido}%0AFec. Entrega: ${fecha}%0A---------------------------%0AEstamos trabajando su orden.`;
         window.open(`https://wa.me/?text=${texto}`, '_blank');
     }
 
@@ -213,14 +202,19 @@
               .forEach(o => {
                   const esHoy = o.fecha === hoy;
                   list.innerHTML += `
-                    <div class="order-card" style="border-left: 6px solid ${esHoy ? 'var(--ios-danger)' : 'var(--ios-green)'}">
-                        <div class="taller-title">${o.taller} ${esHoy ? '<span class="badge-today">HOY</span>' : ''}</div>
+                    <div class="order-card ${o.llego ? 'llego' : ''}" style="border-left: 6px solid ${esHoy ? 'var(--ios-danger)' : 'var(--ios-green)'}">
+                        <div class="taller-title">
+                            ${o.taller} 
+                            ${esHoy && !o.llego ? '<span class="badge-today">HOY</span>' : ''}
+                            ${o.llego ? '<span class="badge-ready">LISTO</span>' : ''}
+                        </div>
                         <div class="details">
                             Pedido: <b>${o.pedido}</b> | PO#: <b>${o.po || '---'}</b><br>
                             Entrega: <b>${o.fecha}</b>
                         </div>
                         <div class="actions">
-                            <button class="btn-action btn-ws" onclick="shareWS('${o.taller}', '${o.pedido}', '${o.po}', '${o.fecha}')">💬 WhatsApp</button>
+                            ${!o.llego ? `<button class="btn-action btn-ready" onclick="confirmarLlegada(${o.id})">✅ ¡YA LLEGÓ! (Enviar aviso)</button>` : ''}
+                            <button class="btn-action btn-ws" onclick="shareWS('${o.taller}', '${o.pedido}', '${o.po}', '${o.fecha}')">💬 Estado</button>
                             <button class="btn-action btn-del" onclick="deleteOrder(${o.id})">🗑️ Borrar</button>
                         </div>
                     </div>
@@ -236,19 +230,10 @@
         }
     }
 
-    // --- INICIO ---
     window.onload = () => {
         render();
-        
-        // El botón naranja solo aparece si el permiso no ha sido concedido
         const btn = document.getElementById('btnNotif');
-        if (Notification.permission !== "granted") {
-            btn.style.display = "block";
-        }
-
-        if (Notification.permission === "granted") {
-            verificarEntregasHoy();
-        }
+        if (Notification.permission !== "granted") btn.style.display = "block";
     };
 </script>
 </body>
