@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Pedidos Dealer 2.1.0</title>
+    <title>Pedidos Dealer 2.1.1</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1554/1554401.png">
-    <link rel="manifest" href="manifest.json?v=10">
+    <link rel="manifest" href="manifest.json?v=11">
     <meta name="theme-color" content="#F2F2F7">
 
     <style>
@@ -60,7 +60,6 @@
             border-left: 6px solid #ddd;
         }
 
-        /* Colores de Borde por Estatus */
         .st-pendiente { border-left-color: var(--ios-gray) !important; }
         .st-ordenado { border-left-color: var(--ios-yellow) !important; }
         .st-transito { border-left-color: var(--ios-purple) !important; }
@@ -114,14 +113,13 @@
     <div id="orderList" style="margin-top: 20px;"></div>
 </div>
 
-<footer class="footer">v2.1.0 | Ismael Bigio Control</footer>
+<footer class="footer">v2.1.1 | Ismael Bigio Control</footer>
 
 <script>
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js?v=10'); });
+        window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js?v=11'); });
     }
 
-    // Escapar HTML para prevenir XSS
     function esc(str) {
         const d = document.createElement('div');
         d.textContent = str;
@@ -170,27 +168,27 @@
         const o = orders.find(item => item.id === id);
         if (!o) return;
 
-        // Configuración de bolitas y mensajes dinámicos
+        // Configuración de bolitas con UNICODE seguro para iPhone
         const configStatus = {
-            'Pendiente': { bolita: '⚪', msg: 'Su solicitud ha sido recibida.' },
-            'Ordenado': { bolita: '🟡', msg: 'Su pieza ya ha sido ordenada a fabrica.' },
-            'En Tránsito': { bolita: '🟣', msg: 'Su pieza ya viene de camino al dealer.' },
-            'Listo': { bolita: '🔵', msg: 'La pieza ya llego y esta lista para recoger.' },
-            'Entregado': { bolita: '✅', msg: 'Confirmamos que la pieza ha sido entregada.' }
+            'Pendiente': { bolita: '\u26AA', msg: 'Su solicitud ha sido recibida.' },
+            'Ordenado': { bolita: '\uD83D\uDFE1', msg: 'Su pieza ya ha sido ordenada a fabrica.' },
+            'En Tránsito': { bolita: '\uD83D\uDCCA', msg: 'Su pieza ya viene de camino al dealer.' },
+            'Listo': { bolita: '\uD83D\uDD35', msg: 'La pieza ya llego y esta lista para recoger.' },
+            'Entregado': { bolita: '\u2705', msg: 'Confirmamos que la pieza ha sido entregada.' }
         };
 
-        const info = configStatus[o.status] || { bolita: '⚪', msg: '' };
+        const info = configStatus[o.status] || { bolita: '\u26AA', msg: '' };
 
         const texto = `*ACTUALIZACION DE PEDIDO*\n` +
                       `---------------------------\n` +
-                      `🏢 Taller: ${o.taller}\n` +
-                      `📦 Pedido: ${o.pedido}\n` +
-                      `📄 PO#: ${o.po || 'N/A'}\n` +
-                      `📅 DIA PEDIDO: ${o.fecha}\n` +
-                      `📍 ESTATUS: ${info.bolita} ${o.status.toUpperCase()}\n` +
+                      `Taller: ${o.taller}\n` +
+                      `Pedido: ${o.pedido}\n` +
+                      `PO#: ${o.po || 'N/A'}\n` +
+                      `DIA PEDIDO: ${o.fecha}\n` +
+                      `ESTATUS: ${info.bolita} ${o.status.toUpperCase()}\n` +
                       `---------------------------\n` +
                       `${info.msg}\n\n` +
-                      `_Enviado desde Control Ismael_`;
+                      `Enviado desde Control Ismael`;
 
         window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
     }
