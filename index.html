@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Pedidos Dealer 3.0.0</title>
+    <title>Pedidos Dealer 3.1.0</title>
 
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1554/1554401.png">
-    <link rel="manifest" href="manifest.json?v=16">
+    <link rel="manifest" href="manifest.json?v=17">
     <meta name="theme-color" content="#F2F2F7">
 
     <style>
@@ -50,6 +50,32 @@
         .sync-online { background: #D1FAE5; color: #065F46; }
         .sync-offline { background: #FEE2E2; color: #991B1B; }
 
+        /* Contador de estatus */
+        .status-counter {
+            display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 16px 0;
+        }
+        .counter-chip {
+            display: flex; align-items: center; gap: 4px;
+            padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 600;
+            background: var(--ios-card); box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+        }
+        .counter-dot {
+            width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+        }
+
+        /* Filtro por estatus */
+        .filter-bar {
+            display: flex; gap: 6px; padding: 8px 16px; overflow-x: auto;
+            -webkit-overflow-scrolling: touch; scrollbar-width: none;
+        }
+        .filter-bar::-webkit-scrollbar { display: none; }
+        .filter-chip {
+            padding: 6px 12px; border-radius: 16px; font-size: 13px; font-weight: 600;
+            border: none; white-space: nowrap; background: #E3E3E8; color: var(--ios-gray);
+            flex-shrink: 0;
+        }
+        .filter-chip.active { background: var(--ios-blue); color: white; }
+
         .container { padding: 16px; }
 
         .ios-group {
@@ -73,6 +99,11 @@
             border-radius: 12px; font-size: 17px; font-weight: 600; margin-bottom: 10px;
         }
         .btn-blue { background: var(--ios-blue); }
+        .btn-cancel {
+            width: 100%; border: 2px solid var(--ios-gray); background: transparent;
+            color: var(--ios-gray); padding: 12px; border-radius: 12px;
+            font-size: 15px; font-weight: 600; margin-bottom: 10px; display: none;
+        }
 
         .order-card {
             background: var(--ios-card); border-radius: 14px; padding: 16px;
@@ -99,9 +130,10 @@
         .details { font-size: 14px; color: var(--ios-gray); line-height: 1.4; }
         .details b { color: #333; }
 
-        .actions { display: flex; gap: 10px; margin-top: 15px; border-top: 0.5px solid #E5E5EA; padding-top: 12px; }
-        .btn-action { flex: 1; border: none; padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; }
+        .actions { display: flex; gap: 8px; margin-top: 15px; border-top: 0.5px solid #E5E5EA; padding-top: 12px; }
+        .btn-action { flex: 1; border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; }
         .btn-ws { background: #E7F9ED; color: var(--ios-green); }
+        .btn-edit { background: #EDE9FE; color: var(--ios-purple); }
         .btn-del { background: #FFEBEB; color: var(--ios-danger); }
 
         .empty-state {
@@ -135,6 +167,19 @@
     <h1>Mis Ordenes <span id="syncBadge" class="sync-badge sync-offline">offline</span></h1>
 </div>
 
+<div id="statusCounter" class="status-counter"></div>
+
+<div id="filterBar" class="filter-bar">
+    <button class="filter-chip active" onclick="setFilter('Todos')">Todos</button>
+    <button class="filter-chip" onclick="setFilter('Pendiente')">⚪ Pendiente</button>
+    <button class="filter-chip" onclick="setFilter('Ordenado')">🟡 Ordenado</button>
+    <button class="filter-chip" onclick="setFilter('Piezas en Tienda')">🟠 Tienda</button>
+    <button class="filter-chip" onclick="setFilter('En Tránsito')">🟣 Transito</button>
+    <button class="filter-chip" onclick="setFilter('Listo para Recoger')">🔵 Recoger</button>
+    <button class="filter-chip" onclick="setFilter('Listo para Entrega')">📦 Entrega</button>
+    <button class="filter-chip" onclick="setFilter('Entregado')">✅ Entregado</button>
+</div>
+
 <div class="search-container">
     <div class="search-bar">
         <span>🔍</span>
@@ -162,7 +207,8 @@
             </select>
         </div>
     </div>
-    <button class="main-btn btn-blue" onclick="guardarOrden()">Guardar Nueva Orden</button>
+    <button id="btnGuardar" class="main-btn btn-blue" onclick="guardarOrden()">Guardar Nueva Orden</button>
+    <button id="btnCancelar" class="btn-cancel" onclick="cancelarEdicion()">Cancelar Edicion</button>
 
     <div id="orderList" style="margin-top: 20px;"></div>
 
@@ -175,7 +221,7 @@
 
 <div id="toast" class="toast"></div>
 
-<footer class="footer">v3.0.0 | Ismael Bigio Control</footer>
+<footer class="footer">v3.1.0 | Ismael Bigio Control</footer>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -201,6 +247,19 @@
 
     // --- Estado en memoria ---
     let orders = [];
+    let editandoId = null;
+    let filtroActual = 'Todos';
+
+    // --- Configuracion de estatus ---
+    const STATUS_CONFIG = {
+        'Pendiente':           { clase: 'st-pendiente',      color: '#8E8E93', bolita: '\u26AA',       msg: 'Su solicitud ha sido recibida.' },
+        'Ordenado':            { clase: 'st-ordenado',        color: '#FFCC00', bolita: '\uD83D\uDFE1', msg: 'Su pieza ya ha sido ordenada a fabrica.' },
+        'Piezas en Tienda':    { clase: 'st-tienda',          color: '#FF9500', bolita: '\uD83D\uDFE0', msg: 'Las piezas ya se encuentran fisicamente en la tienda.' },
+        'En Tránsito':         { clase: 'st-transito',        color: '#5856D6', bolita: '\uD83D\uDFE3', msg: 'Su pieza ya viene de camino al dealer.' },
+        'Listo para Recoger':  { clase: 'st-listo-recoger',   color: '#007AFF', bolita: '\uD83D\uDD35', msg: 'La pieza ya llego y esta lista para recoger.' },
+        'Listo para Entrega':  { clase: 'st-listo-entrega',   color: '#5AC8FA', bolita: '\uD83D\uDCE6', msg: 'La pieza esta lista para ser entregada.' },
+        'Entregado':           { clase: 'st-entregado',       color: '#34C759', bolita: '\u2705',       msg: 'Confirmamos que la pieza ha sido entregada.' }
+    };
 
     // --- Utilidades ---
     function esc(str) {
@@ -230,6 +289,68 @@
         b.className = 'sync-badge ' + (online ? 'sync-online' : 'sync-offline');
     }
 
+    // --- Filtro por estatus ---
+    window.setFilter = function(status) {
+        filtroActual = status;
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.classList.toggle('active', chip.textContent.includes(status === 'Todos' ? 'Todos' : status.split(' ').pop()));
+        });
+        // Activar el chip correcto por data
+        const chips = document.querySelectorAll('.filter-chip');
+        chips.forEach(c => c.classList.remove('active'));
+        chips.forEach(c => {
+            if (status === 'Todos' && c.textContent.includes('Todos')) c.classList.add('active');
+            else if (c.getAttribute('onclick')?.includes(status)) c.classList.add('active');
+        });
+        render();
+    };
+
+    // --- Contador de estatus ---
+    function renderContador() {
+        const counter = document.getElementById('statusCounter');
+        const conteo = {};
+        orders.forEach(o => { conteo[o.status] = (conteo[o.status] || 0) + 1; });
+
+        let html = '';
+        for (const [status, cfg] of Object.entries(STATUS_CONFIG)) {
+            const n = conteo[status] || 0;
+            if (n > 0) {
+                html += `<div class="counter-chip">
+                    <span class="counter-dot" style="background:${cfg.color}"></span>
+                    ${n}
+                </div>`;
+            }
+        }
+        counter.innerHTML = html;
+    }
+
+    // --- Editar orden ---
+    window.editarOrden = function(id) {
+        const o = orders.find(item => item.id === id);
+        if (!o) return;
+
+        editandoId = id;
+        document.getElementById('taller').value = o.taller;
+        document.getElementById('pedido').value = o.pedido;
+        document.getElementById('po').value = o.po || '';
+        document.getElementById('fechaEntrega').value = o.fechaEntrega || '';
+        document.getElementById('fecha').value = o.fecha;
+        document.getElementById('status').value = o.status;
+
+        document.getElementById('btnGuardar').textContent = 'Actualizar Orden';
+        document.getElementById('btnCancelar').style.display = 'block';
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.cancelarEdicion = function() {
+        editandoId = null;
+        ['taller','pedido','po','fechaEntrega','fecha'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('status').value = 'Pendiente';
+        document.getElementById('btnGuardar').textContent = 'Guardar Nueva Orden';
+        document.getElementById('btnCancelar').style.display = 'none';
+    };
+
     // --- CRUD (Firestore) ---
     window.guardarOrden = async function() {
         const t = document.getElementById('taller').value.trim();
@@ -241,11 +362,19 @@
 
         if(!t || !p || !f) return alert("Llena Taller, Pedido y Dia de Pedido");
 
-        const order = { taller: t, pedido: p, po: po, fechaEntrega: fe, fecha: f, status: s, id: Date.now() };
-        await setDoc(doc(db, 'orders', String(order.id)), order);
+        if (editandoId) {
+            await updateDoc(doc(db, 'orders', String(editandoId)), {
+                taller: t, pedido: p, po: po, fechaEntrega: fe, fecha: f, status: s
+            });
+            mostrarToast('Orden actualizada');
+            cancelarEdicion();
+        } else {
+            const order = { taller: t, pedido: p, po: po, fechaEntrega: fe, fecha: f, status: s, id: Date.now() };
+            await setDoc(doc(db, 'orders', String(order.id)), order);
+            mostrarToast('Orden guardada');
+        }
 
         ['taller','pedido','po','fechaEntrega','fecha'].forEach(id => document.getElementById(id).value = '');
-        mostrarToast('Orden guardada');
     };
 
     window.actualizarStatus = async function(id, nuevoStatus) {
@@ -254,6 +383,7 @@
 
     window.deleteOrder = async function(id) {
         if(confirm("¿Eliminar esta orden?")) {
+            if (editandoId === id) cancelarEdicion();
             await deleteDoc(doc(db, 'orders', String(id)));
             mostrarToast('Orden eliminada');
         }
@@ -263,17 +393,7 @@
         const o = orders.find(item => item.id === id);
         if (!o) return;
 
-        const configStatus = {
-            'Pendiente': { bolita: '\u26AA', msg: 'Su solicitud ha sido recibida.' },
-            'Ordenado': { bolita: '\uD83D\uDFE1', msg: 'Su pieza ya ha sido ordenada a fabrica.' },
-            'Piezas en Tienda': { bolita: '\uD83D\uDFE0', msg: 'Las piezas ya se encuentran fisicamente en la tienda.' },
-            'En Tránsito': { bolita: '\uD83D\uDFE3', msg: 'Su pieza ya viene de camino al dealer.' },
-            'Listo para Recoger': { bolita: '\uD83D\uDD35', msg: 'La pieza ya llego y esta lista para recoger.' },
-            'Listo para Entrega': { bolita: '\uD83D\uDCE6', msg: 'La pieza esta lista para ser entregada.' },
-            'Entregado': { bolita: '\u2705', msg: 'Confirmamos que la pieza ha sido entregada.' }
-        };
-
-        const info = configStatus[o.status] || { bolita: '\u26AA', msg: '' };
+        const info = STATUS_CONFIG[o.status] || STATUS_CONFIG['Pendiente'];
 
         let texto = `*ACTUALIZACION DE PEDIDO*\n` +
                       `---------------------------\n` +
@@ -298,37 +418,37 @@
         const query = document.getElementById('searchInput').value.toLowerCase();
         list.innerHTML = '';
 
-        const statusClases = {
-            'Pendiente': 'st-pendiente',
-            'Ordenado': 'st-ordenado',
-            'Piezas en Tienda': 'st-tienda',
-            'En Tránsito': 'st-transito',
-            'Listo para Recoger': 'st-listo-recoger',
-            'Listo para Entrega': 'st-listo-entrega',
-            'Entregado': 'st-entregado'
-        };
+        renderContador();
 
         const filtradas = orders
-            .filter(o => o.taller.toLowerCase().includes(query) ||
-                         o.pedido.toLowerCase().includes(query) ||
-                         (o.po && o.po.toLowerCase().includes(query)))
+            .filter(o => {
+                if (filtroActual !== 'Todos' && o.status !== filtroActual) return false;
+                if (!query) return true;
+                return o.taller.toLowerCase().includes(query) ||
+                       o.pedido.toLowerCase().includes(query) ||
+                       (o.po && o.po.toLowerCase().includes(query));
+            })
             .sort((a,b) => b.id - a.id);
 
         if (filtradas.length === 0) {
+            const msg = query ? 'Sin resultados para esa busqueda' :
+                        filtroActual !== 'Todos' ? `No hay ordenes con estatus "${filtroActual}"` :
+                        'No hay ordenes todavia';
             list.innerHTML = `
                 <div class="empty-state">
                     <div class="icon">📋</div>
-                    <p>${query ? 'Sin resultados para esa busqueda' : 'No hay ordenes todavia'}</p>
+                    <p>${msg}</p>
                 </div>`;
             return;
         }
 
         filtradas.forEach(o => {
-            const claseStatus = statusClases[o.status] || 'st-pendiente';
+            const cfg = STATUS_CONFIG[o.status] || STATUS_CONFIG['Pendiente'];
             const entregaInfo = o.fechaEntrega ? ` | Entrega: <b>${fechaEs(o.fechaEntrega)}</b>` : '';
+            const esEditando = o.id === editandoId;
 
             list.innerHTML += `
-                <div class="order-card ${claseStatus}">
+                <div class="order-card ${cfg.clase}" ${esEditando ? 'style="outline: 2px solid var(--ios-purple);"' : ''}>
                     <span class="taller-title">${esc(o.taller)}</span>
                     <div class="details">
                         Pedido: <b>${esc(o.pedido)}</b> | PO#: <b>${esc(o.po || '---')}</b><br>
@@ -346,8 +466,9 @@
                     </select>
 
                     <div class="actions">
+                        <button class="btn-action btn-edit" onclick="editarOrden(${o.id})">✏️ Editar</button>
                         <button class="btn-action btn-ws" onclick="enviarWhatsApp(${o.id})">💬 WhatsApp</button>
-                        <button class="btn-action btn-del" onclick="deleteOrder(${o.id})">🗑️ Borrar</button>
+                        <button class="btn-action btn-del" onclick="deleteOrder(${o.id})">🗑️</button>
                     </div>
                 </div>
             `;
@@ -428,7 +549,7 @@
 
     // --- Service Worker ---
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js?v=16');
+        navigator.serviceWorker.register('sw.js?v=17');
     }
 
     // --- Init ---
