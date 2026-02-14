@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Pedidos Dealer 2.1.0</title>
+    <title>Pedidos Dealer 2.2.0</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -83,6 +83,38 @@
         .btn-ws { background: #E7F9ED; color: var(--ios-green); }
         .btn-del { background: #FFEBEB; color: var(--ios-danger); }
 
+        .search-container { padding: 10px 16px 0; }
+        .search-bar {
+            background: #E3E3E8; border-radius: 10px; padding: 8px 12px;
+            display: flex; align-items: center;
+        }
+        .search-bar input {
+            border: none; background: transparent; width: 100%; font-size: 16px;
+            outline: none; margin-left: 8px; color: black;
+        }
+
+        .empty-state {
+            text-align: center; padding: 40px 20px; color: var(--ios-gray);
+        }
+        .empty-state .icon { font-size: 48px; margin-bottom: 10px; }
+        .empty-state p { font-size: 15px; margin: 0; }
+
+        .toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: #333; color: white; padding: 12px 24px; border-radius: 10px;
+            font-size: 15px; font-weight: 600; z-index: 200; opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .toast.show { opacity: 1; }
+
+        .backup-row {
+            display: flex; gap: 8px; margin-bottom: 20px;
+        }
+        .btn-backup {
+            flex: 1; border: none; padding: 10px; border-radius: 10px;
+            font-size: 13px; font-weight: 600; background: #E9E9EB; color: var(--ios-text);
+        }
+
         .footer { text-align: center; color: var(--ios-gray); font-size: 12px; padding: 30px 20px; }
     </style>
 </head>
@@ -90,6 +122,13 @@
 
 <div class="header">
     <h1>Órdenes</h1>
+</div>
+
+<div class="search-container">
+    <div class="search-bar">
+        <span>🔍</span>
+        <input type="text" id="searchInput" placeholder="Buscar taller, pedido o PO..." oninput="render()">
+    </div>
 </div>
 
 <div class="container">
@@ -112,13 +151,21 @@
     <button class="main-btn btn-blue" onclick="saveOrder()">Guardar Nueva Orden</button>
 
     <div id="orderList" style="margin-top: 20px;"></div>
+
+    <div class="backup-row">
+        <button class="btn-backup" onclick="exportarDatos()">📥 Exportar Respaldo</button>
+        <button class="btn-backup" onclick="document.getElementById('importFile').click()">📤 Importar Respaldo</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importarDatos(event)">
+    </div>
 </div>
 
-<footer class="footer">v2.1.0 | Ismael Bigio Control</footer>
+<div id="toast" class="toast"></div>
+
+<footer class="footer">v2.2.0 | Ismael Bigio Control</footer>
 
 <script>
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js?v=10'); });
+        window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js?v=11'); });
     }
 
     // Escapar HTML para prevenir XSS
@@ -128,6 +175,22 @@
         return d.innerHTML;
     }
 
+    // Formato de fecha legible: 14/Feb/2026
+    const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    function fechaEs(str) {
+        const [y, m, d] = str.split('-');
+        if (!y || !m || !d) return str;
+        return `${parseInt(d)}/${MESES[parseInt(m)-1]}/${y}`;
+    }
+
+    // Toast de feedback
+    function mostrarToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
     function getOrders() {
         try { return JSON.parse(localStorage.getItem('pwa_orders')) || []; }
         catch { return []; }
@@ -135,6 +198,22 @@
 
     function setOrders(orders) {
         localStorage.setItem('pwa_orders', JSON.stringify(orders));
+    }
+
+    // Migrar órdenes del formato antiguo (llego:bool) al nuevo (status:string)
+    function migrarDatos() {
+        const orders = getOrders();
+        let migradas = 0;
+        orders.forEach(o => {
+            if (o.status === undefined) {
+                o.status = o.llego ? 'Listo' : 'Pendiente';
+                delete o.llego;
+                migradas++;
+            }
+        });
+        if (migradas > 0) {
+            setOrders(orders);
+        }
     }
 
     function saveOrder() {
@@ -153,6 +232,7 @@
 
         ['taller','pedido','po','fecha'].forEach(id => document.getElementById(id).value = '');
         render();
+        mostrarToast('Orden guardada');
     }
 
     function actualizarStatus(id, nuevoStatus) {
@@ -183,7 +263,7 @@
                       `Taller: ${o.taller}\n` +
                       `Pedido: ${o.pedido}\n` +
                       `PO#: ${o.po || 'N/A'}\n` +
-                      `DIA PEDIDO: ${o.fecha}\n` +
+                      `DIA PEDIDO: ${fechaEs(o.fecha)}\n` +
                       `ESTATUS: ${o.status.toUpperCase()}\n` +
                       `---------------------------\n` +
                       `${mensajes[o.status] || ''}\n\n` +
@@ -194,8 +274,24 @@
 
     function render() {
         const list = document.getElementById('orderList');
+        const query = document.getElementById('searchInput').value.toLowerCase();
         const orders = getOrders();
         list.innerHTML = '';
+
+        const filtradas = orders
+            .filter(o => o.taller.toLowerCase().includes(query) ||
+                         o.pedido.toLowerCase().includes(query) ||
+                         (o.po && o.po.toLowerCase().includes(query)))
+            .sort((a,b) => b.id - a.id);
+
+        if (filtradas.length === 0) {
+            list.innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">📋</div>
+                    <p>${query ? 'Sin resultados para esa búsqueda' : 'No hay órdenes todavía'}</p>
+                </div>`;
+            return;
+        }
 
         const statusClases = {
             'Pendiente': 'st-pendiente',
@@ -205,7 +301,7 @@
             'Entregado': 'st-entregado'
         };
 
-        orders.sort((a,b) => b.id - a.id).forEach(o => {
+        filtradas.forEach(o => {
             const claseStatus = statusClases[o.status] || 'st-pendiente';
 
             list.innerHTML += `
@@ -213,7 +309,7 @@
                     <span class="taller-title">${esc(o.taller)}</span>
                     <div class="details">
                         Pedido: <b>${esc(o.pedido)}</b> | PO#: <b>${esc(o.po || '---')}</b><br>
-                        Pedido el: <b>${esc(o.fecha)}</b>
+                        Pedido el: <b>${fechaEs(o.fecha)}</b>
                     </div>
 
                     <select class="status-selector-mini" onchange="actualizarStatus(${o.id}, this.value)">
@@ -238,10 +334,53 @@
             const orders = getOrders().filter(o => o.id !== id);
             setOrders(orders);
             render();
+            mostrarToast('Orden eliminada');
         }
     }
 
-    window.onload = render;
+    // Exportar respaldo como JSON
+    function exportarDatos() {
+        const orders = getOrders();
+        if (orders.length === 0) return mostrarToast('No hay órdenes para exportar');
+        const blob = new Blob([JSON.stringify(orders, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `pedidos_respaldo_${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        mostrarToast(`${orders.length} órdenes exportadas`);
+    }
+
+    // Importar respaldo desde JSON
+    function importarDatos(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const datos = JSON.parse(e.target.result);
+                if (!Array.isArray(datos)) throw new Error();
+                const actuales = getOrders();
+                const idsExistentes = new Set(actuales.map(o => o.id));
+                const nuevas = datos.filter(o => o.taller && o.pedido && !idsExistentes.has(o.id));
+                if (nuevas.length === 0) return mostrarToast('No hay órdenes nuevas para importar');
+                nuevas.forEach(o => { if (!o.status) o.status = o.llego ? 'Listo' : 'Pendiente'; });
+                setOrders([...actuales, ...nuevas]);
+                render();
+                mostrarToast(`${nuevas.length} órdenes importadas`);
+            } catch {
+                alert('Archivo no válido');
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    }
+
+    window.onload = () => {
+        migrarDatos();
+        render();
+    };
 </script>
 </body>
 </html>
