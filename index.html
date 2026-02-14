@@ -3,71 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Pedidos Dealer 2.0.6</title>
+    <title>Pedidos Dealer 2.0.7</title>
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Pedidos">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1554/1554401.png">
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest.json?v=7">
+    <meta name="theme-color" content="#F2F2F7">
+
     <style>
         :root {
-            --ios-blue: #007AFF; --ios-green: #34C759; --ios-bg: #F2F2F7;
-            --ios-card: #FFFFFF; --ios-gray: #8E8E93; --ios-danger: #FF3B30;
+            --ios-blue: #007AFF;
+            --ios-green: #34C759;
+            --ios-bg: #F2F2F7;
+            --ios-card: #FFFFFF;
+            --ios-text: #000000;
+            --ios-gray: #8E8E93;
+            --ios-danger: #FF3B30;
             --ios-orange: #FF9500;
+            --ios-purple: #5856D6;
         }
 
-        body { font-family: -apple-system, sans-serif; margin: 0; background: var(--ios-bg); padding-bottom: 120px; }
-        .header { background: rgba(242, 242, 247, 0.8); backdrop-filter: blur(20px); padding: 60px 20px 10px 20px; position: sticky; top: 0; z-index: 100; }
-        h1 { margin: 0; font-size: 34px; font-weight: 700; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            margin: 0; background: var(--ios-bg); color: var(--ios-text);
+            -webkit-font-smoothing: antialiased; padding-bottom: 120px;
+        }
+
+        .header { 
+            background: rgba(242, 242, 247, 0.8); backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px); padding: 60px 20px 10px 20px;
+            position: sticky; top: 0; z-index: 100;
+        }
+
+        h1 { margin: 0; font-size: 34px; font-weight: 700; letter-spacing: -1px; }
 
         .container { padding: 16px; }
-        .ios-group { background: var(--ios-card); border-radius: 12px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .ios-row { display: flex; align-items: center; padding: 12px 16px; border-bottom: 0.5px solid #C6C6C8; }
-        .ios-row:last-child { border-bottom: none; }
-        .ios-row label { width: 95px; font-size: 15px; color: black; }
-        .ios-row input, .ios-row select { flex: 1; border: none; font-size: 17px; outline: none; background: transparent; color: var(--ios-blue); font-weight: 500; }
 
-        .main-btn { width: 100%; color: white; border: none; padding: 14px; border-radius: 12px; font-size: 17px; font-weight: 600; margin-bottom: 10px; }
+        .ios-group {
+            background: var(--ios-card); border-radius: 12px;
+            margin-bottom: 25px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .ios-row {
+            display: flex; align-items: center; padding: 12px 16px; border-bottom: 0.5px solid #C6C6C8;
+        }
+
+        .ios-row:last-child { border-bottom: none; }
+        .ios-row label { width: 95px; font-size: 15px; color: var(--ios-text); }
+        .ios-row input, .ios-row select { 
+            flex: 1; border: none; font-size: 17px; outline: none; 
+            background: transparent; color: var(--ios-blue); font-weight: 500;
+        }
+
+        .main-btn {
+            width: 100%; color: white; border: none; padding: 14px; 
+            border-radius: 12px; font-size: 17px; font-weight: 600; margin-bottom: 10px;
+        }
         .btn-blue { background: var(--ios-blue); }
 
-        .order-card { background: var(--ios-card); border-radius: 14px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border-left: 6px solid #ddd; }
+        .order-card {
+            background: var(--ios-card); border-radius: 14px; padding: 16px;
+            margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border-left: 6px solid #ddd;
+        }
+
+        /* Estilos por Estatus */
         .st-pendiente { border-left-color: var(--ios-orange) !important; }
         .st-transito { border-left-color: var(--ios-purple) !important; }
         .st-listo { border-left-color: var(--ios-blue) !important; background: #F0F9FF; }
         .st-entregado { border-left-color: var(--ios-green) !important; opacity: 0.6; }
 
         .taller-title { font-size: 19px; font-weight: 600; }
-        .status-badge { font-size: 11px; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; font-weight: 800; margin-left: 5px; }
+        .status-badge { 
+            font-size: 11px; padding: 3px 8px; border-radius: 6px; 
+            text-transform: uppercase; font-weight: 800; margin-left: 5px; 
+        }
         .bg-orange { background: #FFF4E5; color: var(--ios-orange); }
+        .bg-purple { background: #F5F3FF; color: var(--ios-purple); }
         .bg-blue { background: #E5F1FF; color: var(--ios-blue); }
         .bg-green { background: #E9F9EE; color: var(--ios-green); }
 
-        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 15px; border-top: 0.5px solid #E5E5EA; padding-top: 12px; }
-        .btn-action { border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; text-align: center; }
+        .details { font-size: 15px; color: var(--ios-gray); line-height: 1.4; margin-top: 5px; }
+        .actions { display: flex; gap: 10px; margin-top: 15px; border-top: 0.5px solid #E5E5EA; padding-top: 12px; }
+        .btn-action { flex: 1; border: none; padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; }
         .btn-ws { background: #E7F9ED; color: var(--ios-green); }
         .btn-del { background: #FFEBEB; color: var(--ios-danger); }
-        
-        .footer { text-align: center; color: var(--ios-gray); font-size: 12px; padding: 20px; }
+
+        .footer { text-align: center; color: var(--ios-gray); font-size: 12px; padding: 30px 20px; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>Órdenes</h1>
+    <h1>Entregas</h1>
 </div>
 
 <div class="container">
     <div class="ios-group">
-        <div class="ios-row"><label>Taller</label><input type="text" id="taller" placeholder="Ej. Garaje Morales"></div>
-        <div class="ios-row"><label>Pedido</label><input type="text" id="pedido" placeholder="Ej. m2500"></div>
+        <div class="ios-row"><label>Taller</label><input type="text" id="taller" placeholder="Nombre"></div>
+        <div class="ios-row"><label>Pedido</label><input type="text" id="pedido" placeholder="Número"></div>
         <div class="ios-row"><label>PO#</label><input type="text" id="po" placeholder="Opcional"></div>
         <div class="ios-row"><label>Entrega</label><input type="date" id="fecha"></div>
         <div class="ios-row">
             <label>Estatus</label>
             <select id="status">
-                <option value="Pendiente">🟠 Pendiente</option>
-                <option value="En Tránsito">🟣 En Tránsito</option>
-                <option value="Listo">🔵 Listo para Recoger</option>
-                <option value="Entregado">✅ Entregado</option>
+                <option value="Pendiente">Pendiente</option>
+                <option value="En Tránsito">En Tránsito</option>
+                <option value="Listo">Listo para Recoger</option>
+                <option value="Entregado">Entregado</option>
             </select>
         </div>
     </div>
@@ -76,9 +121,15 @@
     <div id="orderList" style="margin-top: 20px;"></div>
 </div>
 
-<footer class="footer">v2.0.6 | Ismael Bigio Control</footer>
+<footer class="footer">
+    v2.0.7 | Ismael Bigio Control
+</footer>
 
 <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js?v=7'); });
+    }
+
     function saveOrder() {
         const t = document.getElementById('taller').value;
         const p = document.getElementById('pedido').value;
@@ -101,23 +152,21 @@
         let orders = JSON.parse(localStorage.getItem('pwa_orders')) || [];
         const o = orders.find(item => item.id === id);
         
-        let emoji = o.status === 'Listo' ? '✅' : '📦';
         let mensajeExtra = "";
-        
-        if(o.status === 'Pendiente') mensajeExtra = "Su pedido ha sido procesado y está pendiente de envío.";
+        if(o.status === 'Pendiente') mensajeExtra = "Su pedido ha sido procesado y esta pendiente de envio.";
         if(o.status === 'En Tránsito') mensajeExtra = "Su pieza ya viene de camino al dealer.";
-        if(o.status === 'Listo') mensajeExtra = "¡Buenas noticias! La pieza ya llegó y está lista para recoger.";
-        if(o.status === 'Entregado') mensajeExtra = "Confirmamos que la pieza ha sido entregada con éxito.";
+        if(o.status === 'Listo') mensajeExtra = "La pieza ya llego y esta lista para recoger.";
+        if(o.status === 'Entregado') mensajeExtra = "Confirmamos que la pieza ha sido entregada.";
 
-        const texto = `*ACTUALIZACIÓN DE PEDIDO* ${emoji}%0A` +
+        const texto = `*ACTUALIZACION DE PEDIDO*%0A` +
                       `---------------------------%0A` +
-                      `🏢 *Taller:* ${o.taller}%0A` +
-                      `📦 *Pedido:* ${o.pedido}%0A` +
-                      `📄 *PO#:* ${o.po || 'N/A'}%0A` +
-                      `📍 *Estatus:* ${o.status.toUpperCase()}%0A` +
+                      `Taller: ${o.taller}%0A` +
+                      `Pedido: ${o.pedido}%0A` +
+                      `PO#: ${o.po || 'N/A'}%0A` +
+                      `ESTATUS: ${o.status.toUpperCase()}%0A` +
                       `---------------------------%0A` +
                       `${mensajeExtra}%0A%0A` +
-                      `_Enviado desde Control Ismael_`;
+                      `Enviado desde Control Ismael`;
         
         window.open(`https://wa.me/?text=${texto}`, '_blank');
     }
@@ -130,7 +179,7 @@
         orders.sort((a,b) => new Date(a.fecha) - new Date(b.fecha)).forEach(o => {
             let claseStatus = "";
             let colorBadge = "bg-orange";
-            if(o.status === 'En Tránsito') claseStatus = "st-transito";
+            if(o.status === 'En Tránsito') { claseStatus = "st-transito"; colorBadge = "bg-purple"; }
             if(o.status === 'Listo') { claseStatus = "st-listo"; colorBadge = "bg-blue"; }
             if(o.status === 'Entregado') { claseStatus = "st-entregado"; colorBadge = "bg-green"; }
             if(o.status === 'Pendiente') claseStatus = "st-pendiente";
