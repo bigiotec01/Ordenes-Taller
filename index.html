@@ -3,192 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Pedidos Dealer</title>
-        
-    <link rel="manifest" href="manifest.json">
+    <title>Pedidos Dealer 2.0</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Pedidos">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1554/1554401.png">
-    
-
+    <link rel="manifest" href="manifest.json">
     <style>
         :root {
             --ios-blue: #007AFF;
+            --ios-green: #34C759;
             --ios-bg: #F2F2F7;
             --ios-card: #FFFFFF;
-            --ios-text: #000000;
-            --ios-gray: #8E8E93;
-            --ios-danger: #FF3B30;
         }
 
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            margin: 0; 
-            background: var(--ios-bg); 
-            color: var(--ios-text);
-            -webkit-font-smoothing: antialiased;
-            padding-bottom: constant(safe-area-inset-bottom);
-            padding-bottom: env(safe-area-inset-bottom);
+            font-family: -apple-system, system-ui, sans-serif; 
+            margin: 0; background: var(--ios-bg); padding-bottom: 100px;
         }
 
-        /* Título estilo iOS */
         .header { 
             background: rgba(242, 242, 247, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 60px 20px 10px 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            padding: 50px 20px 10px 20px; position: sticky; top: 0; z-index: 100;
         }
 
-        .header h1 {
-            margin: 0;
-            font-size: 34px;
-            font-weight: 700;
-            letter-spacing: -1px;
+        h1 { margin: 0; font-size: 32px; font-weight: 700; }
+
+        /* Buscador estilo iOS */
+        .search-container { padding: 10px 16px; }
+        .search-bar {
+            background: #E3E3E8; border-radius: 10px; padding: 8px 12px;
+            display: flex; align-items: center;
+        }
+        .search-bar input {
+            border: none; background: transparent; width: 100%; font-size: 16px; outline: none;
         }
 
         .container { padding: 16px; }
 
-        /* Formulario agrupado estilo iOS Settings */
-        .ios-group {
-            background: var(--ios-card);
-            border-radius: 12px;
-            margin-bottom: 25px;
-            overflow: hidden;
-        }
-
-        .ios-row {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            border-bottom: 0.5px solid #C6C6C8;
-        }
-
+        /* Grupos de Formulario */
+        .ios-group { background: var(--ios-card); border-radius: 12px; margin-bottom: 15px; overflow: hidden; }
+        .ios-row { display: flex; align-items: center; padding: 12px 16px; border-bottom: 0.5px solid #C6C6C8; }
         .ios-row:last-child { border-bottom: none; }
+        .ios-row label { width: 90px; font-size: 15px; color: #8E8E93; }
+        .ios-row input { flex: 1; border: none; font-size: 17px; outline: none; }
 
-        .ios-row label {
-            width: 110px;
-            font-size: 15px;
-            color: var(--ios-text);
+        button.main-btn {
+            width: 100%; background: var(--ios-blue); color: white; border: none;
+            padding: 14px; border-radius: 12px; font-size: 17px; font-weight: 600;
         }
 
-        .ios-row input {
-            flex: 1;
-            border: none;
-            font-size: 17px;
-            outline: none;
-            background: transparent;
-            padding: 0;
-        }
-
-        button.ios-btn {
-            width: 100%;
-            background: var(--ios-blue);
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 12px;
-            font-size: 17px;
-            font-weight: 600;
-            margin-top: 10px;
-            transition: opacity 0.2s;
-        }
-
-        button.ios-btn:active { opacity: 0.6; }
-
-        /* Tarjetas de órdenes estilo Apple */
+        /* Tarjetas de Órdenes */
         .order-card {
-            background: var(--ios-card);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            background: var(--ios-card); border-radius: 14px; padding: 16px;
+            margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
-        .order-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 8px;
+        .order-card h3 { margin: 0 0 5px 0; font-size: 18px; color: var(--ios-blue); }
+        .details { font-size: 14px; color: #3A3A3C; margin-bottom: 10px; line-height: 1.5; }
+        
+        .actions { display: flex; gap: 10px; margin-top: 15px; border-top: 0.5px solid #E5E5EA; padding-top: 12px; }
+        
+        .btn-action {
+            flex: 1; border: none; padding: 8px; border-radius: 8px;
+            font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;
         }
 
-        .taller-title { font-size: 19px; font-weight: 600; color: var(--ios-text); }
+        .btn-ws { background: #E7F9ED; color: var(--ios-green); }
+        .btn-del { background: #FFEBEB; color: #FF3B30; }
 
-        .info-grid { font-size: 15px; color: var(--ios-gray); line-height: 1.4; }
-        .info-grid span { color: var(--ios-text); font-weight: 500; }
+        .badge-today { background: #FF3B30; color: white; padding: 2px 8px; border-radius: 5px; font-size: 11px; vertical-align: middle; margin-left: 5px; }
 
-        .badge {
-            display: inline-block;
-            margin-top: 12px;
-            font-size: 13px;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 6px;
-        }
-
-        .badge-today { background: #FFD6D6; color: var(--ios-danger); }
-        .badge-future { background: #D6F5D6; color: #248A3D; }
-
-        /* Footer discreto */
-        .footer {
-            text-align: center;
-            padding: 30px 0 50px 0;
-            font-size: 13px;
-            color: var(--ios-gray);
-        }
-
-        .del-action {
-            color: var(--ios-danger);
-            font-size: 14px;
-            font-weight: 500;
-            border: none;
-            background: none;
-            padding: 0;
-        }
+        .footer { text-align: center; color: #8E8E93; font-size: 12px; padding: 20px; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>Entregas</h1>
+    <h1>Órdenes</h1>
+</div>
+
+<div class="search-container">
+    <div class="search-bar">
+        <span>🔍</span>
+        <input type="text" id="searchInput" placeholder="Buscar taller o pedido..." onkeyup="render()">
+    </div>
 </div>
 
 <div class="container">
     <div class="ios-group">
-        <div class="ios-row">
-            <label>Taller</label>
-            <input type="text" id="taller" placeholder="Nombre">
-        </div>
-        <div class="ios-row">
-            <label>Pedido</label>
-            <input type="text" id="pedido" placeholder="Número">
-        </div>
-        <div class="ios-row">
-            <label>PO#</label>
-            <input type="text" id="po" placeholder="Opcional">
-        </div>
-        <div class="ios-row">
-            <label>Fecha</label>
-            <input type="date" id="fecha">
-        </div>
+        <div class="ios-row"><label>Taller</label><input type="text" id="taller"></div>
+        <div class="ios-row"><label>Pedido</label><input type="text" id="pedido"></div>
+        <div class="ios-row"><label>PO#</label><input type="text" id="po"></div>
+        <div class="ios-row"><label>Entrega</label><input type="date" id="fecha"></div>
     </div>
-    <button class="ios-btn" onclick="saveOrder()">Agregar Pedido</button>
+    <button class="main-btn" onclick="saveOrder()">Agregar a la Lista</button>
 
-    <h2 style="font-size: 22px; margin: 30px 0 15px 5px;">Órdenes</h2>
-    <div id="orderList"></div>
+    <div id="orderList" style="margin-top: 25px;"></div>
 </div>
 
 <footer class="footer">
-    Versión 1.0.4<br>
-    Creada por <strong>Ismael Bigio</strong>
+    <strong>v2.0.0</strong><br>
+    Ismael Bigio | Dealer Parts Control
 </footer>
 
 <script>
+    // Registro de Service Worker para PWA
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); });
+        navigator.serviceWorker.register('sw.js');
     }
 
     function saveOrder() {
@@ -197,7 +118,7 @@
         const po = document.getElementById('po').value;
         const f = document.getElementById('fecha').value;
 
-        if(!t || !p || !f) return;
+        if(!t || !p || !f) return alert("Llena los datos principales");
 
         const order = { taller: t, pedido: p, po: po, fecha: f, id: Date.now() };
         let orders = JSON.parse(localStorage.getItem('pwa_orders')) || [];
@@ -208,41 +129,53 @@
         render();
     }
 
+    function shareWS(taller, pedido, po, fecha) {
+        const msg = `*Confirmación de Entrega*%0A---------------------------%0A🏢 *Taller:* ${taller}%0A📦 *Pedido:* ${pedido}%0A📄 *PO#:* ${po || 'N/A'}%0A📅 *Fecha:* ${fecha}%0A---------------------------%0A_Enviado desde mi App de Control_`;
+        window.open(`https://wa.me/?text=${msg}`, '_blank');
+    }
+
     function render() {
         const list = document.getElementById('orderList');
-        const orders = JSON.parse(localStorage.getItem('pwa_orders')) || [];
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        let orders = JSON.parse(localStorage.getItem('pwa_orders')) || [];
         const hoy = new Date().toISOString().split('T')[0];
-        
+
         list.innerHTML = '';
-        
-        orders.sort((a,b) => new Date(a.fecha) - new Date(b.fecha)).forEach(o => {
-            const esHoy = o.fecha === hoy;
-            list.innerHTML += `
-                <div class="order-card">
-                    <div class="order-header">
-                        <div class="taller-title">${o.taller}</div>
-                        <button class="del-action" onclick="deleteOrder(${o.id})">Eliminar</button>
+
+        orders.sort((a,b) => new Date(a.fecha) - new Date(b.fecha))
+              .filter(o => o.taller.toLowerCase().includes(query) || o.pedido.toLowerCase().includes(query))
+              .forEach(o => {
+                  const esHoy = o.fecha === hoy;
+                  list.innerHTML += `
+                    <div class="order-card">
+                        <h3>${o.taller} ${esHoy ? '<span class="badge-today">HOY</span>' : ''}</h3>
+                        <div class="details">
+                            <b>Pedido:</b> ${o.pedido}<br>
+                            <b>PO#:</b> ${o.po || '---'}<br>
+                            <b>Fecha:</b> ${o.fecha}
+                        </div>
+                        <div class="actions">
+                            <button class="btn-action btn-ws" onclick="shareWS('${o.taller}', '${o.pedido}', '${o.po}', '${o.fecha}')">
+                                💬 WhatsApp
+                            </button>
+                            <button class="btn-action btn-del" onclick="deleteOrder(${o.id})">
+                                🗑️ Borrar
+                            </button>
+                        </div>
                     </div>
-                    <div class="info-grid">
-                        Pedido: <span>${o.pedido}</span><br>
-                        PO#: <span>${o.po || 'N/A'}</span>
-                    </div>
-                    <div class="badge ${esHoy ? 'badge-today' : 'badge-future'}">
-                        ${esHoy ? '● Toca Hoy' : '📅 ' + o.fecha}
-                    </div>
-                </div>
-            `;
-        });
+                  `;
+              });
     }
 
     function deleteOrder(id) {
-        let orders = JSON.parse(localStorage.getItem('pwa_orders')).filter(o => o.id !== id);
-        localStorage.setItem('pwa_orders', JSON.stringify(orders));
-        render();
+        if(confirm("¿Seguro que deseas eliminarla?")) {
+            let orders = JSON.parse(localStorage.getItem('pwa_orders')).filter(o => o.id !== id);
+            localStorage.setItem('pwa_orders', JSON.stringify(orders));
+            render();
+        }
     }
 
     window.onload = render;
 </script>
 </body>
 </html>
-
