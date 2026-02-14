@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Pedidos Dealer 2.2.0</title>
+    <title>Pedidos Dealer 2.1.5</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1554/1554401.png">
-    <link rel="manifest" href="manifest.json?v=10">
+    <link rel="manifest" href="manifest.json?v=15">
     <meta name="theme-color" content="#F2F2F7">
 
     <style>
@@ -16,7 +16,7 @@
             --ios-blue: #007AFF; --ios-green: #34C759; --ios-bg: #F2F2F7;
             --ios-card: #FFFFFF; --ios-text: #000000; --ios-gray: #8E8E93;
             --ios-danger: #FF3B30; --ios-orange: #FF9500; --ios-purple: #5856D6;
-            --ios-yellow: #FFCC00;
+            --ios-yellow: #FFCC00; --ios-lightblue: #5AC8FA;
         }
 
         body { 
@@ -28,7 +28,10 @@
         .header { 
             background: rgba(242, 242, 247, 0.8); backdrop-filter: blur(20px);
             padding: 60px 20px 10px 20px; position: sticky; top: 0; z-index: 100;
+            text-align: center;
         }
+
+        h1 { margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -1px; }
 
         .container { padding: 16px; }
 
@@ -42,7 +45,7 @@
         }
 
         .ios-row:last-child { border-bottom: none; }
-        .ios-row label { width: 110px; font-size: 15px; color: var(--ios-text); }
+        .ios-row label { width: 125px; font-size: 15px; color: var(--ios-text); }
         .ios-row input, .ios-row select { 
             flex: 1; border: none; font-size: 17px; outline: none; 
             background: transparent; color: var(--ios-blue); font-weight: 500;
@@ -60,11 +63,12 @@
             border-left: 6px solid #ddd;
         }
 
-        /* Colores de Borde por Estatus */
         .st-pendiente { border-left-color: var(--ios-gray) !important; }
         .st-ordenado { border-left-color: var(--ios-yellow) !important; }
+        .st-tienda { border-left-color: var(--ios-orange) !important; background: #FFF9F0; }
         .st-transito { border-left-color: var(--ios-purple) !important; }
-        .st-listo { border-left-color: var(--ios-blue) !important; background: #F0F9FF; }
+        .st-listo-recoger { border-left-color: var(--ios-blue) !important; background: #F0F9FF; }
+        .st-listo-entrega { border-left-color: var(--ios-lightblue) !important; background: #F2FBFF; }
         .st-entregado { border-left-color: var(--ios-green) !important; opacity: 0.6; }
 
         .taller-title { font-size: 19px; font-weight: 600; margin-bottom: 8px; display: block; }
@@ -83,52 +87,13 @@
         .btn-ws { background: #E7F9ED; color: var(--ios-green); }
         .btn-del { background: #FFEBEB; color: var(--ios-danger); }
 
-        .search-container { padding: 10px 16px 0; }
-        .search-bar {
-            background: #E3E3E8; border-radius: 10px; padding: 8px 12px;
-            display: flex; align-items: center;
-        }
-        .search-bar input {
-            border: none; background: transparent; width: 100%; font-size: 16px;
-            outline: none; margin-left: 8px; color: black;
-        }
-
-        .empty-state {
-            text-align: center; padding: 40px 20px; color: var(--ios-gray);
-        }
-        .empty-state .icon { font-size: 48px; margin-bottom: 10px; }
-        .empty-state p { font-size: 15px; margin: 0; }
-
-        .toast {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            background: #333; color: white; padding: 12px 24px; border-radius: 10px;
-            font-size: 15px; font-weight: 600; z-index: 200; opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .toast.show { opacity: 1; }
-
-        .backup-row {
-            display: flex; gap: 8px; margin-bottom: 20px;
-        }
-        .btn-backup {
-            flex: 1; border: none; padding: 10px; border-radius: 10px;
-            font-size: 13px; font-weight: 600; background: #E9E9EB; color: var(--ios-text);
-        }
-
         .footer { text-align: center; color: var(--ios-gray); font-size: 12px; padding: 30px 20px; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>Órdenes</h1>
-</div>
-
-<div class="search-container">
-    <div class="search-bar">
-        <span>🔍</span>
-        <input type="text" id="searchInput" placeholder="Buscar taller, pedido o PO..." oninput="render()">
-    </div>
+    <h1>📋 Mis Órdenes</h1>
 </div>
 
 <div class="container">
@@ -136,14 +101,17 @@
         <div class="ios-row"><label>Taller</label><input type="text" id="taller" placeholder="Ej. Morales"></div>
         <div class="ios-row"><label>Pedido</label><input type="text" id="pedido" placeholder="Ej. M-100"></div>
         <div class="ios-row"><label>PO#</label><input type="text" id="po" placeholder="Opcional"></div>
+        <div class="ios-row"><label>Día de Entrega</label><input type="date" id="fechaEntrega"></div>
         <div class="ios-row"><label>Día de Pedido</label><input type="date" id="fecha"></div>
         <div class="ios-row">
             <label>Estatus Inicial</label>
             <select id="status">
                 <option value="Pendiente">Pendiente</option>
                 <option value="Ordenado">Ordenado</option>
+                <option value="Piezas en Tienda">Piezas en Tienda</option>
                 <option value="En Tránsito">En Tránsito</option>
-                <option value="Listo">Listo para Recoger</option>
+                <option value="Listo para Recoger">Listo para Recoger</option>
+                <option value="Listo para Entrega">Listo para Entrega</option>
                 <option value="Entregado">Entregado</option>
             </select>
         </div>
@@ -151,44 +119,19 @@
     <button class="main-btn btn-blue" onclick="saveOrder()">Guardar Nueva Orden</button>
 
     <div id="orderList" style="margin-top: 20px;"></div>
-
-    <div class="backup-row">
-        <button class="btn-backup" onclick="exportarDatos()">📥 Exportar Respaldo</button>
-        <button class="btn-backup" onclick="document.getElementById('importFile').click()">📤 Importar Respaldo</button>
-        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importarDatos(event)">
-    </div>
 </div>
 
-<div id="toast" class="toast"></div>
-
-<footer class="footer">v2.2.0 | Ismael Bigio Control</footer>
+<footer class="footer">v2.1.5 | Ismael Bigio Control</footer>
 
 <script>
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js?v=11'); });
+        window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js?v=15'); });
     }
 
-    // Escapar HTML para prevenir XSS
     function esc(str) {
         const d = document.createElement('div');
         d.textContent = str;
         return d.innerHTML;
-    }
-
-    // Formato de fecha legible: 14/Feb/2026
-    const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-    function fechaEs(str) {
-        const [y, m, d] = str.split('-');
-        if (!y || !m || !d) return str;
-        return `${parseInt(d)}/${MESES[parseInt(m)-1]}/${y}`;
-    }
-
-    // Toast de feedback
-    function mostrarToast(msg) {
-        const t = document.getElementById('toast');
-        t.textContent = msg;
-        t.classList.add('show');
-        setTimeout(() => t.classList.remove('show'), 2000);
     }
 
     function getOrders() {
@@ -200,39 +143,23 @@
         localStorage.setItem('pwa_orders', JSON.stringify(orders));
     }
 
-    // Migrar órdenes del formato antiguo (llego:bool) al nuevo (status:string)
-    function migrarDatos() {
-        const orders = getOrders();
-        let migradas = 0;
-        orders.forEach(o => {
-            if (o.status === undefined) {
-                o.status = o.llego ? 'Listo' : 'Pendiente';
-                delete o.llego;
-                migradas++;
-            }
-        });
-        if (migradas > 0) {
-            setOrders(orders);
-        }
-    }
-
     function saveOrder() {
         const t = document.getElementById('taller').value.trim();
         const p = document.getElementById('pedido').value.trim();
         const po = document.getElementById('po').value.trim();
+        const fe = document.getElementById('fechaEntrega').value;
         const f = document.getElementById('fecha').value;
         const s = document.getElementById('status').value;
 
         if(!t || !p || !f) return alert("Llena Taller, Pedido y Día de Pedido");
 
-        const order = { taller: t, pedido: p, po: po, fecha: f, status: s, id: Date.now() };
+        const order = { taller: t, pedido: p, po: po, fechaEntrega: fe, fecha: f, status: s, id: Date.now() };
         const orders = getOrders();
         orders.push(order);
         setOrders(orders);
 
-        ['taller','pedido','po','fecha'].forEach(id => document.getElementById(id).value = '');
+        ['taller','pedido','po','fechaEntrega','fecha'].forEach(id => document.getElementById(id).value = '');
         render();
-        mostrarToast('Orden guardada');
     }
 
     function actualizarStatus(id, nuevoStatus) {
@@ -250,23 +177,30 @@
         const o = orders.find(item => item.id === id);
         if (!o) return;
 
-        const mensajes = {
-            'Pendiente': 'Su solicitud ha sido recibida.',
-            'Ordenado': 'Su pieza ya ha sido ordenada a fabrica.',
-            'En Tránsito': 'Su pieza ya viene de camino al dealer.',
-            'Listo': 'La pieza ya llego y esta lista para recoger.',
-            'Entregado': 'Confirmamos que la pieza ha sido entregada.'
+        const configStatus = {
+            'Pendiente': { bolita: '\u26AA', msg: 'Su solicitud ha sido recibida.' },
+            'Ordenado': { bolita: '\uD83D\uDFE1', msg: 'Su pieza ya ha sido ordenada a fabrica.' },
+            'Piezas en Tienda': { bolita: '\uD83D\uDCE2', msg: 'Las piezas ya se encuentran físicamente en la tienda.' },
+            'En Tránsito': { bolita: '\uD83D\uDCCA', msg: 'Su pieza ya viene de camino al dealer.' },
+            'Listo para Recoger': { bolita: '\uD83D\uDD35', msg: 'La pieza ya llego y esta lista para recoger.' },
+            'Listo para Entrega': { bolita: '\uD83D\uDCE6', msg: 'La pieza esta lista para ser entregada.' },
+            'Entregado': { bolita: '\u2705', msg: 'Confirmamos que la pieza ha sido entregada.' }
         };
 
-        const texto = `*ACTUALIZACION DE PEDIDO*\n` +
+        const info = configStatus[o.status] || { bolita: '\u26AA', msg: '' };
+
+        let texto = `*ACTUALIZACION DE PEDIDO*\n` +
                       `---------------------------\n` +
                       `Taller: ${o.taller}\n` +
                       `Pedido: ${o.pedido}\n` +
-                      `PO#: ${o.po || 'N/A'}\n` +
-                      `DIA PEDIDO: ${fechaEs(o.fecha)}\n` +
-                      `ESTATUS: ${o.status.toUpperCase()}\n` +
+                      `PO#: ${o.po || 'N/A'}\n`;
+        
+        if(o.fechaEntrega) texto += `ENTREGA: ${o.fechaEntrega}\n`;
+        
+        texto += `DIA PEDIDO: ${o.fecha}\n` +
+                      `ESTATUS: ${info.bolita} ${o.status.toUpperCase()}\n` +
                       `---------------------------\n` +
-                      `${mensajes[o.status] || ''}\n\n` +
+                      `${info.msg}\n\n` +
                       `Enviado desde Control Ismael`;
 
         window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
@@ -274,49 +208,38 @@
 
     function render() {
         const list = document.getElementById('orderList');
-        const query = document.getElementById('searchInput').value.toLowerCase();
         const orders = getOrders();
         list.innerHTML = '';
-
-        const filtradas = orders
-            .filter(o => o.taller.toLowerCase().includes(query) ||
-                         o.pedido.toLowerCase().includes(query) ||
-                         (o.po && o.po.toLowerCase().includes(query)))
-            .sort((a,b) => b.id - a.id);
-
-        if (filtradas.length === 0) {
-            list.innerHTML = `
-                <div class="empty-state">
-                    <div class="icon">📋</div>
-                    <p>${query ? 'Sin resultados para esa búsqueda' : 'No hay órdenes todavía'}</p>
-                </div>`;
-            return;
-        }
 
         const statusClases = {
             'Pendiente': 'st-pendiente',
             'Ordenado': 'st-ordenado',
+            'Piezas en Tienda': 'st-tienda',
             'En Tránsito': 'st-transito',
-            'Listo': 'st-listo',
+            'Listo para Recoger': 'st-listo-recoger',
+            'Listo para Entrega': 'st-listo-entrega',
             'Entregado': 'st-entregado'
         };
 
-        filtradas.forEach(o => {
+        orders.sort((a,b) => b.id - a.id).forEach(o => {
             const claseStatus = statusClases[o.status] || 'st-pendiente';
+            const entregaInfo = o.fechaEntrega ? ` | Entrega: <b>${esc(o.fechaEntrega)}</b>` : '';
 
             list.innerHTML += `
                 <div class="order-card ${claseStatus}">
                     <span class="taller-title">${esc(o.taller)}</span>
                     <div class="details">
                         Pedido: <b>${esc(o.pedido)}</b> | PO#: <b>${esc(o.po || '---')}</b><br>
-                        Pedido el: <b>${fechaEs(o.fecha)}</b>
+                        Pedido el: <b>${esc(o.fecha)}</b>${entregaInfo}
                     </div>
 
                     <select class="status-selector-mini" onchange="actualizarStatus(${o.id}, this.value)">
                         <option value="Pendiente" ${o.status === 'Pendiente' ? 'selected' : ''}>⚪ Pendiente</option>
                         <option value="Ordenado" ${o.status === 'Ordenado' ? 'selected' : ''}>🟡 Ordenado</option>
+                        <option value="Piezas en Tienda" ${o.status === 'Piezas en Tienda' ? 'selected' : ''}>🟠 Piezas en Tienda</option>
                         <option value="En Tránsito" ${o.status === 'En Tránsito' ? 'selected' : ''}>🟣 En Tránsito</option>
-                        <option value="Listo" ${o.status === 'Listo' ? 'selected' : ''}>🔵 Listo para Recoger</option>
+                        <option value="Listo para Recoger" ${o.status === 'Listo para Recoger' ? 'selected' : ''}>🔵 Listo para Recoger</option>
+                        <option value="Listo para Entrega" ${o.status === 'Listo para Entrega' ? 'selected' : ''}>📦 Listo para Entrega</option>
                         <option value="Entregado" ${o.status === 'Entregado' ? 'selected' : ''}>✅ Entregado</option>
                     </select>
 
@@ -334,53 +257,10 @@
             const orders = getOrders().filter(o => o.id !== id);
             setOrders(orders);
             render();
-            mostrarToast('Orden eliminada');
         }
     }
 
-    // Exportar respaldo como JSON
-    function exportarDatos() {
-        const orders = getOrders();
-        if (orders.length === 0) return mostrarToast('No hay órdenes para exportar');
-        const blob = new Blob([JSON.stringify(orders, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `pedidos_respaldo_${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        mostrarToast(`${orders.length} órdenes exportadas`);
-    }
-
-    // Importar respaldo desde JSON
-    function importarDatos(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const datos = JSON.parse(e.target.result);
-                if (!Array.isArray(datos)) throw new Error();
-                const actuales = getOrders();
-                const idsExistentes = new Set(actuales.map(o => o.id));
-                const nuevas = datos.filter(o => o.taller && o.pedido && !idsExistentes.has(o.id));
-                if (nuevas.length === 0) return mostrarToast('No hay órdenes nuevas para importar');
-                nuevas.forEach(o => { if (!o.status) o.status = o.llego ? 'Listo' : 'Pendiente'; });
-                setOrders([...actuales, ...nuevas]);
-                render();
-                mostrarToast(`${nuevas.length} órdenes importadas`);
-            } catch {
-                alert('Archivo no válido');
-            }
-        };
-        reader.readAsText(file);
-        event.target.value = '';
-    }
-
-    window.onload = () => {
-        migrarDatos();
-        render();
-    };
+    window.onload = render;
 </script>
 </body>
 </html>
