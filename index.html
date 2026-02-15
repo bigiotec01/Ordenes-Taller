@@ -524,8 +524,24 @@
                     currentRole = currentUserDoc.role;
                     showApp();
                 } else {
-                    await signOut(auth);
-                    showLoginError('Usuario no configurado. Contacte al administrador.');
+                    // Auto-recover seed users whose Firestore doc is missing
+                    const seedMatch = SEED_USERS.find(s => s.email === user.email);
+                    if (seedMatch) {
+                        const recoveredDoc = {
+                            empId: seedMatch.empId, name: seedMatch.name,
+                            email: seedMatch.email, role: seedMatch.role,
+                            taller: seedMatch.taller,
+                            createdAt: new Date().toISOString()
+                        };
+                        await setDoc(doc(db, 'users', user.uid), recoveredDoc);
+                        currentUser = user;
+                        currentUserDoc = recoveredDoc;
+                        currentRole = recoveredDoc.role;
+                        showApp();
+                    } else {
+                        await signOut(auth);
+                        showLoginError('Usuario no configurado. Contacte al administrador.');
+                    }
                 }
             } catch (e) {
                 currentUser = user;
