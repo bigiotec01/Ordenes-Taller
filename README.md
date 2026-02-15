@@ -1,6 +1,8 @@
-# Pedidos Dealer v3.0.0
+# Pedidos Dealer v3.1.2
 
-Sistema de control de ordenes para taller/dealer. PWA con sync en tiempo real via Firebase Firestore.
+Sistema de control y seguimiento de ordenes de piezas para talleres automotrices y dealers. Permite registrar pedidos, darles seguimiento a traves de 7 estados, notificar a clientes por WhatsApp y sincronizar todo en la nube en tiempo real.
+
+Pensado para ser usado desde el telefono como app instalable (PWA), ideal para managers o encargados de partes que necesitan tener visibilidad rapida del estatus de cada orden.
 
 **Live:** https://ordenes-taller.vercel.app
 
@@ -10,7 +12,10 @@ Sistema de control de ordenes para taller/dealer. PWA con sync en tiempo real vi
 - Crear ordenes con taller, pedido, PO#, dia de pedido y dia de entrega
 - 7 estados: Pendiente, Ordenado, Piezas en Tienda, En Transito, Listo para Recoger, Listo para Entrega, Entregado
 - Cambiar estatus desde un dropdown en cada orden
+- Editar y eliminar ordenes existentes
 - Buscador en tiempo real por taller, pedido o PO
+- Filtro rapido por estatus con chips visuales
+- Contador de ordenes por estatus
 
 **WhatsApp**
 - Enviar actualizacion de pedido con un clic
@@ -20,7 +25,8 @@ Sistema de control de ordenes para taller/dealer. PWA con sync en tiempo real vi
 - Firebase Firestore como base de datos
 - Sync automatico entre dispositivos en tiempo real
 - Funciona offline — sincroniza al reconectar
-- Badge visual sync/offline en el header
+- Badge visual sync/offline debajo del titulo
+- Migracion automatica de datos locales (localStorage) a Firestore
 
 **Respaldo**
 - Exportar ordenes como archivo JSON
