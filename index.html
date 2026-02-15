@@ -917,17 +917,21 @@
                    </div>`
                 : '';
 
+            const isSelf = u.uid === currentUser.uid;
             return `<div class="user-card">
                 <div class="user-card-info">
-                    <div class="user-card-name">${esc(u.name)}</div>
+                    <div class="user-card-name">${esc(u.name)}${isSelf ? ' <span style="font-size:11px;color:var(--ios-gray);">(tu)</span>' : ''}</div>
                     <div class="user-card-detail">ID: ${esc(u.empId || '---')} | ${esc(u.email || '---')}</div>
                     ${tallerHtml}
                 </div>
-                <select class="user-card-role" onchange="cambiarRol('${u.uid}', this.value)">
-                    <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
-                    <option value="worker" ${u.role === 'worker' ? 'selected' : ''}>Worker</option>
-                    <option value="customer" ${u.role === 'customer' ? 'selected' : ''}>Customer</option>
-                </select>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <select class="user-card-role" onchange="cambiarRol('${u.uid}', this.value)">
+                        <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+                        <option value="worker" ${u.role === 'worker' ? 'selected' : ''}>Worker</option>
+                        <option value="customer" ${u.role === 'customer' ? 'selected' : ''}>Customer</option>
+                    </select>
+                    ${isSelf ? '' : `<button onclick="eliminarUsuario('${u.uid}', '${esc(u.name)}')" style="background:#FFEBEB;color:var(--ios-danger);border:none;border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;white-space:nowrap;">&#128465;&#65039;</button>`}
+                </div>
             </div>`;
         }).join('');
     }
@@ -942,6 +946,15 @@
         if (currentRole !== 'admin') return;
         await updateDoc(doc(db, 'users', uid), { taller: newTaller });
         mostrarToast('Taller actualizado');
+    };
+
+    window.eliminarUsuario = async function(uid, name) {
+        if (currentRole !== 'admin') return;
+        if (uid === currentUser.uid) return alert('No puedes eliminarte a ti mismo');
+        if (!confirm(`\u00bfEliminar a ${name}? No podra iniciar sesion.`)) return;
+
+        await deleteDoc(doc(db, 'users', uid));
+        mostrarToast(`${name} eliminado`);
     };
 
     // --- Seed Users ---
