@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pedidos-v3.2.0';
+const CACHE_NAME = 'pedidos-v3.2.1';
 const assets = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', (e) => {

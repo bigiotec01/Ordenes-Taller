@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Pedidos Dealer 3.2.0-beta</title>
+    <title>Pedidos Dealer 3.2.1-beta</title>
 
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1554/1554401.png">
-    <link rel="manifest" href="manifest.json?v=18">
+    <link rel="manifest" href="manifest.json?v=19">
     <meta name="theme-color" content="#F2F2F7">
 
     <style>
@@ -22,7 +22,8 @@
         body {
             font-family: -apple-system, sans-serif;
             margin: 0; background: var(--ios-bg); color: var(--ios-text);
-            -webkit-font-smoothing: antialiased; padding-bottom: 120px;
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: 80px;
         }
 
         .header {
@@ -145,6 +146,7 @@
 
         .details { font-size: 14px; color: var(--ios-gray); line-height: 1.4; }
         .details b { color: #333; }
+        .created-by { font-size: 11px; color: var(--ios-purple); margin-top: 4px; font-weight: 600; }
 
         .actions { display: flex; gap: 8px; margin-top: 15px; border-top: 0.5px solid #E5E5EA; padding-top: 12px; }
         .btn-action { flex: 1; border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; }
@@ -159,7 +161,7 @@
         .empty-state p { font-size: 15px; margin: 0; }
 
         .toast {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
             background: #333; color: white; padding: 12px 24px; border-radius: 10px;
             font-size: 15px; font-weight: 600; z-index: 200; opacity: 0;
             transition: opacity 0.3s ease; pointer-events: none;
@@ -174,7 +176,7 @@
             font-size: 13px; font-weight: 600; background: #E9E9EB; color: var(--ios-text);
         }
 
-        .footer { text-align: center; color: var(--ios-gray); font-size: 12px; padding: 30px 20px; }
+        .footer { text-align: center; color: var(--ios-gray); font-size: 12px; padding: 20px; }
 
         /* ===== Login Screen ===== */
         #loginScreen {
@@ -199,11 +201,45 @@
             text-align: center; color: var(--ios-gray); font-size: 12px; margin: 8px 0 0;
         }
 
+        /* ===== Tab Bar ===== */
+        .tab-bar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            display: flex; background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px); border-top: 0.5px solid #C6C6C8;
+            padding: 6px 0 env(safe-area-inset-bottom, 6px);
+            z-index: 100;
+        }
+        .tab-btn {
+            flex: 1; border: none; background: none; padding: 6px 0;
+            font-size: 11px; font-weight: 600; color: var(--ios-gray);
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+        }
+        .tab-btn.active { color: var(--ios-blue); }
+        .tab-icon { font-size: 22px; line-height: 1; }
+
         /* ===== Admin Panel ===== */
-        .admin-title {
-            font-size: 19px; font-weight: 700; margin: 30px 0 12px; display: flex;
+        .section-title {
+            font-size: 19px; font-weight: 700; margin: 0 0 12px; display: flex;
             align-items: center; gap: 8px;
         }
+        .stat-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;
+        }
+        .stat-card {
+            background: var(--ios-card); border-radius: 12px; padding: 14px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .stat-card.wide { grid-column: 1 / -1; }
+        .stat-number { font-size: 28px; font-weight: 700; letter-spacing: -1px; }
+        .stat-label { font-size: 12px; color: var(--ios-gray); font-weight: 600; margin-top: 2px; }
+        .stat-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 0; border-bottom: 0.5px solid #E5E5EA;
+        }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-row-name { font-size: 14px; font-weight: 500; }
+        .stat-row-count { font-size: 14px; font-weight: 700; color: var(--ios-blue); }
+
         .user-card {
             background: var(--ios-card); border-radius: 12px; padding: 14px 16px;
             margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
@@ -234,7 +270,7 @@
 <!-- ===== LOGIN SCREEN ===== -->
 <div id="loginScreen">
     <div class="login-box">
-        <div class="login-icon">📋</div>
+        <div class="login-icon">&#128203;</div>
         <h2 class="login-title">Pedidos Dealer</h2>
         <p class="login-subtitle">Inicia sesion para continuar</p>
         <div class="ios-group">
@@ -251,7 +287,6 @@
         <p id="loginError" class="login-error"></p>
         <p class="login-hint">@pedidos.local se agrega automaticamente</p>
 
-        <!-- Seed section (only with ?setup) -->
         <div id="seedSection" style="display:none;margin-top:24px;">
             <button class="main-btn" style="background:var(--ios-purple);" onclick="seedUsers()">Configurar Usuarios Iniciales</button>
             <div id="seedLog" class="seed-log" style="display:none;"></div>
@@ -273,65 +308,73 @@
         <h1>Pedidos Dealer <span id="syncBadge" class="sync-badge sync-offline">offline</span></h1>
     </div>
 
-    <div id="statusCounter" class="status-counter"></div>
+    <!-- ===== TAB: ORDENES ===== -->
+    <div id="tabOrdenes">
+        <div id="statusCounter" class="status-counter"></div>
 
-    <div id="filterBar" class="filter-bar">
-        <button class="filter-chip active" onclick="setFilter('Todos')">Todos</button>
-        <button class="filter-chip" onclick="setFilter('Pendiente')">&#9898; Pendiente</button>
-        <button class="filter-chip" onclick="setFilter('Ordenado')">&#11088; Ordenado</button>
-        <button class="filter-chip" onclick="setFilter('Piezas en Tienda')">&#9881; Tienda</button>
-        <button class="filter-chip" onclick="setFilter('En Tránsito')">&#10145; Transito</button>
-        <button class="filter-chip" onclick="setFilter('Listo para Recoger')">&#9745; Recoger</button>
-        <button class="filter-chip" onclick="setFilter('Listo para Entrega')">&#11014; Entrega</button>
-        <button class="filter-chip" onclick="setFilter('Entregado')">&#9989; Entregado</button>
-    </div>
-
-    <div class="search-container">
-        <div class="search-bar">
-            <span>&#128269;</span>
-            <input type="text" id="searchInput" placeholder="Buscar taller, pedido o PO..." oninput="render()">
+        <div id="filterBar" class="filter-bar">
+            <button class="filter-chip active" onclick="setFilter('Todos')">Todos</button>
+            <button class="filter-chip" onclick="setFilter('Pendiente')">&#9898; Pendiente</button>
+            <button class="filter-chip" onclick="setFilter('Ordenado')">&#11088; Ordenado</button>
+            <button class="filter-chip" onclick="setFilter('Piezas en Tienda')">&#9881; Tienda</button>
+            <button class="filter-chip" onclick="setFilter('En Tránsito')">&#10145; Transito</button>
+            <button class="filter-chip" onclick="setFilter('Listo para Recoger')">&#9745; Recoger</button>
+            <button class="filter-chip" onclick="setFilter('Listo para Entrega')">&#11014; Entrega</button>
+            <button class="filter-chip" onclick="setFilter('Entregado')">&#9989; Entregado</button>
         </div>
-    </div>
 
-    <div class="container">
-
-        <!-- Form Section (hidden for customers) -->
-        <div id="formSection">
-            <div class="ios-group">
-                <div class="ios-row"><label>Taller</label><input type="text" id="taller" placeholder="Ej. Morales"></div>
-                <div class="ios-row"><label>Pedido</label><input type="text" id="pedido" placeholder="Ej. M-100"></div>
-                <div class="ios-row"><label>PO#</label><input type="text" id="po" placeholder="Opcional"></div>
-                <div class="ios-row"><label>Dia de Entrega</label><input type="date" id="fechaEntrega"></div>
-                <div class="ios-row"><label>Dia de Pedido</label><input type="date" id="fecha"></div>
-                <div class="ios-row">
-                    <label>Estatus Inicial</label>
-                    <select id="status">
-                        <option value="Pendiente">Pendiente</option>
-                        <option value="Ordenado">Ordenado</option>
-                        <option value="Piezas en Tienda">Piezas en Tienda</option>
-                        <option value="En Tránsito">En Tránsito</option>
-                        <option value="Listo para Recoger">Listo para Recoger</option>
-                        <option value="Listo para Entrega">Listo para Entrega</option>
-                        <option value="Entregado">Entregado</option>
-                    </select>
-                </div>
+        <div class="search-container">
+            <div class="search-bar">
+                <span>&#128269;</span>
+                <input type="text" id="searchInput" placeholder="Buscar taller, pedido o PO..." oninput="render()">
             </div>
-            <button id="btnGuardar" class="main-btn btn-blue" onclick="guardarOrden()">Guardar Nueva Orden</button>
-            <button id="btnCancelar" class="btn-cancel" onclick="cancelarEdicion()">Cancelar Edicion</button>
         </div>
 
-        <div id="orderList" style="margin-top: 20px;"></div>
+        <div class="container">
+            <div id="formSection">
+                <div class="ios-group">
+                    <div class="ios-row"><label>Taller</label><input type="text" id="taller" placeholder="Ej. Morales"></div>
+                    <div class="ios-row"><label>Pedido</label><input type="text" id="pedido" placeholder="Ej. M-100"></div>
+                    <div class="ios-row"><label>PO#</label><input type="text" id="po" placeholder="Opcional"></div>
+                    <div class="ios-row"><label>Dia de Entrega</label><input type="date" id="fechaEntrega"></div>
+                    <div class="ios-row"><label>Dia de Pedido</label><input type="date" id="fecha"></div>
+                    <div class="ios-row">
+                        <label>Estatus Inicial</label>
+                        <select id="status">
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="Ordenado">Ordenado</option>
+                            <option value="Piezas en Tienda">Piezas en Tienda</option>
+                            <option value="En Tránsito">En Tránsito</option>
+                            <option value="Listo para Recoger">Listo para Recoger</option>
+                            <option value="Listo para Entrega">Listo para Entrega</option>
+                            <option value="Entregado">Entregado</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="btnGuardar" class="main-btn btn-blue" onclick="guardarOrden()">Guardar Nueva Orden</button>
+                <button id="btnCancelar" class="btn-cancel" onclick="cancelarEdicion()">Cancelar Edicion</button>
+            </div>
 
-        <!-- Backup Section (hidden for customers) -->
-        <div id="backupSection" class="backup-row">
-            <button class="btn-backup" onclick="exportarDatos()">&#128229; Exportar Respaldo</button>
-            <button class="btn-backup" onclick="document.getElementById('importFile').click()">&#128228; Importar Respaldo</button>
-            <input type="file" id="importFile" accept=".json" style="display:none" onchange="importarDatos(event)">
+            <div id="orderList" style="margin-top: 20px;"></div>
+
+            <div id="backupSection" class="backup-row">
+                <button class="btn-backup" onclick="exportarDatos()">&#128229; Exportar Respaldo</button>
+                <button class="btn-backup" onclick="document.getElementById('importFile').click()">&#128228; Importar Respaldo</button>
+                <input type="file" id="importFile" accept=".json" style="display:none" onchange="importarDatos(event)">
+            </div>
         </div>
+        <footer class="footer">v3.2.1-beta | Pedidos Dealer</footer>
+    </div>
 
-        <!-- Admin Panel (only for admins) -->
-        <div id="adminPanel" style="display:none">
-            <div class="admin-title">&#128101; Gestionar Usuarios</div>
+    <!-- ===== TAB: ADMIN ===== -->
+    <div id="tabAdmin" style="display:none">
+        <div class="container">
+            <!-- Stats Dashboard -->
+            <div class="section-title">&#128200; Resumen</div>
+            <div id="adminStats" class="stat-grid"></div>
+
+            <!-- User Management -->
+            <div class="section-title" style="margin-top:10px;">&#128101; Usuarios</div>
             <div class="ios-group">
                 <div class="ios-row"><label>Nombre</label><input type="text" id="newUserName" placeholder="Nombre completo"></div>
                 <div class="ios-row"><label>ID Empleado</label><input type="text" id="newUserEmpId" placeholder="Ej. 2148"></div>
@@ -353,10 +396,20 @@
             <button class="main-btn btn-blue" onclick="crearUsuario()">Crear Usuario</button>
             <div id="userList" style="margin-top: 16px;"></div>
         </div>
-
+        <footer class="footer">v3.2.1-beta | Pedidos Dealer</footer>
     </div>
 
-    <footer class="footer">v3.2.0-beta | Pedidos Dealer</footer>
+    <!-- ===== BOTTOM TAB BAR ===== -->
+    <div id="tabBar" class="tab-bar" style="display:none;">
+        <button class="tab-btn active" id="tabBtnOrdenes" onclick="switchTab('ordenes')">
+            <span class="tab-icon">&#128203;</span>
+            Ordenes
+        </button>
+        <button class="tab-btn" id="tabBtnAdmin" onclick="switchTab('admin')">
+            <span class="tab-icon">&#9881;&#65039;</span>
+            Admin
+        </button>
+    </div>
 </div>
 
 <div id="toast" class="toast"></div>
@@ -400,6 +453,7 @@
     let unsubOrders = null;
     let unsubUsers = null;
     let secondaryApp = null;
+    let activeTab = 'ordenes';
 
     // --- Status Config ---
     const STATUS_CONFIG = {
@@ -441,6 +495,24 @@
         b.className = 'sync-badge ' + (online ? 'sync-online' : 'sync-offline');
     }
 
+    function getCreatorName(uid) {
+        if (!uid) return 'Sistema';
+        const u = allUsers.find(x => x.uid === uid);
+        return u ? u.name : 'Desconocido';
+    }
+
+    // --- Tab Navigation ---
+    window.switchTab = function(tab) {
+        activeTab = tab;
+        document.getElementById('tabOrdenes').style.display = tab === 'ordenes' ? 'block' : 'none';
+        document.getElementById('tabAdmin').style.display = tab === 'admin' ? 'block' : 'none';
+
+        document.getElementById('tabBtnOrdenes').classList.toggle('active', tab === 'ordenes');
+        document.getElementById('tabBtnAdmin').classList.toggle('active', tab === 'admin');
+
+        if (tab === 'admin') renderAdminStats();
+    };
+
     // --- Auth State ---
     onAuthStateChanged(auth, async (user) => {
         if (user) {
@@ -456,7 +528,6 @@
                     showLoginError('Usuario no configurado. Contacte al administrador.');
                 }
             } catch (e) {
-                // Offline with cached auth — try to proceed
                 currentUser = user;
                 showLoginError('Error al verificar usuario. Verifique conexion.');
             }
@@ -515,7 +586,14 @@
         // Role-based visibility
         document.getElementById('formSection').style.display = currentRole === 'customer' ? 'none' : 'block';
         document.getElementById('backupSection').style.display = currentRole === 'customer' ? 'none' : 'flex';
-        document.getElementById('adminPanel').style.display = currentRole === 'admin' ? 'block' : 'none';
+
+        // Tab bar: only show for admin (they have 2 tabs)
+        document.getElementById('tabBar').style.display = currentRole === 'admin' ? 'flex' : 'none';
+
+        // Reset to ordenes tab
+        activeTab = 'ordenes';
+        document.getElementById('tabOrdenes').style.display = 'block';
+        document.getElementById('tabAdmin').style.display = 'none';
 
         startListening();
         migrarLocalAFirestore();
@@ -544,12 +622,14 @@
             orders = snapshot.docs.map(d => d.data());
             setSyncBadge(!snapshot.metadata.fromCache);
             render();
+            if (activeTab === 'admin') renderAdminStats();
         }, () => setSyncBadge(false));
 
         if (currentRole === 'admin') {
             unsubUsers = onSnapshot(usersCol, (snapshot) => {
                 allUsers = snapshot.docs.map(d => ({ uid: d.id, ...d.data() }));
                 renderUsers();
+                if (activeTab === 'admin') renderAdminStats();
             });
         }
     }
@@ -612,6 +692,8 @@
         if (currentRole === 'customer') return;
         const o = orders.find(item => item.id === id);
         if (!o) return;
+
+        if (activeTab !== 'ordenes') switchTab('ordenes');
 
         editandoId = id;
         document.getElementById('taller').value = o.taller;
@@ -741,25 +823,29 @@
                         'No hay ordenes todavia';
             list.innerHTML = `
                 <div class="empty-state">
-                    <div class="icon">\uD83D\uDCCB</div>
+                    <div class="icon">&#128203;</div>
                     <p>${msg}</p>
                 </div>`;
             return;
         }
 
         const isReadOnly = currentRole === 'customer';
+        const isAdmin = currentRole === 'admin';
 
         filtradas.forEach(o => {
             const cfg = STATUS_CONFIG[o.status] || STATUS_CONFIG['Pendiente'];
             const entregaInfo = o.fechaEntrega ? ` | Entrega: <b>${fechaEs(o.fechaEntrega)}</b>` : '';
             const esEditando = o.id === editandoId;
+            const creatorLine = isAdmin && o.createdBy
+                ? `<div class="created-by">Creado por: ${esc(getCreatorName(o.createdBy))}</div>` : '';
 
             let html = `<div class="order-card ${cfg.clase}" ${esEditando ? 'style="outline: 2px solid var(--ios-purple);"' : ''}>
                 <span class="taller-title">${esc(o.taller)}</span>
                 <div class="details">
                     Pedido: <b>${esc(o.pedido)}</b> | PO#: <b>${esc(o.po || '---')}</b><br>
                     Pedido el: <b>${fechaEs(o.fecha)}</b>${entregaInfo}
-                </div>`;
+                </div>
+                ${creatorLine}`;
 
             if (isReadOnly) {
                 html += `<div style="margin-top:10px;padding:8px 12px;border-radius:8px;background:#F2F2F7;font-size:14px;font-weight:600;color:${cfg.color};">
@@ -782,6 +868,62 @@
         });
     }
     window.render = render;
+
+    // --- Admin Stats ---
+    function renderAdminStats() {
+        const el = document.getElementById('adminStats');
+        if (!el || currentRole !== 'admin') return;
+
+        const total = orders.length;
+        const activas = orders.filter(o => o.status !== 'Entregado').length;
+        const entregadas = orders.filter(o => o.status === 'Entregado').length;
+
+        // Orders by worker
+        const byWorker = {};
+        orders.forEach(o => {
+            const name = getCreatorName(o.createdBy);
+            byWorker[name] = (byWorker[name] || 0) + 1;
+        });
+        const workerRows = Object.entries(byWorker)
+            .sort((a, b) => b[1] - a[1])
+            .map(([name, count]) => `<div class="stat-row"><span class="stat-row-name">${esc(name)}</span><span class="stat-row-count">${count}</span></div>`)
+            .join('');
+
+        // Orders by status
+        const byStatus = {};
+        orders.forEach(o => { byStatus[o.status] = (byStatus[o.status] || 0) + 1; });
+        const statusRows = Object.entries(STATUS_CONFIG)
+            .filter(([s]) => byStatus[s])
+            .map(([s, cfg]) => `<div class="stat-row"><span class="stat-row-name">${cfg.bolita} ${s}</span><span class="stat-row-count">${byStatus[s]}</span></div>`)
+            .join('');
+
+        el.innerHTML = `
+            <div class="stat-card">
+                <div class="stat-number">${total}</div>
+                <div class="stat-label">Total ordenes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" style="color:var(--ios-blue);">${activas}</div>
+                <div class="stat-label">Activas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" style="color:var(--ios-green);">${entregadas}</div>
+                <div class="stat-label">Entregadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" style="color:var(--ios-purple);">${allUsers.length}</div>
+                <div class="stat-label">Usuarios</div>
+            </div>
+            <div class="stat-card wide">
+                <div class="stat-label" style="margin-bottom:6px;font-size:13px;">Ordenes por estatus</div>
+                ${statusRows || '<div style="color:var(--ios-gray);font-size:13px;">Sin ordenes</div>'}
+            </div>
+            <div class="stat-card wide">
+                <div class="stat-label" style="margin-bottom:6px;font-size:13px;">Ordenes por trabajador</div>
+                ${workerRows || '<div style="color:var(--ios-gray);font-size:13px;">Sin datos</div>'}
+            </div>
+        `;
+    }
 
     // --- Backup ---
     window.exportarDatos = function() {
@@ -876,7 +1018,6 @@
 
             mostrarToast(`Usuario ${name} creado`);
 
-            // Clear form
             document.getElementById('newUserName').value = '';
             document.getElementById('newUserEmpId').value = '';
             document.getElementById('newUserEmail').value = '';
@@ -918,6 +1059,9 @@
                 : '';
 
             const isSelf = u.uid === currentUser.uid;
+            const isOtherAdmin = !isSelf && u.role === 'admin';
+            const canDelete = !isSelf && !isOtherAdmin;
+
             return `<div class="user-card">
                 <div class="user-card-info">
                     <div class="user-card-name">${esc(u.name)}${isSelf ? ' <span style="font-size:11px;color:var(--ios-gray);">(tu)</span>' : ''}</div>
@@ -925,12 +1069,12 @@
                     ${tallerHtml}
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;">
-                    <select class="user-card-role" onchange="cambiarRol('${u.uid}', this.value)">
+                    <select class="user-card-role" onchange="cambiarRol('${u.uid}', this.value)"${isOtherAdmin ? ' disabled title="No puedes cambiar el rol de otro admin"' : ''}>
                         <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
                         <option value="worker" ${u.role === 'worker' ? 'selected' : ''}>Worker</option>
                         <option value="customer" ${u.role === 'customer' ? 'selected' : ''}>Customer</option>
                     </select>
-                    ${isSelf ? '' : `<button onclick="eliminarUsuario('${u.uid}', '${esc(u.name)}')" style="background:#FFEBEB;color:var(--ios-danger);border:none;border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;white-space:nowrap;">&#128465;&#65039;</button>`}
+                    ${canDelete ? `<button onclick="eliminarUsuario('${u.uid}', '${esc(u.name)}')" style="background:#FFEBEB;color:var(--ios-danger);border:none;border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;white-space:nowrap;">&#128465;&#65039;</button>` : ''}
                 </div>
             </div>`;
         }).join('');
@@ -938,6 +1082,12 @@
 
     window.cambiarRol = async function(uid, newRole) {
         if (currentRole !== 'admin') return;
+        const target = allUsers.find(u => u.uid === uid);
+        if (target && target.role === 'admin' && uid !== currentUser.uid) {
+            mostrarToast('No puedes cambiar el rol de otro admin');
+            renderUsers();
+            return;
+        }
         await updateDoc(doc(db, 'users', uid), { role: newRole });
         mostrarToast('Rol actualizado');
     };
@@ -951,6 +1101,8 @@
     window.eliminarUsuario = async function(uid, name) {
         if (currentRole !== 'admin') return;
         if (uid === currentUser.uid) return alert('No puedes eliminarte a ti mismo');
+        const target = allUsers.find(u => u.uid === uid);
+        if (target && target.role === 'admin') return alert('No puedes eliminar a otro administrador');
         if (!confirm(`\u00bfEliminar a ${name}? No podra iniciar sesion.`)) return;
 
         await deleteDoc(doc(db, 'users', uid));
@@ -1000,7 +1152,6 @@
         logEl.textContent += '\n> Listo! Ya puedes iniciar sesion.\n';
     };
 
-    // Show seed section if ?setup in URL
     if (window.location.search.includes('setup')) {
         const seedSection = document.getElementById('seedSection');
         if (seedSection) seedSection.style.display = 'block';
@@ -1040,7 +1191,7 @@
 
     // --- Service Worker ---
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js?v=18');
+        navigator.serviceWorker.register('sw.js?v=19');
     }
 </script>
 
@@ -1063,7 +1214,7 @@
       match /users/{userId} {
         allow read: if request.auth != null;
         allow create: if request.auth != null && request.auth.uid == userId;
-        allow update: if request.auth != null && userRole() == 'admin';
+        allow update, delete: if request.auth != null && userRole() == 'admin';
       }
     }
   }
