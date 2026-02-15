@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Pedidos Dealer 3.1.0-beta</title>
+    <title>Pedidos Dealer 3.2.0-beta</title>
 
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1554/1554401.png">
-    <link rel="manifest" href="manifest.json?v=17">
+    <link rel="manifest" href="manifest.json?v=18">
     <meta name="theme-color" content="#F2F2F7">
 
     <style>
@@ -27,8 +27,26 @@
 
         .header {
             background: rgba(242, 242, 247, 0.8); backdrop-filter: blur(20px);
-            padding: 60px 20px 10px 20px; position: sticky; top: 0; z-index: 100;
+            padding: 54px 16px 10px 16px; position: sticky; top: 0; z-index: 100;
             text-align: center;
+        }
+
+        .header-top {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 6px; text-align: left;
+        }
+        .user-info { display: flex; align-items: center; gap: 8px; }
+        .user-name { font-size: 15px; font-weight: 600; }
+        .role-badge {
+            padding: 2px 8px; border-radius: 6px; font-size: 11px;
+            font-weight: 700; text-transform: uppercase;
+        }
+        .role-admin { background: #EDE9FE; color: #5856D6; }
+        .role-worker { background: #D1FAE5; color: #065F46; }
+        .role-customer { background: #DBEAFE; color: #1D4ED8; }
+        .btn-logout {
+            background: none; border: 1px solid var(--ios-gray); color: var(--ios-gray);
+            padding: 4px 12px; border-radius: 8px; font-size: 13px; font-weight: 600;
         }
 
         h1 { margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -1px; }
@@ -50,7 +68,6 @@
         .sync-online { background: #D1FAE5; color: #065F46; }
         .sync-offline { background: #FEE2E2; color: #991B1B; }
 
-        /* Contador de estatus */
         .status-counter {
             display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 16px 0;
         }
@@ -63,7 +80,6 @@
             width: 8px; height: 8px; border-radius: 50%; display: inline-block;
         }
 
-        /* Filtro por estatus */
         .filter-bar {
             display: flex; gap: 6px; padding: 8px 16px; overflow-x: auto;
             -webkit-overflow-scrolling: touch; scrollbar-width: none;
@@ -159,74 +175,200 @@
         }
 
         .footer { text-align: center; color: var(--ios-gray); font-size: 12px; padding: 30px 20px; }
+
+        /* ===== Login Screen ===== */
+        #loginScreen {
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh; min-height: 100dvh;
+            background: var(--ios-bg); padding: 20px;
+        }
+        .login-box { width: 100%; max-width: 380px; }
+        .login-icon { text-align: center; font-size: 56px; margin-bottom: 8px; }
+        .login-title {
+            text-align: center; font-size: 28px; font-weight: 700;
+            margin: 0 0 4px; letter-spacing: -0.5px;
+        }
+        .login-subtitle {
+            text-align: center; color: var(--ios-gray); font-size: 15px; margin: 0 0 20px;
+        }
+        .login-error {
+            color: var(--ios-danger); text-align: center; font-size: 14px;
+            font-weight: 600; min-height: 20px; margin: 8px 0 0; display: none;
+        }
+        .login-hint {
+            text-align: center; color: var(--ios-gray); font-size: 12px; margin: 8px 0 0;
+        }
+
+        /* ===== Admin Panel ===== */
+        .admin-title {
+            font-size: 19px; font-weight: 700; margin: 30px 0 12px; display: flex;
+            align-items: center; gap: 8px;
+        }
+        .user-card {
+            background: var(--ios-card); border-radius: 12px; padding: 14px 16px;
+            margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .user-card-info { flex: 1; }
+        .user-card-name { font-size: 15px; font-weight: 600; }
+        .user-card-detail { font-size: 12px; color: var(--ios-gray); margin-top: 2px; }
+        .user-card-role {
+            width: 110px; padding: 6px 8px; border-radius: 8px; border: 1px solid #E5E5EA;
+            background: #F2F2F7; font-size: 13px; font-weight: 600; color: var(--ios-text);
+        }
+        .taller-input {
+            border: 1px solid #E5E5EA; border-radius: 6px; padding: 4px 8px;
+            font-size: 12px; width: 140px; margin-top: 4px; color: var(--ios-blue);
+        }
+
+        /* ===== Seed Section ===== */
+        .seed-log {
+            background: #1a1a1a; color: #34C759; padding: 12px; border-radius: 10px;
+            font-size: 12px; font-family: 'SF Mono', monospace; white-space: pre-wrap;
+            max-height: 220px; overflow-y: auto; margin-top: 12px;
+        }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>Mis Ordenes <span id="syncBadge" class="sync-badge sync-offline">offline</span></h1>
-</div>
+<!-- ===== LOGIN SCREEN ===== -->
+<div id="loginScreen">
+    <div class="login-box">
+        <div class="login-icon">📋</div>
+        <h2 class="login-title">Pedidos Dealer</h2>
+        <p class="login-subtitle">Inicia sesion para continuar</p>
+        <div class="ios-group">
+            <div class="ios-row">
+                <label>Usuario</label>
+                <input type="text" id="loginUser" placeholder="nombre.apellido" autocapitalize="none" autocorrect="off" spellcheck="false">
+            </div>
+            <div class="ios-row">
+                <label>Clave</label>
+                <input type="password" id="loginPass" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;">
+            </div>
+        </div>
+        <button class="main-btn btn-blue" id="btnLogin" onclick="doLogin()">Iniciar Sesion</button>
+        <p id="loginError" class="login-error"></p>
+        <p class="login-hint">@pedidos.local se agrega automaticamente</p>
 
-<div id="statusCounter" class="status-counter"></div>
-
-<div id="filterBar" class="filter-bar">
-    <button class="filter-chip active" onclick="setFilter('Todos')">Todos</button>
-    <button class="filter-chip" onclick="setFilter('Pendiente')">⚪ Pendiente</button>
-    <button class="filter-chip" onclick="setFilter('Ordenado')">🟡 Ordenado</button>
-    <button class="filter-chip" onclick="setFilter('Piezas en Tienda')">🟠 Tienda</button>
-    <button class="filter-chip" onclick="setFilter('En Tránsito')">🟣 Transito</button>
-    <button class="filter-chip" onclick="setFilter('Listo para Recoger')">🔵 Recoger</button>
-    <button class="filter-chip" onclick="setFilter('Listo para Entrega')">📦 Entrega</button>
-    <button class="filter-chip" onclick="setFilter('Entregado')">✅ Entregado</button>
-</div>
-
-<div class="search-container">
-    <div class="search-bar">
-        <span>🔍</span>
-        <input type="text" id="searchInput" placeholder="Buscar taller, pedido o PO..." oninput="render()">
-    </div>
-</div>
-
-<div class="container">
-    <div class="ios-group">
-        <div class="ios-row"><label>Taller</label><input type="text" id="taller" placeholder="Ej. Morales"></div>
-        <div class="ios-row"><label>Pedido</label><input type="text" id="pedido" placeholder="Ej. M-100"></div>
-        <div class="ios-row"><label>PO#</label><input type="text" id="po" placeholder="Opcional"></div>
-        <div class="ios-row"><label>Dia de Entrega</label><input type="date" id="fechaEntrega"></div>
-        <div class="ios-row"><label>Dia de Pedido</label><input type="date" id="fecha"></div>
-        <div class="ios-row">
-            <label>Estatus Inicial</label>
-            <select id="status">
-                <option value="Pendiente">Pendiente</option>
-                <option value="Ordenado">Ordenado</option>
-                <option value="Piezas en Tienda">Piezas en Tienda</option>
-                <option value="En Tránsito">En Tránsito</option>
-                <option value="Listo para Recoger">Listo para Recoger</option>
-                <option value="Listo para Entrega">Listo para Entrega</option>
-                <option value="Entregado">Entregado</option>
-            </select>
+        <!-- Seed section (only with ?setup) -->
+        <div id="seedSection" style="display:none;margin-top:24px;">
+            <button class="main-btn" style="background:var(--ios-purple);" onclick="seedUsers()">Configurar Usuarios Iniciales</button>
+            <div id="seedLog" class="seed-log" style="display:none;"></div>
         </div>
     </div>
-    <button id="btnGuardar" class="main-btn btn-blue" onclick="guardarOrden()">Guardar Nueva Orden</button>
-    <button id="btnCancelar" class="btn-cancel" onclick="cancelarEdicion()">Cancelar Edicion</button>
+</div>
 
-    <div id="orderList" style="margin-top: 20px;"></div>
+<!-- ===== APP CONTENT ===== -->
+<div id="appContent" style="display:none">
 
-    <div class="backup-row">
-        <button class="btn-backup" onclick="exportarDatos()">📥 Exportar Respaldo</button>
-        <button class="btn-backup" onclick="document.getElementById('importFile').click()">📤 Importar Respaldo</button>
-        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importarDatos(event)">
+    <div class="header">
+        <div class="header-top">
+            <div class="user-info">
+                <span id="userName" class="user-name"></span>
+                <span id="userRoleBadge" class="role-badge"></span>
+            </div>
+            <button class="btn-logout" onclick="doLogout()">Salir</button>
+        </div>
+        <h1>Pedidos Dealer <span id="syncBadge" class="sync-badge sync-offline">offline</span></h1>
     </div>
+
+    <div id="statusCounter" class="status-counter"></div>
+
+    <div id="filterBar" class="filter-bar">
+        <button class="filter-chip active" onclick="setFilter('Todos')">Todos</button>
+        <button class="filter-chip" onclick="setFilter('Pendiente')">&#9898; Pendiente</button>
+        <button class="filter-chip" onclick="setFilter('Ordenado')">&#11088; Ordenado</button>
+        <button class="filter-chip" onclick="setFilter('Piezas en Tienda')">&#9881; Tienda</button>
+        <button class="filter-chip" onclick="setFilter('En Tránsito')">&#10145; Transito</button>
+        <button class="filter-chip" onclick="setFilter('Listo para Recoger')">&#9745; Recoger</button>
+        <button class="filter-chip" onclick="setFilter('Listo para Entrega')">&#11014; Entrega</button>
+        <button class="filter-chip" onclick="setFilter('Entregado')">&#9989; Entregado</button>
+    </div>
+
+    <div class="search-container">
+        <div class="search-bar">
+            <span>&#128269;</span>
+            <input type="text" id="searchInput" placeholder="Buscar taller, pedido o PO..." oninput="render()">
+        </div>
+    </div>
+
+    <div class="container">
+
+        <!-- Form Section (hidden for customers) -->
+        <div id="formSection">
+            <div class="ios-group">
+                <div class="ios-row"><label>Taller</label><input type="text" id="taller" placeholder="Ej. Morales"></div>
+                <div class="ios-row"><label>Pedido</label><input type="text" id="pedido" placeholder="Ej. M-100"></div>
+                <div class="ios-row"><label>PO#</label><input type="text" id="po" placeholder="Opcional"></div>
+                <div class="ios-row"><label>Dia de Entrega</label><input type="date" id="fechaEntrega"></div>
+                <div class="ios-row"><label>Dia de Pedido</label><input type="date" id="fecha"></div>
+                <div class="ios-row">
+                    <label>Estatus Inicial</label>
+                    <select id="status">
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="Ordenado">Ordenado</option>
+                        <option value="Piezas en Tienda">Piezas en Tienda</option>
+                        <option value="En Tránsito">En Tránsito</option>
+                        <option value="Listo para Recoger">Listo para Recoger</option>
+                        <option value="Listo para Entrega">Listo para Entrega</option>
+                        <option value="Entregado">Entregado</option>
+                    </select>
+                </div>
+            </div>
+            <button id="btnGuardar" class="main-btn btn-blue" onclick="guardarOrden()">Guardar Nueva Orden</button>
+            <button id="btnCancelar" class="btn-cancel" onclick="cancelarEdicion()">Cancelar Edicion</button>
+        </div>
+
+        <div id="orderList" style="margin-top: 20px;"></div>
+
+        <!-- Backup Section (hidden for customers) -->
+        <div id="backupSection" class="backup-row">
+            <button class="btn-backup" onclick="exportarDatos()">&#128229; Exportar Respaldo</button>
+            <button class="btn-backup" onclick="document.getElementById('importFile').click()">&#128228; Importar Respaldo</button>
+            <input type="file" id="importFile" accept=".json" style="display:none" onchange="importarDatos(event)">
+        </div>
+
+        <!-- Admin Panel (only for admins) -->
+        <div id="adminPanel" style="display:none">
+            <div class="admin-title">&#128101; Gestionar Usuarios</div>
+            <div class="ios-group">
+                <div class="ios-row"><label>Nombre</label><input type="text" id="newUserName" placeholder="Nombre completo"></div>
+                <div class="ios-row"><label>ID Empleado</label><input type="text" id="newUserEmpId" placeholder="Ej. 2148"></div>
+                <div class="ios-row"><label>Email</label><input type="text" id="newUserEmail" placeholder="auto desde nombre" autocapitalize="none"></div>
+                <div class="ios-row">
+                    <label>Rol</label>
+                    <select id="newUserRole" onchange="toggleTallerField()">
+                        <option value="worker">Worker</option>
+                        <option value="customer">Customer</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="ios-row" id="newUserTallerRow" style="display:none">
+                    <label>Taller</label>
+                    <input type="text" id="newUserTaller" placeholder="Nombre del taller">
+                </div>
+                <div class="ios-row"><label>Clave</label><input type="password" id="newUserPass" placeholder="Clave del usuario"></div>
+            </div>
+            <button class="main-btn btn-blue" onclick="crearUsuario()">Crear Usuario</button>
+            <div id="userList" style="margin-top: 16px;"></div>
+        </div>
+
+    </div>
+
+    <footer class="footer">v3.2.0-beta | Pedidos Dealer</footer>
 </div>
 
 <div id="toast" class="toast"></div>
 
-<footer class="footer">v3.1.0-beta | Ismael Bigio Control</footer>
-
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import {
-        getFirestore, collection, doc, setDoc, deleteDoc, updateDoc,
+        getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+        onAuthStateChanged, signOut
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import {
+        getFirestore, collection, doc, setDoc, getDoc, deleteDoc, updateDoc,
         onSnapshot, getDocs, writeBatch, enableIndexedDbPersistence
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -242,15 +384,24 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app);
     enableIndexedDbPersistence(db).catch(() => {});
     const ordersCol = collection(db, 'orders');
+    const usersCol = collection(db, 'users');
 
-    // --- Estado en memoria ---
+    // --- State ---
     let orders = [];
+    let allUsers = [];
     let editandoId = null;
     let filtroActual = 'Todos';
+    let currentUser = null;
+    let currentUserDoc = null;
+    let currentRole = null;
+    let unsubOrders = null;
+    let unsubUsers = null;
+    let secondaryApp = null;
 
-    // --- Configuracion de estatus ---
+    // --- Status Config ---
     const STATUS_CONFIG = {
         'Pendiente':           { clase: 'st-pendiente',      color: '#8E8E93', bolita: '\u23F3', msg: 'Su solicitud ha sido recibida.' },
         'Ordenado':            { clase: 'st-ordenado',        color: '#FFCC00', bolita: '\u2B50', msg: 'Su pieza ya ha sido ordenada a fabrica.' },
@@ -261,7 +412,7 @@
         'Entregado':           { clase: 'st-entregado',       color: '#34C759', bolita: '\u2705', msg: 'Confirmamos que la pieza ha sido entregada.' }
     };
 
-    // --- Utilidades ---
+    // --- Utilities ---
     function esc(str) {
         const d = document.createElement('div');
         d.textContent = str;
@@ -285,17 +436,148 @@
 
     function setSyncBadge(online) {
         const b = document.getElementById('syncBadge');
+        if (!b) return;
         b.textContent = online ? 'sync' : 'offline';
         b.className = 'sync-badge ' + (online ? 'sync-online' : 'sync-offline');
     }
 
-    // --- Filtro por estatus ---
+    // --- Auth State ---
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            try {
+                const userDocSnap = await getDoc(doc(db, 'users', user.uid));
+                if (userDocSnap.exists()) {
+                    currentUser = user;
+                    currentUserDoc = userDocSnap.data();
+                    currentRole = currentUserDoc.role;
+                    showApp();
+                } else {
+                    await signOut(auth);
+                    showLoginError('Usuario no configurado. Contacte al administrador.');
+                }
+            } catch (e) {
+                // Offline with cached auth — try to proceed
+                currentUser = user;
+                showLoginError('Error al verificar usuario. Verifique conexion.');
+            }
+        } else {
+            currentUser = null;
+            currentUserDoc = null;
+            currentRole = null;
+            stopListening();
+            showLogin();
+        }
+    });
+
+    window.doLogin = async function() {
+        const userInput = document.getElementById('loginUser').value.trim();
+        const pass = document.getElementById('loginPass').value;
+        if (!userInput || !pass) return showLoginError('Ingrese usuario y clave');
+
+        const email = userInput.includes('@') ? userInput : userInput + '@pedidos.local';
+        const btn = document.getElementById('btnLogin');
+        btn.textContent = 'Entrando...';
+        btn.disabled = true;
+
+        try {
+            await signInWithEmailAndPassword(auth, email, pass);
+            hideLoginError();
+        } catch (e) {
+            if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
+                showLoginError('Usuario o clave incorrecta');
+            } else if (e.code === 'auth/too-many-requests') {
+                showLoginError('Demasiados intentos. Espere un momento.');
+            } else {
+                showLoginError('Error de conexion. Intente de nuevo.');
+            }
+        } finally {
+            btn.textContent = 'Iniciar Sesion';
+            btn.disabled = false;
+        }
+    };
+
+    window.doLogout = async function() {
+        stopListening();
+        cancelarEdicion();
+        await signOut(auth);
+    };
+
+    function showApp() {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('appContent').style.display = 'block';
+
+        // Update user bar
+        document.getElementById('userName').textContent = currentUserDoc.name;
+        const badge = document.getElementById('userRoleBadge');
+        badge.textContent = currentRole;
+        badge.className = 'role-badge role-' + currentRole;
+
+        // Role-based visibility
+        document.getElementById('formSection').style.display = currentRole === 'customer' ? 'none' : 'block';
+        document.getElementById('backupSection').style.display = currentRole === 'customer' ? 'none' : 'flex';
+        document.getElementById('adminPanel').style.display = currentRole === 'admin' ? 'block' : 'none';
+
+        startListening();
+        migrarLocalAFirestore();
+    }
+
+    function showLogin() {
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('appContent').style.display = 'none';
+    }
+
+    function showLoginError(msg) {
+        const el = document.getElementById('loginError');
+        el.textContent = msg;
+        el.style.display = 'block';
+    }
+
+    function hideLoginError() {
+        document.getElementById('loginError').style.display = 'none';
+    }
+
+    // --- Listeners ---
+    function startListening() {
+        stopListening();
+
+        unsubOrders = onSnapshot(ordersCol, (snapshot) => {
+            orders = snapshot.docs.map(d => d.data());
+            setSyncBadge(!snapshot.metadata.fromCache);
+            render();
+        }, () => setSyncBadge(false));
+
+        if (currentRole === 'admin') {
+            unsubUsers = onSnapshot(usersCol, (snapshot) => {
+                allUsers = snapshot.docs.map(d => ({ uid: d.id, ...d.data() }));
+                renderUsers();
+            });
+        }
+    }
+
+    function stopListening() {
+        if (unsubOrders) { unsubOrders(); unsubOrders = null; }
+        if (unsubUsers) { unsubUsers(); unsubUsers = null; }
+        orders = [];
+        allUsers = [];
+    }
+
+    // --- Role-based order filtering ---
+    function getVisibleOrders() {
+        if (!currentRole) return [];
+        return orders.filter(o => {
+            if (currentRole === 'admin') return true;
+            if (currentRole === 'worker') return o.createdBy === currentUser.uid;
+            if (currentRole === 'customer') {
+                if (!currentUserDoc.taller) return false;
+                return o.taller && o.taller.toLowerCase() === currentUserDoc.taller.toLowerCase();
+            }
+            return false;
+        });
+    }
+
+    // --- Filter ---
     window.setFilter = function(status) {
         filtroActual = status;
-        document.querySelectorAll('.filter-chip').forEach(chip => {
-            chip.classList.toggle('active', chip.textContent.includes(status === 'Todos' ? 'Todos' : status.split(' ').pop()));
-        });
-        // Activar el chip correcto por data
         const chips = document.querySelectorAll('.filter-chip');
         chips.forEach(c => c.classList.remove('active'));
         chips.forEach(c => {
@@ -305,11 +587,12 @@
         render();
     };
 
-    // --- Contador de estatus ---
-    function renderContador() {
+    // --- Counter ---
+    function renderContador(visibleOrders) {
         const counter = document.getElementById('statusCounter');
+        if (!counter) return;
         const conteo = {};
-        orders.forEach(o => { conteo[o.status] = (conteo[o.status] || 0) + 1; });
+        visibleOrders.forEach(o => { conteo[o.status] = (conteo[o.status] || 0) + 1; });
 
         let html = '';
         for (const [status, cfg] of Object.entries(STATUS_CONFIG)) {
@@ -324,8 +607,9 @@
         counter.innerHTML = html;
     }
 
-    // --- Editar orden ---
+    // --- Edit / Cancel ---
     window.editarOrden = function(id) {
+        if (currentRole === 'customer') return;
         const o = orders.find(item => item.id === id);
         if (!o) return;
 
@@ -345,14 +629,22 @@
 
     window.cancelarEdicion = function() {
         editandoId = null;
-        ['taller','pedido','po','fechaEntrega','fecha'].forEach(id => document.getElementById(id).value = '');
-        document.getElementById('status').value = 'Pendiente';
-        document.getElementById('btnGuardar').textContent = 'Guardar Nueva Orden';
-        document.getElementById('btnCancelar').style.display = 'none';
+        ['taller','pedido','po','fechaEntrega','fecha'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        const statusEl = document.getElementById('status');
+        if (statusEl) statusEl.value = 'Pendiente';
+        const btnGuardar = document.getElementById('btnGuardar');
+        if (btnGuardar) btnGuardar.textContent = 'Guardar Nueva Orden';
+        const btnCancelar = document.getElementById('btnCancelar');
+        if (btnCancelar) btnCancelar.style.display = 'none';
     };
 
-    // --- CRUD (Firestore) ---
+    // --- CRUD ---
     window.guardarOrden = async function() {
+        if (!currentUser || currentRole === 'customer') return;
+
         const t = document.getElementById('taller').value.trim();
         const p = document.getElementById('pedido').value.trim();
         const po = document.getElementById('po').value.trim();
@@ -360,7 +652,7 @@
         const f = document.getElementById('fecha').value;
         const s = document.getElementById('status').value;
 
-        if(!t || !p || !f) return alert("Llena Taller, Pedido y Dia de Pedido");
+        if (!t || !p || !f) return alert("Llena Taller, Pedido y Dia de Pedido");
 
         if (editandoId) {
             await updateDoc(doc(db, 'orders', String(editandoId)), {
@@ -369,7 +661,11 @@
             mostrarToast('Orden actualizada');
             cancelarEdicion();
         } else {
-            const order = { taller: t, pedido: p, po: po, fechaEntrega: fe, fecha: f, status: s, id: Date.now() };
+            const order = {
+                taller: t, pedido: p, po: po, fechaEntrega: fe, fecha: f, status: s,
+                id: Date.now(),
+                createdBy: currentUser.uid
+            };
             await setDoc(doc(db, 'orders', String(order.id)), order);
             mostrarToast('Orden guardada');
         }
@@ -378,11 +674,13 @@
     };
 
     window.actualizarStatus = async function(id, nuevoStatus) {
+        if (!currentUser || currentRole === 'customer') return;
         await updateDoc(doc(db, 'orders', String(id)), { status: nuevoStatus });
     };
 
     window.deleteOrder = async function(id) {
-        if(confirm("¿Eliminar esta orden?")) {
+        if (!currentUser || currentRole === 'customer') return;
+        if (confirm("\u00bfEliminar esta orden?")) {
             if (editandoId === id) cancelarEdicion();
             await deleteDoc(doc(db, 'orders', String(id)));
             mostrarToast('Orden eliminada');
@@ -390,37 +688,42 @@
     };
 
     window.enviarWhatsApp = function(id) {
+        if (currentRole === 'customer') return;
         const o = orders.find(item => item.id === id);
         if (!o) return;
 
         const info = STATUS_CONFIG[o.status] || STATUS_CONFIG['Pendiente'];
+        const sender = currentUserDoc ? currentUserDoc.name : 'Pedidos Dealer';
 
         let texto = `*ACTUALIZACION DE PEDIDO*\n` +
-                      `---------------------------\n` +
-                      `Taller: ${o.taller}\n` +
-                      `Pedido: ${o.pedido}\n` +
-                      `PO#: ${o.po || 'N/A'}\n`;
+                    `---------------------------\n` +
+                    `Taller: ${o.taller}\n` +
+                    `Pedido: ${o.pedido}\n` +
+                    `PO#: ${o.po || 'N/A'}\n`;
 
-        if(o.fechaEntrega) texto += `ENTREGA: ${fechaEs(o.fechaEntrega)}\n`;
+        if (o.fechaEntrega) texto += `ENTREGA: ${fechaEs(o.fechaEntrega)}\n`;
 
         texto += `DIA PEDIDO: ${fechaEs(o.fecha)}\n` +
-                      `ESTATUS: ${info.bolita} ${o.status.toUpperCase()}\n` +
-                      `---------------------------\n` +
-                      `${info.msg}\n\n` +
-                      `Enviado desde Control Ismael`;
+                 `ESTATUS: ${info.bolita} ${o.status.toUpperCase()}\n` +
+                 `---------------------------\n` +
+                 `${info.msg}\n\n` +
+                 `Enviado desde Pedidos Dealer - ${sender}`;
 
         window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
     };
 
     // --- Render ---
     function render() {
+        if (!currentUser || !currentRole) return;
+
         const list = document.getElementById('orderList');
-        const query = document.getElementById('searchInput').value.toLowerCase();
-        list.innerHTML = '';
+        if (!list) return;
+        const query = (document.getElementById('searchInput')?.value || '').toLowerCase();
 
-        renderContador();
+        const visible = getVisibleOrders();
+        renderContador(visible);
 
-        const filtradas = orders
+        const filtradas = visible
             .filter(o => {
                 if (filtroActual !== 'Todos' && o.status !== filtroActual) return false;
                 if (!query) return true;
@@ -428,7 +731,9 @@
                        o.pedido.toLowerCase().includes(query) ||
                        (o.po && o.po.toLowerCase().includes(query));
             })
-            .sort((a,b) => b.id - a.id);
+            .sort((a, b) => b.id - a.id);
+
+        list.innerHTML = '';
 
         if (filtradas.length === 0) {
             const msg = query ? 'Sin resultados para esa busqueda' :
@@ -436,60 +741,65 @@
                         'No hay ordenes todavia';
             list.innerHTML = `
                 <div class="empty-state">
-                    <div class="icon">📋</div>
+                    <div class="icon">\uD83D\uDCCB</div>
                     <p>${msg}</p>
                 </div>`;
             return;
         }
+
+        const isReadOnly = currentRole === 'customer';
 
         filtradas.forEach(o => {
             const cfg = STATUS_CONFIG[o.status] || STATUS_CONFIG['Pendiente'];
             const entregaInfo = o.fechaEntrega ? ` | Entrega: <b>${fechaEs(o.fechaEntrega)}</b>` : '';
             const esEditando = o.id === editandoId;
 
-            list.innerHTML += `
-                <div class="order-card ${cfg.clase}" ${esEditando ? 'style="outline: 2px solid var(--ios-purple);"' : ''}>
-                    <span class="taller-title">${esc(o.taller)}</span>
-                    <div class="details">
-                        Pedido: <b>${esc(o.pedido)}</b> | PO#: <b>${esc(o.po || '---')}</b><br>
-                        Pedido el: <b>${fechaEs(o.fecha)}</b>${entregaInfo}
-                    </div>
+            let html = `<div class="order-card ${cfg.clase}" ${esEditando ? 'style="outline: 2px solid var(--ios-purple);"' : ''}>
+                <span class="taller-title">${esc(o.taller)}</span>
+                <div class="details">
+                    Pedido: <b>${esc(o.pedido)}</b> | PO#: <b>${esc(o.po || '---')}</b><br>
+                    Pedido el: <b>${fechaEs(o.fecha)}</b>${entregaInfo}
+                </div>`;
 
-                    <select class="status-selector-mini" onchange="actualizarStatus(${o.id}, this.value)">
-                        <option value="Pendiente" ${o.status === 'Pendiente' ? 'selected' : ''}>⚪ Pendiente</option>
-                        <option value="Ordenado" ${o.status === 'Ordenado' ? 'selected' : ''}>🟡 Ordenado</option>
-                        <option value="Piezas en Tienda" ${o.status === 'Piezas en Tienda' ? 'selected' : ''}>🟠 Piezas en Tienda</option>
-                        <option value="En Tránsito" ${o.status === 'En Tránsito' ? 'selected' : ''}>🟣 En Tránsito</option>
-                        <option value="Listo para Recoger" ${o.status === 'Listo para Recoger' ? 'selected' : ''}>🔵 Listo para Recoger</option>
-                        <option value="Listo para Entrega" ${o.status === 'Listo para Entrega' ? 'selected' : ''}>📦 Listo para Entrega</option>
-                        <option value="Entregado" ${o.status === 'Entregado' ? 'selected' : ''}>✅ Entregado</option>
-                    </select>
+            if (isReadOnly) {
+                html += `<div style="margin-top:10px;padding:8px 12px;border-radius:8px;background:#F2F2F7;font-size:14px;font-weight:600;color:${cfg.color};">
+                    ${cfg.bolita} ${o.status}
+                </div></div>`;
+            } else {
+                html += `<select class="status-selector-mini" onchange="actualizarStatus(${o.id}, this.value)">
+                    ${Object.keys(STATUS_CONFIG).map(s =>
+                        `<option value="${s}" ${o.status === s ? 'selected' : ''}>${STATUS_CONFIG[s].bolita} ${s}</option>`
+                    ).join('')}
+                </select>
+                <div class="actions">
+                    <button class="btn-action btn-edit" onclick="editarOrden(${o.id})">&#9999;&#65039; Editar</button>
+                    <button class="btn-action btn-ws" onclick="enviarWhatsApp(${o.id})">&#128172; WhatsApp</button>
+                    <button class="btn-action btn-del" onclick="deleteOrder(${o.id})">&#128465;&#65039;</button>
+                </div></div>`;
+            }
 
-                    <div class="actions">
-                        <button class="btn-action btn-edit" onclick="editarOrden(${o.id})">✏️ Editar</button>
-                        <button class="btn-action btn-ws" onclick="enviarWhatsApp(${o.id})">💬 WhatsApp</button>
-                        <button class="btn-action btn-del" onclick="deleteOrder(${o.id})">🗑️</button>
-                    </div>
-                </div>
-            `;
+            list.innerHTML += html;
         });
     }
     window.render = render;
 
-    // --- Respaldo ---
+    // --- Backup ---
     window.exportarDatos = function() {
-        if (orders.length === 0) return mostrarToast('No hay ordenes para exportar');
-        const blob = new Blob([JSON.stringify(orders, null, 2)], { type: 'application/json' });
+        if (currentRole === 'customer') return;
+        const visible = getVisibleOrders();
+        if (visible.length === 0) return mostrarToast('No hay ordenes para exportar');
+        const blob = new Blob([JSON.stringify(visible, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = `pedidos_respaldo_${new Date().toISOString().split('T')[0]}.json`;
         a.click();
         URL.revokeObjectURL(url);
-        mostrarToast(`${orders.length} ordenes exportadas`);
+        mostrarToast(`${visible.length} ordenes exportadas`);
     };
 
     window.importarDatos = async function(event) {
+        if (!currentUser || currentRole === 'customer') return;
         const file = event.target.files[0];
         if (!file) return;
         const reader = new FileReader();
@@ -504,6 +814,7 @@
                 for (const o of nuevas) {
                     if (!o.status) o.status = o.llego ? 'Listo para Recoger' : 'Pendiente';
                     delete o.llego;
+                    if (!o.createdBy) o.createdBy = currentUser.uid;
                     await setDoc(doc(db, 'orders', String(o.id)), o);
                 }
                 mostrarToast(`${nuevas.length} ordenes importadas`);
@@ -515,16 +826,182 @@
         event.target.value = '';
     };
 
-    // --- Sync en tiempo real (Firestore → UI) ---
-    onSnapshot(ordersCol, (snapshot) => {
-        orders = snapshot.docs.map(d => d.data());
-        setSyncBadge(!snapshot.metadata.fromCache);
-        render();
-    }, () => {
-        setSyncBadge(false);
+    // --- Admin Panel ---
+    function getSecondaryAuth() {
+        if (!secondaryApp) {
+            secondaryApp = initializeApp(firebaseConfig, 'secondary');
+        }
+        return getAuth(secondaryApp);
+    }
+
+    window.toggleTallerField = function() {
+        const role = document.getElementById('newUserRole').value;
+        document.getElementById('newUserTallerRow').style.display = role === 'customer' ? 'flex' : 'none';
+    };
+
+    // Auto-generate email from name
+    document.getElementById('newUserName')?.addEventListener('input', function() {
+        const emailField = document.getElementById('newUserEmail');
+        if (emailField && !emailField.dataset.manual) {
+            const name = this.value.trim().toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/\s+/g, '.').replace(/[^a-z.]/g, '');
+            emailField.value = name ? name + '@pedidos.local' : '';
+        }
+    });
+    document.getElementById('newUserEmail')?.addEventListener('input', function() {
+        this.dataset.manual = 'true';
     });
 
-    // --- Migrar localStorage → Firestore (una sola vez) ---
+    window.crearUsuario = async function() {
+        if (currentRole !== 'admin') return;
+
+        const name = document.getElementById('newUserName').value.trim();
+        const empId = document.getElementById('newUserEmpId').value.trim();
+        const email = document.getElementById('newUserEmail').value.trim();
+        const role = document.getElementById('newUserRole').value;
+        const taller = document.getElementById('newUserTaller')?.value.trim() || '';
+        const pass = document.getElementById('newUserPass').value;
+
+        if (!name || !empId || !email || !pass) return alert('Llena Nombre, ID, Email y Clave');
+
+        try {
+            const secAuth = getSecondaryAuth();
+            const cred = await createUserWithEmailAndPassword(secAuth, email, pass);
+            await setDoc(doc(db, 'users', cred.user.uid), {
+                empId, name, email, role, taller,
+                createdAt: new Date().toISOString()
+            });
+            await signOut(secAuth);
+
+            mostrarToast(`Usuario ${name} creado`);
+
+            // Clear form
+            document.getElementById('newUserName').value = '';
+            document.getElementById('newUserEmpId').value = '';
+            document.getElementById('newUserEmail').value = '';
+            delete document.getElementById('newUserEmail').dataset.manual;
+            document.getElementById('newUserRole').value = 'worker';
+            document.getElementById('newUserTaller').value = '';
+            document.getElementById('newUserTallerRow').style.display = 'none';
+            document.getElementById('newUserPass').value = '';
+        } catch (e) {
+            if (e.code === 'auth/email-already-in-use') {
+                alert('Ese email ya esta registrado.');
+            } else {
+                alert('Error: ' + e.message);
+            }
+        }
+    };
+
+    function renderUsers() {
+        const list = document.getElementById('userList');
+        if (!list || currentRole !== 'admin') return;
+
+        if (allUsers.length === 0) {
+            list.innerHTML = '<p style="color:var(--ios-gray);font-size:13px;text-align:center;">No hay usuarios</p>';
+            return;
+        }
+
+        const sorted = [...allUsers].sort((a, b) => {
+            const roleOrder = { admin: 0, worker: 1, customer: 2 };
+            return (roleOrder[a.role] || 9) - (roleOrder[b.role] || 9);
+        });
+
+        list.innerHTML = sorted.map(u => {
+            const tallerHtml = u.role === 'customer'
+                ? `<div style="margin-top:4px;">
+                    <input type="text" class="taller-input" value="${esc(u.taller || '')}"
+                        placeholder="Asignar taller..."
+                        onchange="actualizarTaller('${u.uid}', this.value)">
+                   </div>`
+                : '';
+
+            return `<div class="user-card">
+                <div class="user-card-info">
+                    <div class="user-card-name">${esc(u.name)}</div>
+                    <div class="user-card-detail">ID: ${esc(u.empId || '---')} | ${esc(u.email || '---')}</div>
+                    ${tallerHtml}
+                </div>
+                <select class="user-card-role" onchange="cambiarRol('${u.uid}', this.value)">
+                    <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+                    <option value="worker" ${u.role === 'worker' ? 'selected' : ''}>Worker</option>
+                    <option value="customer" ${u.role === 'customer' ? 'selected' : ''}>Customer</option>
+                </select>
+            </div>`;
+        }).join('');
+    }
+
+    window.cambiarRol = async function(uid, newRole) {
+        if (currentRole !== 'admin') return;
+        await updateDoc(doc(db, 'users', uid), { role: newRole });
+        mostrarToast('Rol actualizado');
+    };
+
+    window.actualizarTaller = async function(uid, newTaller) {
+        if (currentRole !== 'admin') return;
+        await updateDoc(doc(db, 'users', uid), { taller: newTaller });
+        mostrarToast('Taller actualizado');
+    };
+
+    // --- Seed Users ---
+    const SEED_USERS = [
+        { empId: '2148', name: 'Ismael Bigio', email: 'ismael.bigio@pedidos.local', role: 'admin', taller: '' },
+        { empId: '2171', name: "Bigio's Boss", email: 'bigio.boss@pedidos.local', role: 'admin', taller: '' },
+        { empId: '2731', name: 'Untitled', email: 'untitled@pedidos.local', role: 'admin', taller: '' },
+        { empId: '2294', name: 'Reynaldo Morales', email: 'reynaldo.morales@pedidos.local', role: 'worker', taller: '' },
+        { empId: '2174', name: 'Jose Aviles', email: 'jose.aviles@pedidos.local', role: 'worker', taller: '' },
+        { empId: '2271', name: 'Patricia Oramas', email: 'patricia.oramas@pedidos.local', role: 'worker', taller: '' },
+        { empId: '1584', name: 'Wiridalis Liyida', email: 'wiridalis.liyida@pedidos.local', role: 'customer', taller: '' },
+    ];
+
+    window.seedUsers = async function() {
+        const seedPass = prompt('Clave inicial para todos los usuarios:');
+        if (!seedPass || seedPass.length < 6) return alert('La clave debe tener al menos 6 caracteres');
+
+        const logEl = document.getElementById('seedLog');
+        logEl.style.display = 'block';
+        logEl.textContent = '> Iniciando configuracion...\n';
+
+        for (const u of SEED_USERS) {
+            try {
+                const secAuth = getSecondaryAuth();
+                const cred = await createUserWithEmailAndPassword(secAuth, u.email, seedPass);
+                await setDoc(doc(db, 'users', cred.user.uid), {
+                    empId: u.empId, name: u.name, email: u.email,
+                    role: u.role, taller: u.taller,
+                    createdAt: new Date().toISOString()
+                });
+                await signOut(secAuth);
+                logEl.textContent += `  [OK] ${u.name} (${u.role})\n`;
+            } catch (e) {
+                if (e.code === 'auth/email-already-in-use') {
+                    logEl.textContent += `  [--] ${u.name} ya existe\n`;
+                } else {
+                    logEl.textContent += `  [!!] ${u.name}: ${e.message}\n`;
+                }
+            }
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        logEl.textContent += '\n> Listo! Ya puedes iniciar sesion.\n';
+    };
+
+    // Show seed section if ?setup in URL
+    if (window.location.search.includes('setup')) {
+        const seedSection = document.getElementById('seedSection');
+        if (seedSection) seedSection.style.display = 'block';
+    }
+
+    // --- Enter key on login ---
+    document.getElementById('loginPass')?.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') window.doLogin();
+    });
+    document.getElementById('loginUser')?.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') document.getElementById('loginPass').focus();
+    });
+
+    // --- Migrate localStorage to Firestore ---
     async function migrarLocalAFirestore() {
         let local = [];
         try { local = JSON.parse(localStorage.getItem('pwa_orders')) || []; } catch {}
@@ -541,6 +1018,7 @@
             if (!o.status) o.status = o.llego ? 'Listo para Recoger' : 'Pendiente';
             delete o.llego;
             if (!o.fechaEntrega) o.fechaEntrega = '';
+            if (!o.createdBy) o.createdBy = currentUser.uid;
             batch.set(doc(db, 'orders', String(o.id)), o);
         });
         await batch.commit();
@@ -549,11 +1027,33 @@
 
     // --- Service Worker ---
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js?v=17');
+        navigator.serviceWorker.register('sw.js?v=18');
     }
-
-    // --- Init ---
-    migrarLocalAFirestore();
 </script>
+
+<!--
+  FIRESTORE RULES (apply in Firebase Console > Firestore > Rules):
+
+  rules_version = '2';
+  service cloud.firestore {
+    match /databases/{database}/documents {
+
+      function userRole() {
+        return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+      }
+
+      match /orders/{orderId} {
+        allow read: if request.auth != null;
+        allow write: if request.auth != null && userRole() in ['admin', 'worker'];
+      }
+
+      match /users/{userId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null && request.auth.uid == userId;
+        allow update: if request.auth != null && userRole() == 'admin';
+      }
+    }
+  }
+-->
 </body>
 </html>
