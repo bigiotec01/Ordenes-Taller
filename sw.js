@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pedidos-v3.2.1';
+const CACHE_NAME = 'pedidos-v3.3.0';
 const assets = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', (e) => {
@@ -20,7 +20,13 @@ self.addEventListener('activate', (e) => {
 });
 
 // Estrategia network-first: intenta red, si falla usa cache
+// Skip caching for Firebase Storage URLs (images/PDFs)
 self.addEventListener('fetch', (e) => {
+  const url = e.request.url;
+  if (url.includes('firebasestorage.googleapis.com') || url.includes('firebasestorage.app')) {
+    e.respondWith(fetch(e.request));
+    return;
+  }
   e.respondWith(
     fetch(e.request)
       .then((response) => {
