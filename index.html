@@ -1,0 +1,2011 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Pedidos Dealer 3.3.0</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="./icon-512.png">
+    <link rel="manifest" href="manifest.json?v=22">
+    <meta name="theme-color" content="#F2F2F7">
+
+    <style>
+        :root {
+            --ios-blue: #007AFF; --ios-green: #34C759; --ios-bg: #F2F2F7;
+            --ios-card: #FFFFFF; --ios-text: #000000; --ios-gray: #8E8E93;
+            --ios-danger: #FF3B30; --ios-orange: #FF9500; --ios-purple: #5856D6;
+            --ios-yellow: #FFCC00; --ios-lightblue: #5AC8FA;
+        }
+
+        body {
+            font-family: -apple-system, sans-serif;
+            margin: 0; background: var(--ios-bg); color: var(--ios-text);
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: 80px;
+        }
+
+        .header {
+            background: rgba(242, 242, 247, 0.8); backdrop-filter: blur(20px);
+            padding: 54px 16px 10px 16px; position: sticky; top: 0; z-index: 100;
+            text-align: center;
+        }
+
+        .header-top {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 6px; text-align: left;
+        }
+        .user-info { display: flex; align-items: center; gap: 8px; }
+        .user-name { font-size: 15px; font-weight: 600; }
+        .role-badge {
+            padding: 2px 8px; border-radius: 6px; font-size: 11px;
+            font-weight: 700; text-transform: uppercase;
+        }
+        .role-admin { background: #EDE9FE; color: #5856D6; }
+        .role-worker { background: #D1FAE5; color: #065F46; }
+        .role-customer { background: #DBEAFE; color: #1D4ED8; }
+        .btn-logout {
+            background: none; border: 1px solid var(--ios-gray); color: var(--ios-gray);
+            padding: 4px 12px; border-radius: 8px; font-size: 13px; font-weight: 600;
+        }
+
+        h1 { margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -1px; }
+
+        .search-container { padding: 10px 16px 0; }
+        .search-bar {
+            background: #E3E3E8; border-radius: 10px; padding: 8px 12px;
+            display: flex; align-items: center;
+        }
+        .search-bar input {
+            border: none; background: transparent; width: 100%; font-size: 16px;
+            outline: none; margin-left: 8px; color: black;
+        }
+
+        .sync-badge {
+            display: inline-block; padding: 2px 8px; border-radius: 6px;
+            font-size: 11px; font-weight: 700; margin-left: 8px; vertical-align: middle;
+        }
+        .sync-online { background: #D1FAE5; color: #065F46; }
+        .sync-offline { background: #FEE2E2; color: #991B1B; }
+
+        .status-counter {
+            display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 16px 0;
+        }
+        .counter-chip {
+            display: flex; align-items: center; gap: 4px;
+            padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 600;
+            background: var(--ios-card); box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+        }
+        .counter-dot {
+            width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+        }
+
+        .filter-bar {
+            display: flex; gap: 6px; padding: 8px 16px; overflow-x: auto;
+            -webkit-overflow-scrolling: touch; scrollbar-width: none;
+        }
+        .filter-bar::-webkit-scrollbar { display: none; }
+        .filter-chip {
+            padding: 6px 12px; border-radius: 16px; font-size: 13px; font-weight: 600;
+            border: none; white-space: nowrap; background: #E3E3E8; color: var(--ios-gray);
+            flex-shrink: 0;
+        }
+        .filter-chip.active { background: var(--ios-blue); color: white; }
+
+        .container { padding: 16px; }
+
+        .ios-group {
+            background: var(--ios-card); border-radius: 12px;
+            margin-bottom: 25px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .ios-row {
+            display: flex; align-items: center; padding: 12px 16px; border-bottom: 0.5px solid #C6C6C8;
+        }
+
+        .ios-row:last-child { border-bottom: none; }
+        .ios-row label { width: 125px; font-size: 15px; color: var(--ios-text); }
+        .ios-row input, .ios-row select {
+            flex: 1; border: none; font-size: 17px; outline: none;
+            background: transparent; color: var(--ios-blue); font-weight: 500;
+        }
+
+        .main-btn {
+            width: 100%; color: white; border: none; padding: 14px;
+            border-radius: 12px; font-size: 17px; font-weight: 600; margin-bottom: 10px;
+        }
+        .btn-blue { background: var(--ios-blue); }
+        .btn-cancel {
+            width: 100%; border: 2px solid var(--ios-gray); background: transparent;
+            color: var(--ios-gray); padding: 12px; border-radius: 12px;
+            font-size: 15px; font-weight: 600; margin-bottom: 10px; display: none;
+        }
+
+        .order-card {
+            background: var(--ios-card); border-radius: 14px; padding: 16px;
+            margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border-left: 6px solid #ddd;
+        }
+
+        .st-aprobacion { border-left-color: #AF52DE !important; background: #F9F0FF; }
+        .st-ordenado { border-left-color: var(--ios-yellow) !important; }
+        .st-backorder { border-left-color: #FF2D55 !important; background: #FFF0F3; }
+        .st-tienda { border-left-color: var(--ios-orange) !important; background: #FFF9F0; }
+        .st-transito { border-left-color: var(--ios-purple) !important; }
+        .st-listo-recoger { border-left-color: var(--ios-blue) !important; background: #F0F9FF; }
+        .st-listo-entrega { border-left-color: var(--ios-lightblue) !important; background: #F2FBFF; }
+        .st-entregado { border-left-color: var(--ios-green) !important; opacity: 0.6; }
+
+        .taller-title { font-size: 19px; font-weight: 600; margin-bottom: 8px; display: block; }
+
+        .status-selector-mini {
+            width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #E5E5EA;
+            background: #F2F2F7; font-size: 14px; font-weight: 600; margin-top: 10px;
+            color: var(--ios-text);
+        }
+
+        .details { font-size: 14px; color: var(--ios-gray); line-height: 1.4; }
+        .details b { color: #333; }
+        .created-by { font-size: 11px; color: var(--ios-purple); margin-top: 4px; font-weight: 600; }
+
+        .actions { display: flex; gap: 8px; margin-top: 15px; border-top: 0.5px solid #E5E5EA; padding-top: 12px; }
+        .btn-action { flex: 1; border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; }
+        .btn-ws { background: #E7F9ED; color: var(--ios-green); }
+        .btn-edit { background: #EDE9FE; color: var(--ios-purple); }
+        .btn-del { background: #FFEBEB; color: var(--ios-danger); }
+
+        .empty-state {
+            text-align: center; padding: 40px 20px; color: var(--ios-gray);
+        }
+        .empty-state .icon { font-size: 48px; margin-bottom: 10px; }
+        .empty-state p { font-size: 15px; margin: 0; }
+
+        .toast {
+            position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+            background: #333; color: white; padding: 12px 24px; border-radius: 10px;
+            font-size: 15px; font-weight: 600; z-index: 200; opacity: 0;
+            transition: opacity 0.3s ease; pointer-events: none;
+        }
+        .toast.show { opacity: 1; }
+
+        .backup-row {
+            display: flex; gap: 8px; margin-bottom: 20px;
+        }
+        .btn-backup {
+            flex: 1; border: none; padding: 10px; border-radius: 10px;
+            font-size: 13px; font-weight: 600; background: #E9E9EB; color: var(--ios-text);
+        }
+
+        .footer { text-align: center; color: var(--ios-gray); font-size: 12px; padding: 20px; }
+
+        /* ===== Login Screen ===== */
+        #loginScreen {
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh; min-height: 100dvh;
+            background: var(--ios-bg); padding: 20px;
+        }
+        .login-box { width: 100%; max-width: 380px; }
+        .login-icon { text-align: center; font-size: 56px; margin-bottom: 8px; }
+        .login-title {
+            text-align: center; font-size: 28px; font-weight: 700;
+            margin: 0 0 4px; letter-spacing: -0.5px;
+        }
+        .login-subtitle {
+            text-align: center; color: var(--ios-gray); font-size: 15px; margin: 0 0 20px;
+        }
+        .login-error {
+            color: var(--ios-danger); text-align: center; font-size: 14px;
+            font-weight: 600; min-height: 20px; margin: 8px 0 0; display: none;
+        }
+        .login-hint {
+            text-align: center; color: var(--ios-gray); font-size: 12px; margin: 8px 0 0;
+        }
+
+        /* ===== Tab Bar ===== */
+        .tab-bar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            display: flex; background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px); border-top: 0.5px solid #C6C6C8;
+            padding: 6px 0 env(safe-area-inset-bottom, 6px);
+            z-index: 100;
+        }
+        .tab-btn {
+            flex: 1; border: none; background: none; padding: 6px 0;
+            font-size: 11px; font-weight: 600; color: var(--ios-gray);
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+        }
+        .tab-btn.active { color: var(--ios-blue); }
+        .tab-icon { font-size: 22px; line-height: 1; }
+
+        /* ===== Admin Panel ===== */
+        .section-title {
+            font-size: 19px; font-weight: 700; margin: 0 0 12px; display: flex;
+            align-items: center; gap: 8px;
+        }
+        .stat-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;
+        }
+        .stat-card {
+            background: var(--ios-card); border-radius: 12px; padding: 14px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .stat-card.wide { grid-column: 1 / -1; }
+        .stat-number { font-size: 28px; font-weight: 700; letter-spacing: -1px; }
+        .stat-label { font-size: 12px; color: var(--ios-gray); font-weight: 600; margin-top: 2px; }
+        .stat-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 0; border-bottom: 0.5px solid #E5E5EA;
+        }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-row-name { font-size: 14px; font-weight: 500; }
+        .stat-row-count { font-size: 14px; font-weight: 700; color: var(--ios-blue); }
+
+        .user-card {
+            background: var(--ios-card); border-radius: 12px; padding: 14px 16px;
+            margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .user-card-info { flex: 1; }
+        .user-card-name { font-size: 15px; font-weight: 600; }
+        .user-card-detail { font-size: 12px; color: var(--ios-gray); margin-top: 2px; }
+        .user-card-role {
+            width: 110px; padding: 6px 8px; border-radius: 8px; border: 1px solid #E5E5EA;
+            background: #F2F2F7; font-size: 13px; font-weight: 600; color: var(--ios-text);
+        }
+        .taller-input {
+            border: 1px solid #E5E5EA; border-radius: 6px; padding: 4px 8px;
+            font-size: 12px; width: 140px; margin-top: 4px; color: var(--ios-blue);
+        }
+
+        /* ===== Attachments ===== */
+        .attachment-section {
+            border-top: 0.5px solid #E5E5EA; margin-top: 12px; padding-top: 10px;
+        }
+        .attachment-section-label {
+            font-size: 12px; color: var(--ios-gray); font-weight: 600; margin-bottom: 6px;
+            cursor: pointer; display: flex; align-items: center; gap: 4px;
+            user-select: none; -webkit-user-select: none;
+        }
+        .attachment-section-label .toggle-arrow {
+            font-size: 10px; transition: transform 0.2s;
+        }
+        .attachment-section-label .toggle-arrow.open { transform: rotate(90deg); }
+
+        /* ===== Notes ===== */
+        .notes-section {
+            border-top: 0.5px solid #E5E5EA; margin-top: 10px; padding-top: 8px;
+        }
+        .notes-toggle {
+            font-size: 12px; color: var(--ios-gray); font-weight: 600;
+            cursor: pointer; display: flex; align-items: center; gap: 4px;
+            user-select: none; -webkit-user-select: none;
+        }
+        .notes-toggle .toggle-arrow { font-size: 10px; transition: transform 0.2s; }
+        .notes-toggle .toggle-arrow.open { transform: rotate(90deg); }
+        .notes-body { margin-top: 6px; }
+        .notes-display {
+            font-size: 13px; color: #333; background: #FFF9E6; border-radius: 8px;
+            padding: 8px 10px; white-space: pre-wrap; word-break: break-word;
+            border: 1px solid #F0E6C0;
+        }
+        .notes-empty { font-size: 12px; color: #C7C7CC; font-style: italic; }
+        .notes-textarea {
+            width: 100%; min-height: 60px; border-radius: 8px; border: 1px solid #E5E5EA;
+            padding: 8px 10px; font-size: 13px; font-family: inherit; resize: vertical;
+            background: #FFFEF5; box-sizing: border-box;
+        }
+        .notes-textarea:focus { outline: none; border-color: var(--ios-blue); }
+        .notes-actions { display: flex; gap: 8px; margin-top: 6px; }
+        .notes-btn {
+            font-size: 12px; font-weight: 600; border: none; border-radius: 6px;
+            padding: 5px 12px; cursor: pointer;
+        }
+        .notes-btn-save { background: var(--ios-blue); color: #fff; }
+        .notes-btn-cancel { background: #E5E5EA; color: #333; }
+
+        .attachment-grid {
+            display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+        }
+        .attachment-thumb {
+            width: 72px; height: 72px; border-radius: 10px; object-fit: cover;
+            cursor: pointer; border: 1px solid #E5E5EA; position: relative;
+        }
+        .attachment-thumb-wrap {
+            position: relative; display: inline-block;
+        }
+        .attachment-pdf-thumb {
+            width: 72px; height: 72px; border-radius: 10px; border: 1px solid #E5E5EA;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: #F9F9F9; cursor: pointer; font-size: 10px; color: var(--ios-gray);
+            font-weight: 600; text-align: center; overflow: hidden; padding: 4px;
+        }
+        .attachment-pdf-thumb .pdf-icon { font-size: 28px; line-height: 1; }
+        .attachment-delete {
+            position: absolute; top: -6px; right: -6px; width: 22px; height: 22px;
+            border-radius: 50%; background: var(--ios-danger); color: white;
+            font-size: 13px; font-weight: 700; border: 2px solid white;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; line-height: 1; z-index: 2;
+        }
+        .attachment-add-btn {
+            width: 72px; height: 72px; border-radius: 10px; border: 2px dashed #C6C6C8;
+            background: none; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; font-size: 24px; color: var(--ios-gray); cursor: pointer;
+            gap: 2px;
+        }
+        .attachment-add-btn span { font-size: 10px; font-weight: 600; }
+
+        .lightbox {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.92); z-index: 300; display: none;
+            align-items: center; justify-content: center; flex-direction: column;
+        }
+        .lightbox.open { display: flex; }
+        .lightbox img {
+            max-width: 95vw; max-height: 85vh; border-radius: 8px; object-fit: contain;
+        }
+        .lightbox-close {
+            position: absolute; top: 50px; right: 16px; background: rgba(255,255,255,0.2);
+            border: none; color: white; font-size: 28px; width: 44px; height: 44px;
+            border-radius: 50%; cursor: pointer; display: flex; align-items: center;
+            justify-content: center; z-index: 301;
+        }
+
+        .form-attach-row {
+            display: flex; gap: 8px; margin-bottom: 8px;
+        }
+        .btn-camera, .btn-attach {
+            flex: 1; border: none; padding: 10px; border-radius: 10px;
+            font-size: 14px; font-weight: 600; display: flex; align-items: center;
+            justify-content: center; gap: 6px;
+        }
+        .btn-camera { background: #E7F9ED; color: var(--ios-green); }
+        .btn-attach { background: #EDE9FE; color: var(--ios-purple); }
+
+        .pending-files {
+            display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;
+        }
+        .pending-file-chip {
+            display: flex; align-items: center; gap: 4px; padding: 4px 10px;
+            border-radius: 8px; background: #F2F2F7; font-size: 12px; font-weight: 600;
+            color: var(--ios-text); max-width: 180px;
+        }
+        .pending-file-chip .file-name {
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .pending-file-chip .remove-file {
+            background: none; border: none; color: var(--ios-danger); font-size: 14px;
+            font-weight: 700; cursor: pointer; padding: 0; line-height: 1;
+        }
+
+        .upload-progress {
+            height: 3px; background: #E5E5EA; border-radius: 2px; margin-bottom: 8px;
+            overflow: hidden; display: none;
+        }
+        .upload-progress-bar {
+            height: 100%; background: var(--ios-blue); border-radius: 2px;
+            transition: width 0.2s ease; width: 0%;
+        }
+
+        /* ===== Seed Section ===== */
+        .seed-log {
+            background: #1a1a1a; color: #34C759; padding: 12px; border-radius: 10px;
+            font-size: 12px; font-family: 'SF Mono', monospace; white-space: pre-wrap;
+            max-height: 220px; overflow-y: auto; margin-top: 12px;
+        }
+
+        /* ===== Sidebar layout: mobile defaults (transparent, stacked) ===== */
+        .desktop-layout { display: block; }
+        .sidebar { background: transparent; }
+        .sidebar-section {
+            background: transparent; border-radius: 0; padding: 0;
+            margin: 0; box-shadow: none;
+        }
+        .sidebar-section-title { display: none; }
+        .main-content { display: block; }
+        #formSection { padding: 0 16px; }
+        .sidebar .backup-row { padding: 0 16px; margin-bottom: 8px; }
+        #orderList { margin-top: 16px; }
+
+        /* ===== Desktop (768px+) — Sidebar Layout ===== */
+        @media (min-width: 768px) {
+            body { padding-bottom: 60px; }
+
+            /* Compact header */
+            .header {
+                max-width: none; margin: 0; padding: 12px 28px 10px;
+                border-bottom: 0.5px solid #C6C6C8;
+            }
+            .header h1 { font-size: 26px; }
+
+            /* Two-column layout */
+            .desktop-layout {
+                display: flex;
+                align-items: flex-start;
+            }
+
+            /* LEFT SIDEBAR */
+            .sidebar {
+                width: 300px;
+                min-width: 270px;
+                max-width: 320px;
+                flex-shrink: 0;
+                position: sticky;
+                top: 112px;
+                max-height: calc(100vh - 112px);
+                overflow-y: auto;
+                background: #E8E8ED;
+                border-right: 0.5px solid #C6C6C8;
+                padding: 14px 12px 80px;
+                box-sizing: border-box;
+                scrollbar-width: thin;
+            }
+            .sidebar::-webkit-scrollbar { width: 4px; }
+            .sidebar::-webkit-scrollbar-thumb { background: #C6C6C8; border-radius: 4px; }
+
+            .sidebar-section {
+                background: var(--ios-card);
+                border-radius: 14px;
+                padding: 14px;
+                margin-bottom: 12px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+            }
+
+            .sidebar-section-title {
+                display: block;
+                font-size: 10px;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.7px;
+                color: var(--ios-gray);
+                margin-bottom: 10px;
+            }
+
+            /* Adjust elements inside sidebar */
+            .sidebar .search-container { padding: 0; }
+            .sidebar .search-bar { background: #F2F2F7; }
+            .sidebar .status-counter { padding: 0 0 6px; flex-wrap: wrap; }
+            .sidebar .filter-bar {
+                padding: 0; flex-wrap: wrap; overflow: visible; gap: 5px;
+                justify-content: flex-start;
+            }
+            .sidebar #formSection { padding: 0; }
+            .sidebar .backup-row { padding: 0; margin: 0; }
+            .sidebar .main-btn { font-size: 15px; padding: 12px; }
+            .sidebar .ios-row label { font-size: 13px; width: 110px; }
+            .sidebar .ios-row input,
+            .sidebar .ios-row select { font-size: 14px; }
+
+            /* RIGHT MAIN CONTENT */
+            .main-content {
+                flex: 1;
+                padding: 16px 20px;
+                min-width: 0;
+            }
+
+            #orderList {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 14px;
+                margin-top: 0;
+            }
+            #orderList .order-card { margin-bottom: 0; }
+            #orderList .empty-state { grid-column: 1 / -1; }
+
+            /* Tab bar floats centered at bottom */
+            .tab-bar {
+                left: 50%; right: auto; transform: translateX(-50%);
+                width: 320px; border-radius: 14px 14px 0 0;
+                border: 0.5px solid #C6C6C8; border-bottom: none;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== LOGIN SCREEN ===== -->
+<div id="loginScreen">
+    <div class="login-box">
+        <div class="login-icon">&#128203;</div>
+        <h2 class="login-title">Pedidos Dealer</h2>
+        <p class="login-subtitle">Inicia sesion para continuar</p>
+        <div class="ios-group">
+            <div class="ios-row">
+                <label>Usuario</label>
+                <input type="text" id="loginUser" placeholder="nombre.apellido" autocapitalize="none" autocorrect="off" spellcheck="false">
+            </div>
+            <div class="ios-row">
+                <label>Clave</label>
+                <input type="password" id="loginPass" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;">
+            </div>
+        </div>
+        <button class="main-btn btn-blue" id="btnLogin" onclick="doLogin()">Iniciar Sesion</button>
+        <p id="loginError" class="login-error"></p>
+        <p class="login-hint">Ingrese su usuario y clave<br>Support: bigio_tec@me.com</p>
+
+        <div id="seedSection" style="display:none;margin-top:24px;">
+            <button class="main-btn" style="background:var(--ios-purple);" onclick="seedUsers()">Configurar Usuarios Iniciales</button>
+            <div id="seedLog" class="seed-log" style="display:none;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== APP CONTENT ===== -->
+<div id="appContent" style="display:none">
+
+    <div class="header">
+        <div class="header-top">
+            <div class="user-info">
+                <span id="userName" class="user-name"></span>
+                <span id="userRoleBadge" class="role-badge"></span>
+            </div>
+            <button class="btn-logout" onclick="doLogout()">Salir</button>
+        </div>
+        <h1>&#128230; Pedidos Dealer &#128230;</h1>
+        <div style="margin-top:4px;"><span id="syncBadge" class="sync-badge sync-offline">offline</span></div>
+    </div>
+
+    <!-- ===== TAB: ORDENES ===== -->
+    <div id="tabOrdenes">
+        <div class="desktop-layout">
+
+            <!-- ===== SIDEBAR (izquierda en desktop) ===== -->
+            <aside class="sidebar">
+
+                <!-- FILTROS -->
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Filtros</div>
+                    <div id="statusCounter" class="status-counter"></div>
+                    <div id="filterBar" class="filter-bar">
+                        <button class="filter-chip active" onclick="setFilter('Todos')">Todos</button>
+                        <button class="filter-chip" onclick="setFilter('Espera de Aprobacion')">&#9995; Aprobacion</button>
+                        <button class="filter-chip" onclick="setFilter('Ordenado')">&#11088; Ordenado</button>
+                        <button class="filter-chip" onclick="setFilter('Backorder')">&#9888; Backorder</button>
+                        <button class="filter-chip" onclick="setFilter('Piezas en Tienda')">&#9881; Tienda</button>
+                        <button class="filter-chip" onclick="setFilter('En Tránsito')">&#10145; Transito</button>
+                        <button class="filter-chip" onclick="setFilter('Listo para Recoger')">&#9745; Recoger</button>
+                        <button class="filter-chip" onclick="setFilter('Listo para Entrega')">&#11014; Entrega</button>
+                        <button class="filter-chip" onclick="setFilter('Entregado')">&#9989; Entregado</button>
+                    </div>
+                </div>
+
+                <!-- BUSCADOR -->
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Buscador</div>
+                    <div class="search-container">
+                        <div class="search-bar">
+                            <span>&#128269;</span>
+                            <input type="text" id="searchInput" placeholder="Buscar taller, pedido o PO..." oninput="render()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NUEVA ORDEN -->
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Nueva Orden</div>
+                    <div id="formSection">
+                        <div class="ios-group">
+                            <div class="ios-row"><label>Taller</label><input type="text" id="taller" placeholder="Ej. Morales"></div>
+                            <div class="ios-row"><label>Pedido</label><input type="text" id="pedido" placeholder="Ej. M-100"></div>
+                            <div class="ios-row"><label>PO#</label><input type="text" id="po" placeholder="Opcional"></div>
+                            <div class="ios-row"><label>Dia de Pedido</label><input type="date" id="fecha"></div>
+                            <div class="ios-row"><label>Dia de Entrega</label><input type="date" id="fechaEntrega"></div>
+                            <div class="ios-row">
+                                <label>Estatus</label>
+                                <select id="status">
+                                    <option value="Espera de Aprobacion">Espera de Aprobacion</option>
+                                    <option value="Ordenado">Ordenado</option>
+                                    <option value="Backorder">Backorder</option>
+                                    <option value="Piezas en Tienda">Piezas en Tienda</option>
+                                    <option value="En Tránsito">En Tránsito</option>
+                                    <option value="Listo para Recoger">Listo para Recoger</option>
+                                    <option value="Listo para Entrega">Listo para Entrega</option>
+                                    <option value="Entregado">Entregado</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-attach-row">
+                            <button type="button" class="btn-camera" onclick="capturePhoto()">&#128247; Foto</button>
+                            <button type="button" class="btn-attach" onclick="pickFile()">&#128206; Archivo</button>
+                            <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleFileSelect(event)">
+                            <input type="file" id="fileInput" accept="image/*,application/pdf" multiple style="display:none" onchange="handleFileSelect(event)">
+                        </div>
+                        <div id="pendingFiles" class="pending-files"></div>
+                        <div id="uploadProgress" class="upload-progress"><div id="uploadProgressBar" class="upload-progress-bar"></div></div>
+                        <button id="btnGuardar" class="main-btn btn-blue" onclick="guardarOrden()">Guardar Nueva Orden</button>
+                        <button id="btnCancelar" class="btn-cancel" onclick="cancelarEdicion()">Cancelar Edicion</button>
+                    </div>
+                </div>
+
+                <!-- RESPALDO -->
+                <div id="backupSection" class="backup-row">
+                    <button class="btn-backup" onclick="exportarDatos()">&#128229; Exportar</button>
+                    <button class="btn-backup" onclick="document.getElementById('importFile').click()">&#128228; Importar</button>
+                    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importarDatos(event)">
+                </div>
+
+            </aside>
+
+            <!-- ===== MAIN: Lista de Ordenes ===== -->
+            <main class="main-content">
+                <div id="orderList"></div>
+                <footer class="footer">v3.3.0 | Pedidos Dealer</footer>
+            </main>
+
+        </div>
+    </div>
+
+    <!-- ===== TAB: INVENTARIO ===== -->
+    <div id="tabInventario" style="display:none">
+        <div class="search-container">
+            <div class="search-bar">
+                <span>&#128269;</span>
+                <input type="text" id="adminSearchInput" placeholder="Buscar taller, pedido, PO o trabajador..." oninput="renderAdminOrders()">
+            </div>
+        </div>
+        <div class="container">
+            <div style="margin-bottom:16px;">
+                <div class="section-title" style="cursor:pointer;" onclick="toggleAdminSection('adminStatsWrap')">&#128200; Resumen <span id="adminStatsToggle" style="font-size:14px;color:var(--ios-gray);">&#9660;</span></div>
+                <div id="adminStatsWrap" style="display:none;">
+                    <div id="adminStats" class="stat-grid"></div>
+                </div>
+            </div>
+            <div id="adminOrderList"></div>
+        </div>
+        <footer class="footer">v3.3.0 | Pedidos Dealer</footer>
+    </div>
+
+    <!-- ===== TAB: ADMIN ===== -->
+    <div id="tabAdmin" style="display:none">
+        <div class="container">
+            <div class="section-title">&#128101; Usuarios</div>
+            <div class="ios-group">
+                <div class="ios-row"><label>Nombre</label><input type="text" id="newUserName" placeholder="Nombre completo"></div>
+                <div class="ios-row"><label>ID Empleado</label><input type="text" id="newUserEmpId" placeholder="Ej. 2148"></div>
+                <div class="ios-row"><label>Email</label><input type="text" id="newUserEmail" placeholder="Email" autocapitalize="none"></div>
+                <div class="ios-row">
+                    <label>Rol</label>
+                    <select id="newUserRole" onchange="toggleTallerField()">
+                        <option value="worker">Worker</option>
+                        <option value="customer">Customer</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="ios-row" id="newUserTallerRow" style="display:none">
+                    <label>Taller</label>
+                    <input type="text" id="newUserTaller" placeholder="Nombre del taller">
+                </div>
+                <div class="ios-row"><label>Clave</label><input type="password" id="newUserPass" placeholder="Clave del usuario"></div>
+            </div>
+            <button class="main-btn btn-blue" onclick="crearUsuario()">Crear Usuario</button>
+            <div id="userList" style="margin-top: 16px;"></div>
+        </div>
+        <footer class="footer">v3.3.0 | Pedidos Dealer</footer>
+    </div>
+
+    <!-- ===== BOTTOM TAB BAR ===== -->
+    <div id="tabBar" class="tab-bar" style="display:none;">
+        <button class="tab-btn active" id="tabBtnOrdenes" onclick="switchTab('ordenes')">
+            <span class="tab-icon">&#128203;</span>
+            Mis Ordenes
+        </button>
+        <button class="tab-btn" id="tabBtnInventario" onclick="switchTab('inventario')">
+            <span class="tab-icon">&#128230;</span>
+            Inventario
+        </button>
+        <button class="tab-btn" id="tabBtnAdmin" onclick="switchTab('admin')">
+            <span class="tab-icon">&#9881;&#65039;</span>
+            Admin
+        </button>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<div id="lightbox" class="lightbox" onclick="closeLightbox()">
+    <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+    <img id="lightboxImg" src="" alt="Attachment">
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import {
+        getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+        onAuthStateChanged, signOut
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import {
+        getFirestore, collection, doc, setDoc, getDoc, deleteDoc, updateDoc,
+        onSnapshot, getDocs, writeBatch, enableIndexedDbPersistence
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import {
+        getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+    // --- Firebase ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyA84JgJHrziYRF90W6kpilfEKwGtqOf_6A",
+        authDomain: "ordenes-taller-f35bb.firebaseapp.com",
+        projectId: "ordenes-taller-f35bb",
+        storageBucket: "ordenes-taller-f35bb.firebasestorage.app",
+        messagingSenderId: "444016011348",
+        appId: "1:444016011348:web:26d9a64d3accffd5e1e5c1"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const storage = getStorage(app);
+    enableIndexedDbPersistence(db).catch(() => {});
+    const ordersCol = collection(db, 'orders');
+    const usersCol = collection(db, 'users');
+
+    // --- State ---
+    let orders = [];
+    let allUsers = [];
+    let editandoId = null;
+    let filtroActual = 'Todos';
+    let currentUser = null;
+    let currentUserDoc = null;
+    let currentRole = null;
+    let unsubOrders = null;
+    let unsubUsers = null;
+    let secondaryApp = null;
+    let activeTab = 'ordenes';
+    let pendingFiles = [];
+
+    // --- Status Config ---
+    const STATUS_CONFIG = {
+        'Espera de Aprobacion':   { clase: 'st-aprobacion',       color: '#AF52DE', bolita: '\u270B', msg: 'Su orden esta en espera de aprobacion.' },
+        'Ordenado':               { clase: 'st-ordenado',         color: '#FFCC00', bolita: '\u2B50', msg: 'Su pieza ya ha sido ordenada a fabrica.' },
+        'Backorder':              { clase: 'st-backorder',        color: '#FF2D55', bolita: '\u26A0', msg: 'La pieza esta en backorder. Estamos pendientes de disponibilidad.' },
+        'Piezas en Tienda':       { clase: 'st-tienda',           color: '#FF9500', bolita: '\u2699', msg: 'Las piezas ya se encuentran fisicamente en la tienda.' },
+        'En Tránsito':            { clase: 'st-transito',         color: '#5856D6', bolita: '\u27A1', msg: 'Su Orden ya viene de camino al dealer.' },
+        'Listo para Recoger':     { clase: 'st-listo-recoger',    color: '#007AFF', bolita: '\u2611', msg: 'La pieza ya llego y esta lista para recoger.' },
+        'Listo para Entrega':     { clase: 'st-listo-entrega',    color: '#5AC8FA', bolita: '\u2B06', msg: 'La pieza esta lista para ser entregada.' },
+        'Entregado':              { clase: 'st-entregado',        color: '#34C759', bolita: '\u2705', msg: 'Confirmamos que la pieza ha sido entregada.' }
+    };
+
+    // --- Utilities ---
+    function esc(str) {
+        const d = document.createElement('div');
+        d.textContent = str;
+        return d.innerHTML;
+    }
+
+    const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    function fechaEs(str) {
+        if (!str) return '---';
+        const [y, m, d] = str.split('-');
+        if (!y || !m || !d) return str;
+        return `${parseInt(d)}/${MESES[parseInt(m)-1]}/${y}`;
+    }
+
+    function mostrarToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    function setSyncBadge(online) {
+        const b = document.getElementById('syncBadge');
+        if (!b) return;
+        b.textContent = online ? 'sync' : 'offline';
+        b.className = 'sync-badge ' + (online ? 'sync-online' : 'sync-offline');
+    }
+
+    function getDocId(orderId) {
+        const o = orders.find(x => String(x.id) === String(orderId));
+        return o?._docId || String(orderId);
+    }
+
+    function getCreatorName(uid) {
+        if (!uid) return 'Sistema';
+        const u = allUsers.find(x => x.uid === uid);
+        return u ? u.name : 'Desconocido';
+    }
+
+    // --- Tab Navigation ---
+    window.switchTab = function(tab) {
+        activeTab = tab;
+        document.getElementById('tabOrdenes').style.display = tab === 'ordenes' ? 'block' : 'none';
+        document.getElementById('tabInventario').style.display = tab === 'inventario' ? 'block' : 'none';
+        document.getElementById('tabAdmin').style.display = tab === 'admin' ? 'block' : 'none';
+
+        document.getElementById('tabBtnOrdenes').classList.toggle('active', tab === 'ordenes');
+        document.getElementById('tabBtnInventario').classList.toggle('active', tab === 'inventario');
+        document.getElementById('tabBtnAdmin').classList.toggle('active', tab === 'admin');
+
+        if (tab === 'inventario') { renderAdminStats(); renderAdminOrders(); }
+        if (tab === 'admin') renderUsers();
+    };
+
+    window.toggleAdminSection = function(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const isHidden = el.style.display === 'none';
+        el.style.display = isHidden ? 'block' : 'none';
+        const toggleEl = document.getElementById(id.replace('Wrap', 'Toggle'));
+        if (toggleEl) toggleEl.innerHTML = isHidden ? '&#9650;' : '&#9660;';
+    };
+
+    window.toggleAttachments = function(id) {
+        const grid = document.getElementById(id);
+        const arrow = document.getElementById('arrow-' + id);
+        if (!grid) return;
+        const isHidden = grid.style.display === 'none';
+        grid.style.display = isHidden ? 'flex' : 'none';
+        if (arrow) arrow.classList.toggle('open', isHidden);
+    };
+
+    // --- Notes ---
+    window.toggleNotes = function(id) {
+        const body = document.getElementById(id);
+        const arrow = document.getElementById('arrow-' + id);
+        if (!body) return;
+        const isHidden = body.style.display === 'none';
+        body.style.display = isHidden ? 'block' : 'none';
+        if (arrow) arrow.classList.toggle('open', isHidden);
+    };
+
+    window.editNote = function(orderId) {
+        const notesId = `notes-${orderId}`;
+        document.getElementById(`view-${notesId}`).style.display = 'none';
+        document.getElementById(`edit-${notesId}`).style.display = 'block';
+        document.getElementById(`textarea-${notesId}`).focus();
+    };
+
+    window.cancelNote = function(orderId) {
+        const notesId = `notes-${orderId}`;
+        const order = orders.find(o => String(o.id) === String(orderId));
+        document.getElementById(`textarea-${notesId}`).value = order?.notes || '';
+        document.getElementById(`edit-${notesId}`).style.display = 'none';
+        document.getElementById(`view-${notesId}`).style.display = 'block';
+    };
+
+    window.saveNote = async function(orderId) {
+        const notesId = `notes-${orderId}`;
+        const textarea = document.getElementById(`textarea-${notesId}`);
+        const text = textarea.value.trim();
+        try {
+            await updateDoc(doc(db, 'orders', getDocId(orderId)), { notes: text });
+            mostrarToast('Nota guardada');
+        } catch {
+            mostrarToast('No se pudo guardar la nota');
+        }
+    };
+
+    // --- Auth State ---
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            try {
+                const userDocSnap = await getDoc(doc(db, 'users', user.uid));
+                if (userDocSnap.exists()) {
+                    currentUser = user;
+                    currentUserDoc = userDocSnap.data();
+                    currentRole = currentUserDoc.role;
+                    showApp();
+                } else {
+                    // Auto-recover seed users whose Firestore doc is missing
+                    const seedMatch = SEED_USERS.find(s => s.email === user.email);
+                    if (seedMatch) {
+                        const recoveredDoc = {
+                            empId: seedMatch.empId, name: seedMatch.name,
+                            email: seedMatch.email, role: seedMatch.role,
+                            taller: seedMatch.taller,
+                            createdAt: new Date().toISOString()
+                        };
+                        await setDoc(doc(db, 'users', user.uid), recoveredDoc);
+                        currentUser = user;
+                        currentUserDoc = recoveredDoc;
+                        currentRole = recoveredDoc.role;
+                        showApp();
+                    } else {
+                        await signOut(auth);
+                        showLoginError('Usuario no configurado. Contacte al administrador.');
+                    }
+                }
+            } catch (e) {
+                currentUser = user;
+                showLoginError('Error al verificar usuario. Verifique conexion.');
+            }
+        } else {
+            currentUser = null;
+            currentUserDoc = null;
+            currentRole = null;
+            stopListening();
+            showLogin();
+        }
+    });
+
+    window.doLogin = async function() {
+        const userInput = document.getElementById('loginUser').value.trim();
+        const pass = document.getElementById('loginPass').value;
+        if (!userInput || !pass) return showLoginError('Ingrese usuario y clave');
+
+        const email = userInput.includes('@') ? userInput : userInput + '@pedidos.local';
+        const btn = document.getElementById('btnLogin');
+        btn.textContent = 'Entrando...';
+        btn.disabled = true;
+
+        try {
+            await signInWithEmailAndPassword(auth, email, pass);
+            hideLoginError();
+        } catch (e) {
+            if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
+                showLoginError('Usuario o clave incorrecta');
+            } else if (e.code === 'auth/too-many-requests') {
+                showLoginError('Demasiados intentos. Espere un momento.');
+            } else {
+                showLoginError('Error de conexion. Intente de nuevo.');
+            }
+        } finally {
+            btn.textContent = 'Iniciar Sesion';
+            btn.disabled = false;
+        }
+    };
+
+    window.doLogout = async function() {
+        stopListening();
+        cancelarEdicion();
+        await signOut(auth);
+    };
+
+    function showApp() {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('appContent').style.display = 'block';
+
+        // Update user bar
+        document.getElementById('userName').textContent = currentUserDoc.name;
+        const badge = document.getElementById('userRoleBadge');
+        badge.textContent = currentRole;
+        badge.className = 'role-badge role-' + currentRole;
+
+        // Role-based visibility
+        document.getElementById('formSection').style.display = currentRole === 'customer' ? 'none' : 'block';
+        document.getElementById('backupSection').style.display = currentRole === 'customer' ? 'none' : 'flex';
+
+        // Tab bar: only show for admin (they have 2 tabs)
+        document.getElementById('tabBar').style.display = currentRole === 'admin' ? 'flex' : 'none';
+
+        // Reset to ordenes tab
+        activeTab = 'ordenes';
+        document.getElementById('tabOrdenes').style.display = 'block';
+        document.getElementById('tabInventario').style.display = 'none';
+        document.getElementById('tabAdmin').style.display = 'none';
+
+        startListening();
+        migrarLocalAFirestore();
+    }
+
+    function showLogin() {
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('appContent').style.display = 'none';
+    }
+
+    function showLoginError(msg) {
+        const el = document.getElementById('loginError');
+        el.textContent = msg;
+        el.style.display = 'block';
+    }
+
+    function hideLoginError() {
+        document.getElementById('loginError').style.display = 'none';
+    }
+
+    // --- Listeners ---
+    function startListening() {
+        stopListening();
+
+        unsubOrders = onSnapshot(ordersCol, (snapshot) => {
+            orders = snapshot.docs.map(d => ({ ...d.data(), _docId: d.id }));
+            setSyncBadge(!snapshot.metadata.fromCache);
+            render();
+            if (activeTab === 'inventario') { renderAdminStats(); renderAdminOrders(); }
+        }, () => setSyncBadge(false));
+
+        if (currentRole === 'admin') {
+            unsubUsers = onSnapshot(usersCol, (snapshot) => {
+                allUsers = snapshot.docs.map(d => ({ uid: d.id, ...d.data() }));
+                renderUsers();
+                if (activeTab === 'inventario') { renderAdminStats(); renderAdminOrders(); }
+            });
+        }
+    }
+
+    function stopListening() {
+        if (unsubOrders) { unsubOrders(); unsubOrders = null; }
+        if (unsubUsers) { unsubUsers(); unsubUsers = null; }
+        orders = [];
+        allUsers = [];
+    }
+
+    // --- Role-based order filtering ---
+    function getVisibleOrders() {
+        if (!currentRole) return [];
+        return orders.filter(o => {
+            if (currentRole === 'admin') return o.createdBy === currentUser.uid;
+            if (currentRole === 'worker') return o.createdBy === currentUser.uid;
+            if (currentRole === 'customer') {
+                if (!currentUserDoc.taller) return false;
+                return o.taller && o.taller.toLowerCase() === currentUserDoc.taller.toLowerCase();
+            }
+            return false;
+        });
+    }
+
+    // --- Filter ---
+    window.setFilter = function(status) {
+        filtroActual = status;
+        const chips = document.querySelectorAll('.filter-chip');
+        chips.forEach(c => c.classList.remove('active'));
+        chips.forEach(c => {
+            if (status === 'Todos' && c.textContent.includes('Todos')) c.classList.add('active');
+            else if (c.getAttribute('onclick')?.includes(status)) c.classList.add('active');
+        });
+        render();
+    };
+
+    // --- Counter ---
+    function renderContador(visibleOrders) {
+        const counter = document.getElementById('statusCounter');
+        if (!counter) return;
+        const conteo = {};
+        visibleOrders.forEach(o => { conteo[o.status] = (conteo[o.status] || 0) + 1; });
+
+        let html = '';
+        for (const [status, cfg] of Object.entries(STATUS_CONFIG)) {
+            const n = conteo[status] || 0;
+            if (n > 0) {
+                html += `<div class="counter-chip">
+                    <span class="counter-dot" style="background:${cfg.color}"></span>
+                    ${n}
+                </div>`;
+            }
+        }
+        counter.innerHTML = html;
+    }
+
+    // --- Edit / Cancel ---
+    window.editarOrden = function(id) {
+        if (currentRole === 'customer') return;
+        const o = orders.find(item => String(item.id) === String(id));
+        if (!o) return;
+
+        if (activeTab !== 'ordenes') switchTab('ordenes');
+
+        editandoId = id;
+        document.getElementById('taller').value = o.taller;
+        document.getElementById('pedido').value = o.pedido;
+        document.getElementById('po').value = o.po || '';
+        document.getElementById('fechaEntrega').value = o.fechaEntrega || '';
+        document.getElementById('fecha').value = o.fecha;
+        document.getElementById('status').value = o.status;
+
+        document.getElementById('btnGuardar').textContent = 'Actualizar Orden';
+        document.getElementById('btnCancelar').style.display = 'block';
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.cancelarEdicion = function() {
+        editandoId = null;
+        pendingFiles = [];
+        renderPendingFiles();
+        ['taller','pedido','po','fechaEntrega','fecha'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        const statusEl = document.getElementById('status');
+        if (statusEl) statusEl.value = 'Ordenado';
+        const btnGuardar = document.getElementById('btnGuardar');
+        if (btnGuardar) { btnGuardar.textContent = 'Guardar Nueva Orden'; btnGuardar.disabled = false; }
+        const btnCancelar = document.getElementById('btnCancelar');
+        if (btnCancelar) btnCancelar.style.display = 'none';
+    };
+
+    // --- CRUD ---
+    window.guardarOrden = async function() {
+        if (!currentUser || currentRole === 'customer') return;
+
+        const t = document.getElementById('taller').value.trim();
+        const p = document.getElementById('pedido').value.trim();
+        const po = document.getElementById('po').value.trim();
+        const fe = document.getElementById('fechaEntrega').value;
+        const f = document.getElementById('fecha').value;
+        const s = document.getElementById('status').value;
+
+        if (!t || !f) return mostrarToast('Llena los campos: Taller y Dia de Pedido');
+
+        const btn = document.getElementById('btnGuardar');
+        btn.disabled = true;
+        btn.textContent = pendingFiles.length > 0 ? 'Subiendo archivos...' : 'Guardando...';
+
+        try {
+            if (editandoId) {
+                const updateData = { taller: t, pedido: p, po: po, fechaEntrega: fe, fecha: f, status: s };
+                if (pendingFiles.length > 0) {
+                    const uploaded = await uploadAttachments(editandoId);
+                    const existing = orders.find(o => String(o.id) === String(editandoId))?.attachments || [];
+                    updateData.attachments = [...existing, ...uploaded];
+                }
+                await updateDoc(doc(db, 'orders', getDocId(editandoId)), updateData);
+                mostrarToast('Orden actualizada');
+                cancelarEdicion();
+            } else {
+                const orderId = Date.now();
+                const order = {
+                    taller: t, pedido: p, po: po, fechaEntrega: fe, fecha: f, status: s,
+                    id: orderId,
+                    createdBy: currentUser.uid,
+                    attachments: []
+                };
+                await setDoc(doc(db, 'orders', getDocId(orderId)), order);
+
+                if (pendingFiles.length > 0) {
+                    const uploaded = await uploadAttachments(orderId);
+                    await updateDoc(doc(db, 'orders', getDocId(orderId)), { attachments: uploaded });
+                }
+                mostrarToast('Orden guardada');
+            }
+        } catch (err) {
+            if (err?.code === 'offline' || !navigator.onLine) {
+                mostrarToast('Sin conexion. La orden se guardo localmente y se sincronizara despues.');
+            } else if (err?.code?.startsWith?.('storage/')) {
+                mostrarToast(mensajeErrorSubida(err));
+            } else {
+                mostrarToast('No se pudo guardar la orden. Intente de nuevo.');
+            }
+        }
+
+        pendingFiles = [];
+        renderPendingFiles();
+        btn.disabled = false;
+        btn.textContent = 'Guardar Nueva Orden';
+        ['taller','pedido','po','fechaEntrega','fecha'].forEach(id => document.getElementById(id).value = '');
+    };
+
+    window.actualizarStatus = async function(id, nuevoStatus) {
+        if (!currentUser || currentRole === 'customer') return;
+        await updateDoc(doc(db, 'orders', getDocId(id)), { status: nuevoStatus });
+    };
+
+    window.deleteOrder = async function(id) {
+        if (!currentUser || currentRole === 'customer') return;
+        const order = orders.find(o => String(o.id) === String(id));
+        const attachCount = order?.attachments?.length || 0;
+        const extraMsg = attachCount > 0 ? `\n\nTambien se eliminaran ${attachCount} archivo(s) adjunto(s).` : '';
+        if (!confirm(`¿Eliminar esta orden? Esta accion no se puede deshacer.${extraMsg}`)) return;
+
+        try {
+            if (String(editandoId) === String(id)) cancelarEdicion();
+            if (attachCount > 0) {
+                for (const att of order.attachments) {
+                    if (att.storagePath) {
+                        try { await deleteObject(ref(storage, att.storagePath)); } catch {}
+                    }
+                }
+            }
+            await deleteDoc(doc(db, 'orders', getDocId(id)));
+            mostrarToast('Orden eliminada');
+        } catch (err) {
+            if (!navigator.onLine) {
+                mostrarToast('Sin conexion. No se pudo eliminar la orden.');
+            } else {
+                mostrarToast('No se pudo eliminar la orden. Intente de nuevo.');
+            }
+        }
+    };
+
+    window.enviarWhatsApp = function(id) {
+        if (currentRole === 'customer') return;
+        const o = orders.find(item => String(item.id) === String(id));
+        if (!o) return;
+
+        const info = STATUS_CONFIG[o.status] || STATUS_CONFIG['Ordenado'];
+        const sender = currentUserDoc ? currentUserDoc.name : 'Pedidos Dealer';
+
+        let texto = `*ACTUALIZACION DE PEDIDO*\n` +
+                    `---------------------------\n` +
+                    `Taller: ${o.taller}\n` +
+                    `Pedido: ${o.pedido}\n` +
+                    `PO#: ${o.po || 'N/A'}\n`;
+
+        if (o.fechaEntrega) texto += `ENTREGA: ${fechaEs(o.fechaEntrega)}\n`;
+
+        texto += `DIA PEDIDO: ${fechaEs(o.fecha)}\n` +
+                 `---------------------------\n` +
+                 `*ESTATUS: ${info.bolita} ${o.status.toUpperCase()}*\n` +
+                 `---------------------------\n` +
+                 `${info.msg}\n\n` +
+                 `Enviado desde Pedidos Dealer - ${sender}`;
+
+        window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+    };
+
+    // --- Render ---
+    function render() {
+        if (!currentUser || !currentRole) return;
+
+        const list = document.getElementById('orderList');
+        if (!list) return;
+        const query = (document.getElementById('searchInput')?.value || '').toLowerCase();
+
+        const visible = getVisibleOrders();
+        renderContador(visible);
+
+        const filtradas = visible
+            .filter(o => {
+                if (filtroActual !== 'Todos' && o.status !== filtroActual) return false;
+                if (!query) return true;
+                return o.taller.toLowerCase().includes(query) ||
+                       o.pedido.toLowerCase().includes(query) ||
+                       (o.po && o.po.toLowerCase().includes(query));
+            })
+            .sort((a, b) => b.id - a.id);
+
+        list.innerHTML = '';
+
+        if (filtradas.length === 0) {
+            const msg = query ? 'Sin resultados para esa busqueda' :
+                        filtroActual !== 'Todos' ? `No hay ordenes con estatus "${filtroActual}"` :
+                        'No hay ordenes todavia';
+            list.innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">&#128203;</div>
+                    <p>${msg}</p>
+                </div>`;
+            return;
+        }
+
+        const isReadOnly = currentRole === 'customer';
+
+        filtradas.forEach(o => {
+            list.innerHTML += renderOrderCard(o, { readOnly: isReadOnly, showCreator: false });
+        });
+    }
+    window.render = render;
+
+    // --- Render Order Card (shared) ---
+    function renderOrderCard(o, { readOnly = false, showCreator = false } = {}) {
+        const cfg = STATUS_CONFIG[o.status] || STATUS_CONFIG['Ordenado'];
+        const entregaInfo = o.fechaEntrega ? ` | Entrega: <b>${fechaEs(o.fechaEntrega)}</b>` : '';
+        const esEditando = String(o.id) === String(editandoId);
+        const creatorLine = showCreator && o.createdBy
+            ? `<div class="created-by">Creado por: ${esc(getCreatorName(o.createdBy))}</div>` : '';
+
+        const attachments = o.attachments || [];
+        let attachHtml = '';
+        if (attachments.length > 0 || !readOnly) {
+            const attachId = `attach-${o.id}`;
+            attachHtml = '<div class="attachment-section">';
+            attachHtml += `<div class="attachment-section-label" onclick="toggleAttachments('${attachId}')"><span class="toggle-arrow" id="arrow-${attachId}">&#9654;</span> Archivos adjuntos (${attachments.length})</div>`;
+            attachHtml += `<div class="attachment-grid" id="${attachId}" style="display:none;">`;
+            attachments.forEach((att, idx) => {
+                const isImg = att.type && att.type.startsWith('image/');
+                if (isImg) {
+                    attachHtml += `<div class="attachment-thumb-wrap">
+                        <img class="attachment-thumb" src="${esc(att.url)}" alt="${esc(att.name)}" onclick="openLightbox('${esc(att.url)}')" loading="lazy">
+                        ${!readOnly ? `<div class="attachment-delete" onclick="deleteAttachment('${o.id}', ${idx})">&times;</div>` : ''}
+                    </div>`;
+                } else {
+                    attachHtml += `<div class="attachment-thumb-wrap">
+                        <div class="attachment-pdf-thumb" onclick="window.open('${esc(att.url)}', '_blank')">
+                            <span class="pdf-icon">&#128196;</span>
+                            <span>${esc(att.name.length > 10 ? att.name.slice(0,8) + '..' : att.name)}</span>
+                        </div>
+                        ${!readOnly ? `<div class="attachment-delete" onclick="deleteAttachment('${o.id}', ${idx})">&times;</div>` : ''}
+                    </div>`;
+                }
+            });
+            if (!readOnly) {
+                attachHtml += `<button class="attachment-add-btn" onclick="addAttachmentToOrder('${o.id}')" title="Agregar archivo">+<span>Archivo</span></button>`;
+                attachHtml += `<button class="attachment-add-btn" onclick="addPhotoToOrder('${o.id}')" title="Tomar foto">&#128247;<span>Foto</span></button>`;
+            }
+            attachHtml += '</div></div>';
+        }
+
+        let html = `<div class="order-card ${cfg.clase}" ${esEditando ? 'style="outline: 2px solid var(--ios-purple);"' : ''}>
+            <span class="taller-title">${esc(o.taller)}</span>
+            <div class="details">
+                Pedido: <b>${esc(o.pedido)}</b> | PO#: <b>${esc(o.po || '---')}</b><br>
+                Pedido el: <b>${fechaEs(o.fecha)}</b>${entregaInfo}
+            </div>
+            ${creatorLine}`;
+
+        // Notes section (visible and editable by all roles)
+        const noteText = o.notes || '';
+        const notesId = `notes-${o.id}`;
+        const notesHtml = `<div class="notes-section">
+            <div class="notes-toggle" onclick="toggleNotes('${notesId}')">
+                <span class="toggle-arrow" id="arrow-${notesId}">&#9654;</span> Notas${noteText ? '' : ' (vacío)'}
+            </div>
+            <div class="notes-body" id="${notesId}" style="display:none;">
+                <div id="view-${notesId}">
+                    ${noteText ? `<div class="notes-display">${esc(noteText)}</div>` : '<div class="notes-empty">Sin notas</div>'}
+                    <div class="notes-actions"><button class="notes-btn notes-btn-save" onclick="editNote('${o.id}')">Editar nota</button></div>
+                </div>
+                <div id="edit-${notesId}" style="display:none;">
+                    <textarea class="notes-textarea" id="textarea-${notesId}" placeholder="Escribir nota...">${esc(noteText)}</textarea>
+                    <div class="notes-actions">
+                        <button class="notes-btn notes-btn-save" onclick="saveNote('${o.id}')">Guardar</button>
+                        <button class="notes-btn notes-btn-cancel" onclick="cancelNote('${o.id}')">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
+        if (readOnly) {
+            html += `<div style="margin-top:10px;padding:8px 12px;border-radius:8px;background:#F2F2F7;font-size:14px;font-weight:600;color:${cfg.color};">
+                ${cfg.bolita} ${o.status}
+            </div>${attachHtml}${notesHtml}</div>`;
+        } else {
+            html += `<select class="status-selector-mini" onchange="actualizarStatus('${o.id}', this.value)">
+                ${Object.keys(STATUS_CONFIG).map(s =>
+                    `<option value="${s}" ${o.status === s ? 'selected' : ''}>${STATUS_CONFIG[s].bolita} ${s}</option>`
+                ).join('')}
+            </select>
+            ${attachHtml}
+            ${notesHtml}
+            <div class="actions">
+                <button class="btn-action btn-edit" onclick="editarOrden('${o.id}')">&#9999;&#65039; Editar</button>
+                <button class="btn-action btn-ws" onclick="enviarWhatsApp('${o.id}')">&#128172; WhatsApp</button>
+                <button class="btn-action btn-del" onclick="deleteOrder('${o.id}')">&#128465;&#65039;</button>
+            </div></div>`;
+        }
+        return html;
+    }
+
+    // --- Admin: All Orders ---
+    function renderAdminOrders() {
+        const list = document.getElementById('adminOrderList');
+        if (!list || currentRole !== 'admin') return;
+        const query = (document.getElementById('adminSearchInput')?.value || '').toLowerCase();
+
+        const filtradas = orders
+            .filter(o => {
+                if (!query) return true;
+                return o.taller.toLowerCase().includes(query) ||
+                       (o.pedido && o.pedido.toLowerCase().includes(query)) ||
+                       (o.po && o.po.toLowerCase().includes(query)) ||
+                       getCreatorName(o.createdBy).toLowerCase().includes(query);
+            })
+            .sort((a, b) => b.id - a.id);
+
+        if (filtradas.length === 0) {
+            list.innerHTML = `<div class="empty-state"><div class="icon">&#128203;</div><p>${query ? 'Sin resultados' : 'No hay ordenes'}</p></div>`;
+            return;
+        }
+
+        list.innerHTML = filtradas.map(o => renderOrderCard(o, { readOnly: false, showCreator: true })).join('');
+    }
+    window.renderAdminOrders = renderAdminOrders;
+
+    // --- Admin Stats ---
+    function renderAdminStats() {
+        const el = document.getElementById('adminStats');
+        if (!el || currentRole !== 'admin') return;
+
+        const total = orders.length;
+        const activas = orders.filter(o => o.status !== 'Entregado').length;
+        const entregadas = orders.filter(o => o.status === 'Entregado').length;
+
+        // Orders by worker
+        const byWorker = {};
+        orders.forEach(o => {
+            const name = getCreatorName(o.createdBy);
+            byWorker[name] = (byWorker[name] || 0) + 1;
+        });
+        const workerRows = Object.entries(byWorker)
+            .sort((a, b) => b[1] - a[1])
+            .map(([name, count]) => `<div class="stat-row"><span class="stat-row-name">${esc(name)}</span><span class="stat-row-count">${count}</span></div>`)
+            .join('');
+
+        // Orders by status
+        const byStatus = {};
+        orders.forEach(o => { byStatus[o.status] = (byStatus[o.status] || 0) + 1; });
+        const statusRows = Object.entries(STATUS_CONFIG)
+            .filter(([s]) => byStatus[s])
+            .map(([s, cfg]) => `<div class="stat-row"><span class="stat-row-name">${cfg.bolita} ${s}</span><span class="stat-row-count">${byStatus[s]}</span></div>`)
+            .join('');
+
+        el.innerHTML = `
+            <div class="stat-card">
+                <div class="stat-number">${total}</div>
+                <div class="stat-label">Total ordenes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" style="color:var(--ios-blue);">${activas}</div>
+                <div class="stat-label">Activas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" style="color:var(--ios-green);">${entregadas}</div>
+                <div class="stat-label">Entregadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" style="color:var(--ios-purple);">${allUsers.length}</div>
+                <div class="stat-label">Usuarios</div>
+            </div>
+            <div class="stat-card wide">
+                <div class="stat-label" style="margin-bottom:6px;font-size:13px;">Ordenes por estatus</div>
+                ${statusRows || '<div style="color:var(--ios-gray);font-size:13px;">Sin ordenes</div>'}
+            </div>
+            <div class="stat-card wide">
+                <div class="stat-label" style="margin-bottom:6px;font-size:13px;">Ordenes por trabajador</div>
+                ${workerRows || '<div style="color:var(--ios-gray);font-size:13px;">Sin datos</div>'}
+            </div>
+        `;
+    }
+
+    // --- Backup ---
+    window.exportarDatos = function() {
+        if (currentRole === 'customer') return;
+        const visible = getVisibleOrders();
+        if (visible.length === 0) return mostrarToast('No hay ordenes para exportar');
+        const blob = new Blob([JSON.stringify(visible, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `pedidos_respaldo_${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        mostrarToast(`${visible.length} ordenes exportadas`);
+    };
+
+    window.importarDatos = async function(event) {
+        if (!currentUser || currentRole === 'customer') return;
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            try {
+                const datos = JSON.parse(e.target.result);
+                if (!Array.isArray(datos)) throw new Error();
+                const idsExistentes = new Set(orders.map(o => o.id));
+                const nuevas = datos.filter(o => o.taller && o.pedido && !idsExistentes.has(o.id));
+                if (nuevas.length === 0) return mostrarToast('No hay ordenes nuevas para importar');
+
+                for (const o of nuevas) {
+                    if (!o.status) o.status = o.llego ? 'Listo para Recoger' : 'Ordenado';
+                    delete o.llego;
+                    if (!o.createdBy) o.createdBy = currentUser.uid;
+                    await setDoc(doc(db, 'orders', String(o.id)), o);
+                }
+                mostrarToast(`${nuevas.length} ordenes importadas`);
+            } catch {
+                alert('Archivo no valido');
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    };
+
+    // --- Admin Panel ---
+    function getSecondaryAuth() {
+        if (!secondaryApp) {
+            secondaryApp = initializeApp(firebaseConfig, 'secondary');
+        }
+        return getAuth(secondaryApp);
+    }
+
+    window.toggleTallerField = function() {
+        const role = document.getElementById('newUserRole').value;
+        document.getElementById('newUserTallerRow').style.display = role === 'customer' ? 'flex' : 'none';
+    };
+
+    // Auto-generate email from name
+    document.getElementById('newUserName')?.addEventListener('input', function() {
+        const emailField = document.getElementById('newUserEmail');
+        if (emailField && !emailField.dataset.manual) {
+            const name = this.value.trim().toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/\s+/g, '.').replace(/[^a-z.]/g, '');
+            emailField.value = name ? name + '@pedidos.local' : '';
+        }
+    });
+    document.getElementById('newUserEmail')?.addEventListener('input', function() {
+        this.dataset.manual = 'true';
+    });
+
+    window.crearUsuario = async function() {
+        if (currentRole !== 'admin') return;
+
+        const name = document.getElementById('newUserName').value.trim();
+        const empId = document.getElementById('newUserEmpId').value.trim();
+        const email = document.getElementById('newUserEmail').value.trim();
+        const role = document.getElementById('newUserRole').value;
+        const taller = document.getElementById('newUserTaller')?.value.trim() || '';
+        const pass = document.getElementById('newUserPass').value;
+
+        if (!name || !empId || !email || !pass) return alert('Llena Nombre, ID, Email y Clave');
+
+        try {
+            const secAuth = getSecondaryAuth();
+            const cred = await createUserWithEmailAndPassword(secAuth, email, pass);
+            await setDoc(doc(db, 'users', cred.user.uid), {
+                empId, name, email, role, taller,
+                createdAt: new Date().toISOString()
+            });
+            await signOut(secAuth);
+
+            mostrarToast(`Usuario ${name} creado`);
+
+            document.getElementById('newUserName').value = '';
+            document.getElementById('newUserEmpId').value = '';
+            document.getElementById('newUserEmail').value = '';
+            delete document.getElementById('newUserEmail').dataset.manual;
+            document.getElementById('newUserRole').value = 'worker';
+            document.getElementById('newUserTaller').value = '';
+            document.getElementById('newUserTallerRow').style.display = 'none';
+            document.getElementById('newUserPass').value = '';
+        } catch (e) {
+            if (e.code === 'auth/email-already-in-use') {
+                alert('Ese email ya esta registrado.');
+            } else {
+                alert('Error: ' + e.message);
+            }
+        }
+    };
+
+    function renderUsers() {
+        const list = document.getElementById('userList');
+        if (!list || currentRole !== 'admin') return;
+
+        if (allUsers.length === 0) {
+            list.innerHTML = '<p style="color:var(--ios-gray);font-size:13px;text-align:center;">No hay usuarios</p>';
+            return;
+        }
+
+        const sorted = [...allUsers].sort((a, b) => {
+            const roleOrder = { admin: 0, worker: 1, customer: 2 };
+            return (roleOrder[a.role] || 9) - (roleOrder[b.role] || 9);
+        });
+
+        list.innerHTML = sorted.map(u => {
+            const tallerHtml = u.role === 'customer'
+                ? `<div style="margin-top:4px;">
+                    <input type="text" class="taller-input" value="${esc(u.taller || '')}"
+                        placeholder="Asignar taller..."
+                        onchange="actualizarTaller('${u.uid}', this.value)">
+                   </div>`
+                : '';
+
+            const isSelf = u.uid === currentUser.uid;
+            const isOtherAdmin = !isSelf && u.role === 'admin';
+            const canDelete = !isSelf;
+
+            return `<div class="user-card">
+                <div class="user-card-info">
+                    <div class="user-card-name">${esc(u.name)}${isSelf ? ' <span style="font-size:11px;color:var(--ios-gray);">(tu)</span>' : ''}</div>
+                    <div class="user-card-detail">ID: ${esc(u.empId || '---')} | ${esc(u.email || '---')}</div>
+                    ${tallerHtml}
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <select class="user-card-role" onchange="cambiarRol('${u.uid}', this.value)"${isSelf ? ' disabled title="No puedes cambiar tu propio rol"' : ''}>
+                        <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+                        <option value="worker" ${u.role === 'worker' ? 'selected' : ''}>Worker</option>
+                        <option value="customer" ${u.role === 'customer' ? 'selected' : ''}>Customer</option>
+                    </select>
+                    ${canDelete ? `<button onclick="eliminarUsuario('${u.uid}', '${esc(u.name)}')" style="background:#FFEBEB;color:var(--ios-danger);border:none;border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;white-space:nowrap;">&#128465;&#65039;</button>` : ''}
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    window.cambiarRol = async function(uid, newRole) {
+        if (currentRole !== 'admin') return;
+        if (uid === currentUser.uid) {
+            mostrarToast('No puedes cambiar tu propio rol');
+            renderUsers();
+            return;
+        }
+        const target = allUsers.find(u => u.uid === uid);
+        if (target && target.role === 'admin') {
+            if (!confirm(`⚠️ ${target.name} es admin. ¿Cambiar su rol a ${newRole}?`)) {
+                renderUsers();
+                return;
+            }
+        }
+        await updateDoc(doc(db, 'users', uid), { role: newRole });
+        mostrarToast('Rol actualizado');
+    };
+
+    window.actualizarTaller = async function(uid, newTaller) {
+        if (currentRole !== 'admin') return;
+        await updateDoc(doc(db, 'users', uid), { taller: newTaller });
+        mostrarToast('Taller actualizado');
+    };
+
+    window.eliminarUsuario = async function(uid, name) {
+        if (currentRole !== 'admin') return;
+        if (uid === currentUser.uid) return alert('No puedes eliminarte a ti mismo');
+        const target = allUsers.find(u => u.uid === uid);
+        if (target && target.role === 'admin') {
+            if (!confirm(`⚠️ ${name} es administrador. ¿Seguro que quieres eliminarlo?`)) return;
+        }
+        if (!confirm(`¿Eliminar a ${name}?`)) return;
+
+        try {
+            try {
+                const token = await currentUser.getIdToken();
+                const resp = await fetch('/api/delete-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ uid })
+                });
+                if (!resp.ok) {
+                    const text = await resp.text();
+                    try { const err = JSON.parse(text); console.warn('API error:', err.error); }
+                    catch(_) { console.warn('API error (non-JSON):', text.slice(0, 100)); }
+                }
+            } catch (apiErr) {
+                console.warn('delete-user API failed, removing Firestore doc only:', apiErr.message);
+            }
+            await deleteDoc(doc(db, 'users', uid));
+            mostrarToast(`${name} eliminado`);
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
+    };
+
+    // --- Seed Users ---
+    const SEED_USERS = [
+        { empId: '2148', name: 'Ismael Bigio', email: 'ismael.bigio@pedidos.local', role: 'admin', taller: '' },
+        { empId: '2171', name: "Bigio's Boss", email: 'bigio.boss@pedidos.local', role: 'admin', taller: '' },
+        { empId: '2731', name: 'Untitled', email: 'untitled@pedidos.local', role: 'admin', taller: '' },
+        { empId: '2294', name: 'Reynaldo Morales', email: 'reynaldo.morales@pedidos.local', role: 'worker', taller: '' },
+        { empId: '2174', name: 'Jose Aviles', email: 'jose.aviles@pedidos.local', role: 'worker', taller: '' },
+        { empId: '2271', name: 'Patricia Oramas', email: 'patricia.oramas@pedidos.local', role: 'worker', taller: '' },
+        { empId: '1584', name: 'Wiridalis Liyida', email: 'wiridalis.liyida@pedidos.local', role: 'customer', taller: '' },
+    ];
+
+    window.seedUsers = async function() {
+        const seedPass = prompt('Clave inicial para todos los usuarios:');
+        if (!seedPass || seedPass.length < 6) return alert('La clave debe tener al menos 6 caracteres');
+
+        const logEl = document.getElementById('seedLog');
+        logEl.style.display = 'block';
+        logEl.textContent = '> Iniciando configuracion...\n';
+
+        for (const u of SEED_USERS) {
+            try {
+                const secAuth = getSecondaryAuth();
+                const cred = await createUserWithEmailAndPassword(secAuth, u.email, seedPass);
+                await setDoc(doc(db, 'users', cred.user.uid), {
+                    empId: u.empId, name: u.name, email: u.email,
+                    role: u.role, taller: u.taller,
+                    createdAt: new Date().toISOString()
+                });
+                await signOut(secAuth);
+                logEl.textContent += `  [OK] ${u.name} (${u.role})\n`;
+            } catch (e) {
+                if (e.code === 'auth/email-already-in-use') {
+                    logEl.textContent += `  [--] ${u.name} ya existe\n`;
+                } else {
+                    logEl.textContent += `  [!!] ${u.name}: ${e.message}\n`;
+                }
+            }
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        logEl.textContent += '\n> Listo! Ya puedes iniciar sesion.\n';
+    };
+
+    if (window.location.search.includes('setup')) {
+        const seedSection = document.getElementById('seedSection');
+        if (seedSection) seedSection.style.display = 'block';
+    }
+
+    // --- Enter key on login ---
+    document.getElementById('loginPass')?.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') window.doLogin();
+    });
+    document.getElementById('loginUser')?.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') document.getElementById('loginPass').focus();
+    });
+
+    // --- Migrate localStorage to Firestore ---
+    async function migrarLocalAFirestore() {
+        let local = [];
+        try { local = JSON.parse(localStorage.getItem('pwa_orders')) || []; } catch {}
+        if (local.length === 0) return;
+
+        const snapshot = await getDocs(ordersCol);
+        const idsFirestore = new Set(snapshot.docs.map(d => d.data().id));
+
+        const nuevas = local.filter(o => !idsFirestore.has(o.id));
+        if (nuevas.length === 0) return;
+
+        const batch = writeBatch(db);
+        nuevas.forEach(o => {
+            if (!o.status) o.status = o.llego ? 'Listo para Recoger' : 'Ordenado';
+            delete o.llego;
+            if (!o.fechaEntrega) o.fechaEntrega = '';
+            if (!o.createdBy) o.createdBy = currentUser.uid;
+            batch.set(doc(db, 'orders', String(o.id)), o);
+        });
+        await batch.commit();
+        mostrarToast(`${nuevas.length} ordenes migradas a la nube`);
+    }
+
+    // --- File Selection & Pending State ---
+    window.capturePhoto = function() {
+        document.getElementById('cameraInput').click();
+    };
+
+    window.pickFile = function() {
+        document.getElementById('fileInput').click();
+    };
+
+    function validarArchivo(file) {
+        const isImage = file.type.startsWith('image/');
+        const isPdf = file.type === 'application/pdf';
+        if (!isImage && !isPdf) {
+            const ext = file.name.split('.').pop().toUpperCase();
+            mostrarToast(`No se puede adjuntar archivos .${ext}. Solo fotos y PDF.`);
+            return false;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+            const sizeMB = (file.size / 1024 / 1024).toFixed(1);
+            mostrarToast(`"${file.name}" pesa ${sizeMB}MB. El maximo es 10MB.`);
+            return false;
+        }
+        return true;
+    }
+
+    function mensajeErrorSubida(err) {
+        if (!navigator.onLine) return 'Sin conexion a internet. Conectese e intente de nuevo.';
+        if (err?.code === 'storage/unauthorized') return 'No tiene permiso para subir archivos. Contacte al administrador.';
+        if (err?.code === 'storage/canceled') return 'Se cancelo la subida del archivo.';
+        if (err?.code === 'storage/retry-limit-exceeded') return 'La conexion es muy lenta. Intente de nuevo.';
+        return 'No se pudo subir el archivo. Intente de nuevo.';
+    }
+
+    window.handleFileSelect = function(event) {
+        const files = Array.from(event.target.files);
+        for (const file of files) {
+            if (validarArchivo(file)) {
+                pendingFiles.push(file);
+            }
+        }
+        renderPendingFiles();
+        event.target.value = '';
+    };
+
+    window.removePendingFile = function(index) {
+        pendingFiles.splice(index, 1);
+        renderPendingFiles();
+    };
+
+    function renderPendingFiles() {
+        const el = document.getElementById('pendingFiles');
+        if (!el) return;
+        if (pendingFiles.length === 0) { el.innerHTML = ''; return; }
+        el.innerHTML = pendingFiles.map((f, i) => {
+            const icon = f.type === 'application/pdf' ? '&#128196;' : '&#128248;';
+            return `<div class="pending-file-chip">
+                ${icon} <span class="file-name">${esc(f.name)}</span>
+                <button class="remove-file" onclick="removePendingFile(${i})">&times;</button>
+            </div>`;
+        }).join('');
+    }
+
+    // --- Upload Attachments ---
+    async function uploadAttachments(orderId) {
+        if (!navigator.onLine) {
+            throw { code: 'offline', message: 'Sin conexion a internet. Conectese e intente de nuevo.' };
+        }
+
+        const results = [];
+        const progressEl = document.getElementById('uploadProgress');
+        const barEl = document.getElementById('uploadProgressBar');
+        if (pendingFiles.length === 0) return results;
+
+        progressEl.style.display = 'block';
+        const totalFiles = pendingFiles.length;
+
+        for (let i = 0; i < pendingFiles.length; i++) {
+            const file = pendingFiles[i];
+            const timestamp = Date.now();
+            const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+            const storagePath = `orders/${orderId}/${timestamp}_${safeName}`;
+            const storageRef = ref(storage, storagePath);
+
+            const url = await new Promise((resolve, reject) => {
+                const task = uploadBytesResumable(storageRef, file, { contentType: file.type });
+                task.on('state_changed',
+                    (snap) => {
+                        const fileProgress = snap.bytesTransferred / snap.totalBytes;
+                        const overall = ((i + fileProgress) / totalFiles) * 100;
+                        barEl.style.width = overall + '%';
+                    },
+                    (err) => reject(err),
+                    async () => {
+                        try {
+                            const dlUrl = await getDownloadURL(task.snapshot.ref);
+                            resolve(dlUrl);
+                        } catch (e) {
+                            reject(e);
+                        }
+                    }
+                );
+            });
+
+            results.push({
+                name: file.name,
+                url: url,
+                type: file.type,
+                size: file.size,
+                storagePath: storagePath,
+                uploadedAt: new Date().toISOString(),
+                uploadedBy: currentUser.uid
+            });
+        }
+
+        barEl.style.width = '100%';
+        setTimeout(() => { progressEl.style.display = 'none'; barEl.style.width = '0%'; }, 500);
+        return results;
+    }
+
+    // --- Add Attachment from Order Card ---
+    window.addAttachmentToOrder = function(orderId) {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*,application/pdf';
+        input.multiple = true;
+        input.onchange = async (e) => {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+
+            const valid = [];
+            for (const file of files) {
+                if (validarArchivo(file)) valid.push(file);
+            }
+            if (valid.length === 0) return;
+
+            pendingFiles = valid;
+            try {
+                const uploaded = await uploadAttachments(orderId);
+                const order = orders.find(o => String(o.id) === String(orderId));
+                const existing = order?.attachments || [];
+                await updateDoc(doc(db, 'orders', getDocId(orderId)), {
+                    attachments: [...existing, ...uploaded]
+                });
+                mostrarToast(uploaded.length === 1 ? 'Archivo agregado' : `${uploaded.length} archivos agregados`);
+            } catch (err) {
+                mostrarToast(mensajeErrorSubida(err));
+            }
+            pendingFiles = [];
+        };
+        input.click();
+    };
+
+    window.addPhotoToOrder = function(orderId) {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.capture = 'environment';
+        input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (!validarArchivo(file)) return;
+
+            pendingFiles = [file];
+            try {
+                const uploaded = await uploadAttachments(orderId);
+                const order = orders.find(o => String(o.id) === String(orderId));
+                const existing = order?.attachments || [];
+                await updateDoc(doc(db, 'orders', getDocId(orderId)), {
+                    attachments: [...existing, ...uploaded]
+                });
+                mostrarToast('Foto agregada');
+            } catch (err) {
+                mostrarToast(mensajeErrorSubida(err));
+            }
+            pendingFiles = [];
+        };
+        input.click();
+    };
+
+    // --- Delete Attachment ---
+    window.deleteAttachment = async function(orderId, index) {
+        const order = orders.find(o => String(o.id) === String(orderId));
+        if (!order || !order.attachments) return;
+        const att = order.attachments[index];
+        if (!att) return;
+
+        const nombre = att.name || 'este archivo';
+        if (!confirm(`¿Eliminar "${nombre}"? Esta accion no se puede deshacer.`)) return;
+
+        try {
+            if (att.storagePath) {
+                const storageRef = ref(storage, att.storagePath);
+                await deleteObject(storageRef).catch(() => {});
+            }
+            const updated = [...order.attachments];
+            updated.splice(index, 1);
+            await updateDoc(doc(db, 'orders', getDocId(orderId)), { attachments: updated });
+            mostrarToast('Archivo eliminado');
+        } catch (err) {
+            if (!navigator.onLine) {
+                mostrarToast('Sin conexion. No se pudo eliminar el archivo.');
+            } else {
+                mostrarToast('No se pudo eliminar el archivo. Intente de nuevo.');
+            }
+        }
+    };
+
+    // --- Lightbox ---
+    window.openLightbox = function(url) {
+        const lb = document.getElementById('lightbox');
+        document.getElementById('lightboxImg').src = url;
+        lb.classList.add('open');
+    };
+
+    window.closeLightbox = function() {
+        const lb = document.getElementById('lightbox');
+        lb.classList.remove('open');
+        document.getElementById('lightboxImg').src = '';
+    };
+
+    // --- Service Worker ---
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js?v=22').then((reg) => {
+            // Check for updates every 60 seconds
+            setInterval(() => reg.update(), 60000);
+        });
+
+        // When SW sends update message, reload page
+        navigator.serviceWorker.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'SW_UPDATED') {
+                window.location.reload();
+            }
+        });
+    }
+</script>
+
+<!--
+  FIRESTORE RULES (apply in Firebase Console > Firestore > Rules):
+
+  rules_version = '2';
+  service cloud.firestore {
+    match /databases/{database}/documents {
+
+      function userRole() {
+        return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+      }
+
+      match /orders/{orderId} {
+        allow read: if request.auth != null;
+        allow write: if request.auth != null && userRole() in ['admin', 'worker'];
+        allow update: if request.auth != null
+                      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['notes']);
+      }
+
+      match /users/{userId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null && request.auth.uid == userId;
+        allow update, delete: if request.auth != null && userRole() == 'admin';
+      }
+    }
+  }
+
+  STORAGE RULES (apply in Firebase Console > Storage > Rules):
+
+  rules_version = '2';
+  service firebase.storage {
+    match /b/{bucket}/o {
+      match /orders/{orderId}/{fileName} {
+        allow read: if request.auth != null;
+        allow write: if request.auth != null
+          && request.resource.size < 10 * 1024 * 1024
+          && (request.resource.contentType.matches('image/.*')
+              || request.resource.contentType == 'application/pdf');
+        allow delete: if request.auth != null;
+      }
+    }
+  }
+-->
+</body>
+</html>
