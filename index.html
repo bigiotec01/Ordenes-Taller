@@ -554,34 +554,6 @@
             <!-- ===== SIDEBAR (izquierda en desktop) ===== -->
             <aside class="sidebar">
 
-                <!-- FILTROS -->
-                <div class="sidebar-section">
-                    <div class="sidebar-section-title">Filtros</div>
-                    <div id="statusCounter" class="status-counter"></div>
-                    <div id="filterBar" class="filter-bar">
-                        <button class="filter-chip active" onclick="setFilter('Todos')">Todos</button>
-                        <button class="filter-chip" onclick="setFilter('Espera de Aprobacion')">&#9995; Aprobacion</button>
-                        <button class="filter-chip" onclick="setFilter('Ordenado')">&#11088; Ordenado</button>
-                        <button class="filter-chip" onclick="setFilter('Backorder')">&#9888; Backorder</button>
-                        <button class="filter-chip" onclick="setFilter('Piezas en Tienda')">&#9881; Tienda</button>
-                        <button class="filter-chip" onclick="setFilter('En Tránsito')">&#10145; Transito</button>
-                        <button class="filter-chip" onclick="setFilter('Listo para Recoger')">&#9745; Recoger</button>
-                        <button class="filter-chip" onclick="setFilter('Listo para Entrega')">&#11014; Entrega</button>
-                        <button class="filter-chip" onclick="setFilter('Entregado')">&#9989; Entregado</button>
-                    </div>
-                </div>
-
-                <!-- BUSCADOR -->
-                <div class="sidebar-section">
-                    <div class="sidebar-section-title">Buscador</div>
-                    <div class="search-container">
-                        <div class="search-bar">
-                            <span>&#128269;</span>
-                            <input type="text" id="searchInput" placeholder="Buscar taller, pedido o PO..." oninput="render()">
-                        </div>
-                    </div>
-                </div>
-
                 <!-- NUEVA ORDEN -->
                 <div class="sidebar-section">
                     <div class="sidebar-section-title">Nueva Orden</div>
@@ -616,6 +588,34 @@
                         <div id="uploadProgress" class="upload-progress"><div id="uploadProgressBar" class="upload-progress-bar"></div></div>
                         <button id="btnGuardar" class="main-btn btn-blue" onclick="guardarOrden()">Guardar Nueva Orden</button>
                         <button id="btnCancelar" class="btn-cancel" onclick="cancelarEdicion()">Cancelar Edicion</button>
+                    </div>
+                </div>
+
+                <!-- BUSCADOR -->
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Buscador</div>
+                    <div class="search-container">
+                        <div class="search-bar">
+                            <span>&#128269;</span>
+                            <input type="text" id="searchInput" placeholder="Buscar taller, pedido o PO..." oninput="render()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FILTROS -->
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Filtros</div>
+                    <div id="statusCounter" class="status-counter"></div>
+                    <div id="filterBar" class="filter-bar">
+                        <button class="filter-chip active" onclick="setFilter('Todos')">Todos</button>
+                        <button class="filter-chip" onclick="setFilter('Espera de Aprobacion')">&#9995; Aprobacion</button>
+                        <button class="filter-chip" onclick="setFilter('Ordenado')">&#11088; Ordenado</button>
+                        <button class="filter-chip" onclick="setFilter('Backorder')">&#9888; Backorder</button>
+                        <button class="filter-chip" onclick="setFilter('Piezas en Tienda')">&#9881; Tienda</button>
+                        <button class="filter-chip" onclick="setFilter('En Tránsito')">&#10145; Transito</button>
+                        <button class="filter-chip" onclick="setFilter('Listo para Recoger')">&#9745; Recoger</button>
+                        <button class="filter-chip" onclick="setFilter('Listo para Entrega')">&#11014; Entrega</button>
+                        <button class="filter-chip" onclick="setFilter('Entregado')">&#9989; Entregado</button>
                     </div>
                 </div>
 
