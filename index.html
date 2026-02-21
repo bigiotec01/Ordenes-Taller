@@ -539,6 +539,46 @@
             #orderList .order-card { margin-bottom: 0; }
             #orderList .empty-state { grid-column: 1 / -1; }
 
+            /* Inventario: stat-grid inside dark sidebar */
+            .sidebar .stat-grid { gap: 8px; }
+            .sidebar .stat-card {
+                background: #2C2C2E; border-radius: 10px;
+                box-shadow: none;
+            }
+            .sidebar .stat-number { color: #FFFFFF; font-size: 22px; }
+            .sidebar .stat-label { color: #AEAEB2; }
+            .sidebar .stat-row { border-bottom-color: #48484A; }
+            .sidebar .stat-row-name { color: #EBEBF5; font-size: 13px; }
+            .sidebar .stat-row-count { color: var(--ios-blue); }
+            .sidebar .section-title { color: #FFFFFF; }
+
+            /* Panel central: título de sección */
+            .main-content-title {
+                font-size: 20px; font-weight: 700; letter-spacing: -0.5px;
+                color: #1C1C1E; margin-bottom: 16px;
+            }
+
+            /* Admin: user list grid 2 columnas */
+            #userList {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+            #userList .user-card {
+                margin-bottom: 0;
+                border-radius: 12px;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            }
+
+            /* Inventario: admin order list grid */
+            #adminOrderList {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 14px;
+            }
+            #adminOrderList .order-card { margin-bottom: 0; }
+            #adminOrderList .empty-state { grid-column: 1 / -1; }
+
             /* Tab bar floats centered at bottom */
             .tab-bar {
                 left: 50%; right: auto; transform: translateX(-50%);
@@ -685,50 +725,69 @@
 
     <!-- ===== TAB: INVENTARIO ===== -->
     <div id="tabInventario" style="display:none">
-        <div class="search-container">
-            <div class="search-bar">
-                <span>&#128269;</span>
-                <input type="text" id="adminSearchInput" placeholder="Buscar taller, pedido, PO o trabajador..." oninput="renderAdminOrders()">
-            </div>
-        </div>
-        <div class="container">
-            <div style="margin-bottom:16px;">
-                <div class="section-title" style="cursor:pointer;" onclick="toggleAdminSection('adminStatsWrap')">&#128200; Resumen <span id="adminStatsToggle" style="font-size:14px;color:var(--ios-gray);">&#9660;</span></div>
-                <div id="adminStatsWrap" style="display:none;">
+        <div class="desktop-layout">
+
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Buscador</div>
+                    <div class="search-container">
+                        <div class="search-bar">
+                            <span>&#128269;</span>
+                            <input type="text" id="adminSearchInput" placeholder="Buscar taller, pedido, PO o trabajador..." oninput="renderAdminOrders()">
+                        </div>
+                    </div>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">&#128200; Resumen</div>
                     <div id="adminStats" class="stat-grid"></div>
                 </div>
-            </div>
-            <div id="adminOrderList"></div>
+            </aside>
+
+            <main class="main-content">
+                <div class="main-content-title">&#128230; Todas las Ordenes</div>
+                <div id="adminOrderList"></div>
+                <footer class="footer">v3.3.0 | Pedidos Dealer</footer>
+            </main>
+
         </div>
-        <footer class="footer">v3.3.0 | Pedidos Dealer</footer>
     </div>
 
     <!-- ===== TAB: ADMIN ===== -->
     <div id="tabAdmin" style="display:none">
-        <div class="container">
-            <div class="section-title">&#128101; Usuarios</div>
-            <div class="ios-group">
-                <div class="ios-row"><label>Nombre</label><input type="text" id="newUserName" placeholder="Nombre completo"></div>
-                <div class="ios-row"><label>ID Empleado</label><input type="text" id="newUserEmpId" placeholder="Ej. 2148"></div>
-                <div class="ios-row"><label>Email</label><input type="text" id="newUserEmail" placeholder="Email" autocapitalize="none"></div>
-                <div class="ios-row">
-                    <label>Rol</label>
-                    <select id="newUserRole" onchange="toggleTallerField()">
-                        <option value="worker">Worker</option>
-                        <option value="customer">Customer</option>
-                        <option value="admin">Admin</option>
-                    </select>
+        <div class="desktop-layout">
+
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Nuevo Usuario</div>
+                    <div class="ios-group">
+                        <div class="ios-row"><label>Nombre</label><input type="text" id="newUserName" placeholder="Nombre completo"></div>
+                        <div class="ios-row"><label>ID Empleado</label><input type="text" id="newUserEmpId" placeholder="Ej. 2148"></div>
+                        <div class="ios-row"><label>Email</label><input type="text" id="newUserEmail" placeholder="Email" autocapitalize="none"></div>
+                        <div class="ios-row">
+                            <label>Rol</label>
+                            <select id="newUserRole" onchange="toggleTallerField()">
+                                <option value="worker">Worker</option>
+                                <option value="customer">Customer</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <div class="ios-row" id="newUserTallerRow" style="display:none">
+                            <label>Taller</label>
+                            <input type="text" id="newUserTaller" placeholder="Nombre del taller">
+                        </div>
+                        <div class="ios-row"><label>Clave</label><input type="password" id="newUserPass" placeholder="Clave del usuario"></div>
+                    </div>
+                    <button class="main-btn btn-blue" onclick="crearUsuario()" style="margin-top:10px;">Crear Usuario</button>
                 </div>
-                <div class="ios-row" id="newUserTallerRow" style="display:none">
-                    <label>Taller</label>
-                    <input type="text" id="newUserTaller" placeholder="Nombre del taller">
-                </div>
-                <div class="ios-row"><label>Clave</label><input type="password" id="newUserPass" placeholder="Clave del usuario"></div>
-            </div>
-            <button class="main-btn btn-blue" onclick="crearUsuario()">Crear Usuario</button>
-            <div id="userList" style="margin-top: 16px;"></div>
+            </aside>
+
+            <main class="main-content">
+                <div class="main-content-title">&#128101; Usuarios Registrados</div>
+                <div id="userList"></div>
+                <footer class="footer">v3.3.0 | Pedidos Dealer</footer>
+            </main>
+
         </div>
-        <footer class="footer">v3.3.0 | Pedidos Dealer</footer>
     </div>
 
     <!-- ===== BOTTOM TAB BAR ===== -->
