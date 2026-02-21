@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Pedidos Dealer 3.3.0</title>
+    <title>PartsPilot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
 
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -418,7 +420,11 @@
                 background: #1C1C1E;
                 border-bottom: none;
             }
-            .header h1 { font-size: 26px; color: #FFFFFF; }
+            .header h1 {
+                font-size: 26px; color: #FFFFFF;
+                font-family: 'Montserrat', sans-serif;
+                font-weight: 800; letter-spacing: -0.5px;
+            }
             .header .user-name { color: #FFFFFF; }
 
             .btn-logout {
@@ -595,7 +601,7 @@
 <div id="loginScreen">
     <div class="login-box">
         <div class="login-icon">&#128203;</div>
-        <h2 class="login-title">Pedidos Dealer</h2>
+        <h2 class="login-title" style="font-family:'Montserrat',sans-serif;font-weight:800;">PartsPilot</h2>
         <p class="login-subtitle">Inicia sesion para continuar</p>
         <div class="ios-group">
             <div class="ios-row">
@@ -629,7 +635,7 @@
             </div>
             <button class="btn-logout" onclick="doLogout()">Salir</button>
         </div>
-        <h1>&#128230; Pedidos Dealer &#128230;</h1>
+        <h1>PartsPilot</h1>
         <div style="margin-top:4px;"><span id="syncBadge" class="sync-badge sync-offline">offline</span></div>
     </div>
 
@@ -717,7 +723,7 @@
             <!-- ===== MAIN: Lista de Ordenes ===== -->
             <main class="main-content">
                 <div id="orderList"></div>
-                <footer class="footer">v3.3.0 | Pedidos Dealer</footer>
+                <footer class="footer">v3.3.0 | PartsPilot</footer>
             </main>
 
         </div>
@@ -746,7 +752,7 @@
             <main class="main-content">
                 <div class="main-content-title">&#128230; Todas las Ordenes</div>
                 <div id="adminOrderList"></div>
-                <footer class="footer">v3.3.0 | Pedidos Dealer</footer>
+                <footer class="footer">v3.3.0 | PartsPilot</footer>
             </main>
 
         </div>
@@ -784,7 +790,7 @@
             <main class="main-content">
                 <div class="main-content-title">&#128101; Usuarios Registrados</div>
                 <div id="userList"></div>
-                <footer class="footer">v3.3.0 | Pedidos Dealer</footer>
+                <footer class="footer">v3.3.0 | PartsPilot</footer>
             </main>
 
         </div>
