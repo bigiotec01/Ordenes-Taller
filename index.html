@@ -148,6 +148,19 @@
             animation: note-pulse 1.2s ease-in-out infinite;
         }
 
+        @keyframes overdue-pulse {
+            0%, 100% { box-shadow: 0 0 0 3px #FF3B30, 0 0 10px 2px rgba(255,59,48,0.6); }
+            50%       { box-shadow: 0 0 0 10px rgba(255,59,48,0), 0 0 0px 0px rgba(255,59,48,0); }
+        }
+        .order-card.is-overdue {
+            animation: overdue-pulse 1s ease-in-out infinite;
+        }
+        .overdue-badge {
+            display: inline-block; background: #FF3B30; color: #fff;
+            font-size: 11px; font-weight: 700; padding: 2px 8px;
+            border-radius: 6px; margin-left: 6px; vertical-align: middle;
+        }
+
         @keyframes attention-pulse {
             0%, 100% { box-shadow: 0 0 0 3px #FF9500, 0 0 10px 2px rgba(255,149,0,0.6); }
             50%       { box-shadow: 0 0 0 10px rgba(255,149,0,0), 0 0 0px 0px rgba(255,149,0,0); }
@@ -1508,7 +1521,9 @@
     // --- Render Order Card (shared) ---
     function renderOrderCard(o, { readOnly = false, showCreator = false } = {}) {
         const cfg = STATUS_CONFIG[o.status] || STATUS_CONFIG['Ordenado'];
-        const entregaInfo = o.fechaEntrega ? ` | Entrega: <b>${fechaEs(o.fechaEntrega)}</b>` : '';
+        const entregaInfo = o.fechaEntrega
+            ? ` | Entrega: <b>${fechaEs(o.fechaEntrega)}</b>${isOverdue ? '<span class="overdue-badge">VENCIDA</span>' : ''}`
+            : '';
         const esEditando = String(o.id) === String(editandoId);
         const creatorLine = showCreator && o.createdBy
             ? `<div class="created-by">Creado por: ${esc(getCreatorName(o.createdBy))}</div>` : '';
@@ -1548,7 +1563,10 @@
         const seenNotes = JSON.parse(localStorage.getItem('seenNotes') || '{}');
         const noteUnseen = noteText && seenNotes[o.id] !== noteText;
         const hasAttention = o.needsAttention && currentRole !== 'customer';
-        let html = `<div class="order-card ${cfg.clase}${noteUnseen ? ' has-note' : ''}${hasAttention ? ' has-attention' : ''}" ${esEditando ? 'style="outline: 2px solid var(--ios-purple);"' : ''}>
+        const today = new Date(); today.setHours(0,0,0,0);
+        const isOverdue = o.fechaEntrega && o.status !== 'Entregado'
+            && new Date(o.fechaEntrega + 'T00:00:00') < today;
+        let html = `<div class="order-card ${cfg.clase}${noteUnseen ? ' has-note' : ''}${hasAttention ? ' has-attention' : ''}${isOverdue ? ' is-overdue' : ''}" ${esEditando ? 'style="outline: 2px solid var(--ios-purple);"' : ''}>
             <span class="taller-title">${esc(o.taller)}</span>
             <div class="details">
                 Pedido: <b>${esc(o.pedido)}</b> | PO#: <b>${esc(o.po || '---')}</b><br>
