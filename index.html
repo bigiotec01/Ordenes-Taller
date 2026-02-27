@@ -139,8 +139,12 @@
         .st-listo-entrega { border-left-color: var(--ios-lightblue) !important; background: #F2FBFF; }
         .st-entregado { border-left-color: var(--ios-green) !important; opacity: 0.6; }
 
+        @keyframes note-pulse {
+            0%, 100% { box-shadow: 0 0 0 2.5px var(--ios-green), 0 2px 8px rgba(52,199,89,0.15); }
+            50%       { box-shadow: 0 0 0 2.5px transparent, 0 2px 8px rgba(52,199,89,0); }
+        }
         .order-card.has-note {
-            box-shadow: 0 0 0 2.5px var(--ios-green), 0 2px 8px rgba(52,199,89,0.15);
+            animation: note-pulse 1.4s ease-in-out infinite;
         }
 
         .taller-title { font-size: 19px; font-weight: 600; margin-bottom: 8px; display: block; }
