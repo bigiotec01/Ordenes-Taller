@@ -1440,9 +1440,9 @@
         const notesId = `notes-${o.id}`;
         const notesHtml = `<div class="notes-section">
             <div class="notes-toggle" onclick="toggleNotes('${notesId}')">
-                <span class="toggle-arrow${noteText ? ' open' : ''}" id="arrow-${notesId}">&#9654;</span> Notas${noteText ? '' : ' (vacío)'}
+                <span class="toggle-arrow" id="arrow-${notesId}">&#9654;</span> Notas${noteText ? '' : ' (vacío)'}
             </div>
-            <div class="notes-body" id="${notesId}" style="display:${noteText ? 'block' : 'none'};">
+            <div class="notes-body" id="${notesId}" style="display:none;">
                 <div id="view-${notesId}">
                     ${noteText ? `<div class="notes-display">${esc(noteText)}</div>` : '<div class="notes-empty">Sin notas</div>'}
                     <div class="notes-actions"><button class="notes-btn notes-btn-save" onclick="editNote('${o.id}')">Editar nota</button></div>
