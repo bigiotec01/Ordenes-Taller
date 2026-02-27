@@ -171,6 +171,45 @@
         .empty-state .icon { font-size: 48px; margin-bottom: 10px; }
         .empty-state p { font-size: 15px; margin: 0; }
 
+        /* ===== Feature Popup ===== */
+        .feature-popup-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+            z-index: 500; display: flex; align-items: center; justify-content: center;
+            padding: 24px; backdrop-filter: blur(4px);
+        }
+        .feature-popup-overlay.hidden { display: none; }
+        .feature-popup {
+            background: #fff; border-radius: 20px; padding: 28px 24px 20px;
+            max-width: 360px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+            text-align: center;
+        }
+        .feature-popup-icon {
+            font-size: 48px; margin-bottom: 12px; display: block;
+            animation: note-pulse 1.2s ease-in-out infinite;
+            width: 72px; height: 72px; border-radius: 16px;
+            background: #f0fff4; margin: 0 auto 16px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .feature-popup h2 {
+            font-size: 19px; font-weight: 700; margin: 0 0 10px; color: #111;
+        }
+        .feature-popup p {
+            font-size: 14px; color: #444; line-height: 1.55; margin: 0 0 8px;
+        }
+        .feature-popup-steps {
+            text-align: left; margin: 14px 0 20px;
+            background: #F2F2F7; border-radius: 12px; padding: 14px 16px;
+        }
+        .feature-popup-steps li {
+            font-size: 13px; color: #333; margin-bottom: 8px; line-height: 1.4;
+        }
+        .feature-popup-steps li:last-child { margin-bottom: 0; }
+        .feature-popup-btn {
+            width: 100%; padding: 14px; border-radius: 12px; border: none;
+            background: var(--ios-green); color: #fff; font-size: 16px;
+            font-weight: 700; cursor: pointer;
+        }
+
         .toast {
             position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
             background: #333; color: white; padding: 12px 24px; border-radius: 10px;
@@ -822,6 +861,20 @@
 </div>
 
 <div id="toast" class="toast"></div>
+
+<div id="noteFeaturePopup" class="feature-popup-overlay hidden">
+    <div class="feature-popup">
+        <div class="feature-popup-icon">📝</div>
+        <h2>Nuevo: Indicador de Notas</h2>
+        <p>Ahora podés saber de un vistazo si una orden tiene una nota pendiente de leer.</p>
+        <ul class="feature-popup-steps">
+            <li>🟢 <b>Borde verde parpadeante</b> = la orden tiene una nota nueva o editada</li>
+            <li>👆 <b>Tocá "Notas"</b> en esa orden para leerla y detener el parpadeo</li>
+            <li>✏️ Si la nota es <b>editada</b>, vuelve a parpadear para todos</li>
+        </ul>
+        <button class="feature-popup-btn" onclick="closeNoteFeaturePopup()">Entendido</button>
+    </div>
+</div>
 <div id="lightbox" class="lightbox" onclick="closeLightbox()">
     <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
     <img id="lightboxImg" src="" alt="Attachment">
@@ -899,6 +952,16 @@
         if (!y || !m || !d) return str;
         return `${parseInt(d)}/${MESES[parseInt(m)-1]}/${y}`;
     }
+
+    function showNoteFeaturePopup() {
+        if (!localStorage.getItem('noteFeaturePopupSeen')) {
+            document.getElementById('noteFeaturePopup').classList.remove('hidden');
+        }
+    }
+    window.closeNoteFeaturePopup = function() {
+        document.getElementById('noteFeaturePopup').classList.add('hidden');
+        localStorage.setItem('noteFeaturePopupSeen', '1');
+    };
 
     function mostrarToast(msg) {
         const t = document.getElementById('toast');
@@ -1108,6 +1171,7 @@
 
         startListening();
         migrarLocalAFirestore();
+        showNoteFeaturePopup();
     }
 
     function showLogin() {
