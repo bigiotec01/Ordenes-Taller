@@ -967,7 +967,17 @@
         body.style.display = isHidden ? 'block' : 'none';
         if (arrow) arrow.classList.toggle('open', isHidden);
         const card = body.closest('.order-card');
-        if (card) card.classList.remove('has-note');
+        if (card) {
+            card.classList.remove('has-note');
+            // persist "seen" state: save the note text so we don't pulse again unless it changes
+            const orderId = id.replace('notes-', '');
+            const order = orders.find(o => String(o.id) === String(orderId));
+            if (order?.notes) {
+                const seen = JSON.parse(localStorage.getItem('seenNotes') || '{}');
+                seen[orderId] = order.notes;
+                localStorage.setItem('seenNotes', JSON.stringify(seen));
+            }
+        }
     };
 
     window.editNote = function(orderId) {
@@ -1428,7 +1438,9 @@
         }
 
         const noteText = o.notes || '';
-        let html = `<div class="order-card ${cfg.clase}${noteText ? ' has-note' : ''}" ${esEditando ? 'style="outline: 2px solid var(--ios-purple);"' : ''}>
+        const seenNotes = JSON.parse(localStorage.getItem('seenNotes') || '{}');
+        const noteUnseen = noteText && seenNotes[o.id] !== noteText;
+        let html = `<div class="order-card ${cfg.clase}${noteUnseen ? ' has-note' : ''}" ${esEditando ? 'style="outline: 2px solid var(--ios-purple);"' : ''}>
             <span class="taller-title">${esc(o.taller)}</span>
             <div class="details">
                 Pedido: <b>${esc(o.pedido)}</b> | PO#: <b>${esc(o.po || '---')}</b><br>
