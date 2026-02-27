@@ -638,7 +638,44 @@
             #orderList .order-card { margin-bottom: 0; }
             #orderList .empty-state { grid-column: 1 / -1; }
 
-            /* Inventario: stat-grid inside dark sidebar */
+            /* ===== Admin List View ===== */
+        .admin-list { display: flex; flex-direction: column; gap: 4px; }
+        .admin-row {
+            background: #fff; border-radius: 10px;
+            border-left: 5px solid #ddd;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden;
+        }
+        .admin-row.has-note    { animation: note-pulse      1.2s ease-in-out infinite; }
+        .admin-row.has-attention { animation: attention-pulse 1.2s ease-in-out infinite; }
+        .admin-row.is-overdue  { animation: overdue-pulse   1s   ease-in-out infinite; }
+        .admin-row-header {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; cursor: pointer;
+        }
+        .admin-row-taller {
+            font-weight: 700; font-size: 14px; flex: 1;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .admin-row-info { font-size: 11px; color: #666; white-space: nowrap; }
+        .admin-row-status {
+            font-size: 11px; font-weight: 700; white-space: nowrap;
+            padding: 2px 7px; border-radius: 6px; background: #F2F2F7;
+        }
+        .admin-row-creator { font-size: 11px; color: var(--ios-gray); white-space: nowrap; }
+        .admin-row-chevron {
+            font-size: 11px; color: #C7C7CC; transition: transform 0.2s; flex-shrink: 0;
+        }
+        .admin-row.open .admin-row-chevron { transform: rotate(90deg); }
+        .admin-row-expand {
+            display: none; padding: 0 12px 12px;
+            border-top: 0.5px solid #F0F0F0;
+        }
+        .admin-row.open .admin-row-expand { display: block; }
+        .admin-row-actions {
+            display: flex; gap: 8px; margin-top: 10px;
+        }
+
+        /* Inventario: stat-grid inside dark sidebar */
             .sidebar .stat-grid { gap: 8px; }
             .sidebar .stat-card {
                 background: #2C2C2E; border-radius: 10px;
@@ -1637,6 +1674,128 @@
     }
 
     // --- Admin: All Orders ---
+    window.toggleAdminRow = function(orderId) {
+        const row = document.getElementById(`admin-row-${orderId}`);
+        if (!row) return;
+        row.classList.toggle('open');
+        if (row.classList.contains('open')) {
+            // mark chat as seen
+            const order = orders.find(o => String(o.id) === String(orderId));
+            row.classList.remove('has-note');
+            const count = (order?.comments || []).length;
+            const seen = JSON.parse(localStorage.getItem('seenComments') || '{}');
+            seen[orderId] = count;
+            localStorage.setItem('seenComments', JSON.stringify(seen));
+            const thread = document.getElementById(`chat-thread-${orderId}`);
+            if (thread) thread.scrollTop = thread.scrollHeight;
+        }
+    };
+
+    function renderAdminRow(o) {
+        const cfg = STATUS_CONFIG[o.status] || STATUS_CONFIG['Ordenado'];
+        const today = new Date(); today.setHours(0,0,0,0);
+        const isOverdue = o.fechaEntrega && o.status !== 'Entregado'
+            && new Date(o.fechaEntrega + 'T00:00:00') < today;
+        const comments = o.comments || [];
+        const seenComments = JSON.parse(localStorage.getItem('seenComments') || '{}');
+        const chatUnseen = comments.length > (seenComments[o.id] || 0);
+        const hasAttention = !!o.needsAttention;
+
+        const classes = [
+            chatUnseen    ? 'has-note'       : '',
+            hasAttention  ? 'has-attention'  : '',
+            isOverdue     ? 'is-overdue'     : ''
+        ].filter(Boolean).join(' ');
+
+        // Chat section (reuse same builder)
+        const noteText = o.notes || '';
+        const isMine = (c) => c.role !== 'customer';
+        const fmtTs = (ts) => ts ? new Date(ts).toLocaleString('es-AR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
+        const legacyBubble = noteText
+            ? `<div class="chat-bubble legacy"><div class="chat-text">📋 ${esc(noteText)}</div></div>` : '';
+        const bubbles = comments.map(c =>
+            `<div class="chat-bubble ${isMine(c) ? 'mine' : 'theirs'}">
+                <div class="chat-text">${esc(c.text)}</div>
+                <div class="chat-meta">${esc(c.name)} · ${fmtTs(c.ts)}</div>
+            </div>`
+        ).join('');
+        const chatSection = `<div class="chat-section" style="border-top:none;margin-top:8px;padding-top:0;">
+            <div class="chat-toggle" onclick="toggleChat('${o.id}')">
+                <span class="toggle-arrow" id="chat-arrow-${o.id}">&#9654;</span>
+                💬 Chat${comments.length > 0 ? ` (${comments.length})` : ''}
+            </div>
+            <div class="chat-body" id="chat-body-${o.id}" style="display:none;">
+                <div class="chat-thread" id="chat-thread-${o.id}">
+                    ${legacyBubble}${bubbles || (!noteText ? '<div class="chat-empty">Sin mensajes aún</div>' : '')}
+                </div>
+                <div class="chat-input-row">
+                    <input class="chat-input" id="chat-input-${o.id}" type="text" placeholder="Escribir mensaje..."
+                        onkeydown="if(event.key==='Enter')sendComment('${o.id}')">
+                    <button class="chat-send-btn" onclick="sendComment('${o.id}')">&#9658;</button>
+                </div>
+            </div>
+        </div>`;
+
+        // Attachments
+        const attachments = o.attachments || [];
+        let attachSection = '';
+        if (attachments.length > 0) {
+            const attachId = `attach-${o.id}`;
+            attachSection = `<div class="attachment-section" style="margin-top:8px;">
+                <div class="attachment-section-label" onclick="toggleAttachments('${attachId}')">
+                    <span class="toggle-arrow" id="arrow-${attachId}">&#9654;</span>
+                    📎 Archivos (${attachments.length})
+                </div>
+                <div class="attachment-grid" id="${attachId}" style="display:none;">
+                    ${attachments.map((att, idx) => {
+                        const isImg = att.type && att.type.startsWith('image/');
+                        return isImg
+                            ? `<div class="attachment-thumb-wrap">
+                                <img class="attachment-thumb" src="${esc(att.url)}" onclick="openLightbox('${esc(att.url)}')" loading="lazy">
+                                <div class="attachment-delete" onclick="deleteAttachment('${o.id}', ${idx})">&times;</div>
+                               </div>`
+                            : `<div class="attachment-thumb-wrap">
+                                <div class="attachment-pdf-thumb" onclick="window.open('${esc(att.url)}','_blank')">
+                                    <span class="pdf-icon">📄</span>
+                                    <span>${esc(att.name.length > 10 ? att.name.slice(0,8)+'..' : att.name)}</span>
+                                </div>
+                                <div class="attachment-delete" onclick="deleteAttachment('${o.id}', ${idx})">&times;</div>
+                               </div>`;
+                    }).join('')}
+                </div>
+            </div>`;
+        }
+
+        const entregaStr = o.fechaEntrega ? ` · ${fechaEs(o.fechaEntrega)}${isOverdue ? ' ⚠️' : ''}` : '';
+        const creatorName = getCreatorName(o.createdBy);
+
+        return `<div class="admin-row ${classes}" id="admin-row-${o.id}"
+                    style="border-left-color:${cfg.color};">
+            <div class="admin-row-header" onclick="toggleAdminRow('${o.id}')">
+                <div class="admin-row-taller">${esc(o.taller)}</div>
+                <div class="admin-row-info">${esc(o.pedido)}${o.po ? ' · '+esc(o.po) : ''}${entregaStr}</div>
+                <div class="admin-row-status" style="color:${cfg.color};">${cfg.bolita} ${o.status}</div>
+                <div class="admin-row-creator">${esc(creatorName)}</div>
+                <div class="admin-row-chevron">&#9654;</div>
+            </div>
+            <div class="admin-row-expand">
+                <select class="status-selector-mini${hasAttention ? ' has-attention' : ''}"
+                    onchange="actualizarStatus('${o.id}', this.value)" style="margin-top:8px;">
+                    ${Object.keys(STATUS_CONFIG).map(s =>
+                        `<option value="${s}" ${o.status === s ? 'selected' : ''}>${STATUS_CONFIG[s].bolita} ${s}</option>`
+                    ).join('')}
+                </select>
+                ${chatSection}
+                ${attachSection}
+                <div class="admin-row-actions">
+                    <button class="btn-action btn-edit" onclick="editarOrden('${o.id}')">✏️ Editar</button>
+                    <button class="btn-action btn-ws"  onclick="enviarWhatsApp('${o.id}')">💬 WhatsApp</button>
+                    <button class="btn-action btn-del" onclick="deleteOrder('${o.id}')">🗑️</button>
+                </div>
+            </div>
+        </div>`;
+    }
+
     function renderAdminOrders() {
         const list = document.getElementById('adminOrderList');
         if (!list || currentRole !== 'admin') return;
@@ -1657,7 +1816,7 @@
             return;
         }
 
-        list.innerHTML = filtradas.map(o => renderOrderCard(o, { readOnly: false, showCreator: true })).join('');
+        list.innerHTML = `<div class="admin-list">${filtradas.map(renderAdminRow).join('')}</div>`;
     }
     window.renderAdminOrders = renderAdminOrders;
 
