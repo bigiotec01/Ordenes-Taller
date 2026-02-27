@@ -131,6 +131,7 @@
         }
 
         .st-aprobacion { border-left-color: #AF52DE !important; background: #F9F0FF; }
+        .st-aprobado   { border-left-color: #34C759 !important; background: #F0FFF4; }
         .st-ordenado { border-left-color: var(--ios-yellow) !important; }
         .st-backorder { border-left-color: #FF2D55 !important; background: #FFF0F3; }
         .st-tienda { border-left-color: var(--ios-orange) !important; background: #FFF9F0; }
@@ -145,6 +146,26 @@
         }
         .order-card.has-note {
             animation: note-pulse 1.2s ease-in-out infinite;
+        }
+
+        @keyframes attention-pulse {
+            0%, 100% { box-shadow: 0 0 0 3px #FF9500, 0 0 10px 2px rgba(255,149,0,0.6); }
+            50%       { box-shadow: 0 0 0 10px rgba(255,149,0,0), 0 0 0px 0px rgba(255,149,0,0); }
+        }
+        .order-card.has-attention {
+            animation: attention-pulse 1.2s ease-in-out infinite;
+        }
+        @keyframes status-pulse {
+            0%, 100% { box-shadow: 0 0 0 2px #FF9500; }
+            50%       { box-shadow: 0 0 0 5px rgba(255,149,0,0); }
+        }
+        .status-selector-mini.has-attention {
+            animation: status-pulse 1.2s ease-in-out infinite;
+        }
+        .btn-aprobar {
+            width: 100%; margin-top: 10px; padding: 12px; border-radius: 12px;
+            border: none; background: var(--ios-green); color: #fff;
+            font-size: 15px; font-weight: 700; cursor: pointer;
         }
 
         .taller-title { font-size: 19px; font-weight: 600; margin-bottom: 8px; display: block; }
@@ -864,14 +885,7 @@
 
 <div id="noteFeaturePopup" class="feature-popup-overlay hidden">
     <div class="feature-popup">
-        <div class="feature-popup-icon">📝</div>
-        <h2>Nuevo: Indicador de Notas</h2>
-        <p>Ahora podés saber de un vistazo si una orden tiene una nota pendiente de leer.</p>
-        <ul class="feature-popup-steps">
-            <li>🟢 <b>Borde verde parpadeante</b> = la orden tiene una nota nueva o editada</li>
-            <li>👆 <b>Tocá "Notas"</b> en esa orden para leerla y detener el parpadeo</li>
-            <li>✏️ Si la nota es <b>editada</b>, vuelve a parpadear para todos</li>
-        </ul>
+        <div id="noteFeaturePopupBody"></div>
         <button class="feature-popup-btn" onclick="closeNoteFeaturePopup()">Entendido</button>
     </div>
 </div>
@@ -929,6 +943,7 @@
     // --- Status Config ---
     const STATUS_CONFIG = {
         'Espera de Aprobacion':   { clase: 'st-aprobacion',       color: '#AF52DE', bolita: '\u270B', msg: 'Su orden esta en espera de aprobacion.' },
+        'Aprobado':               { clase: 'st-aprobado',         color: '#34C759', bolita: '\u2705', msg: 'La orden fue aprobada por el cliente.' },
         'Ordenado':               { clase: 'st-ordenado',         color: '#FFCC00', bolita: '\u2B50', msg: 'Su pieza ya ha sido ordenada a fabrica.' },
         'Backorder':              { clase: 'st-backorder',        color: '#FF2D55', bolita: '\u26A0', msg: 'La pieza esta en backorder. Estamos pendientes de disponibilidad.' },
         'Piezas en Tienda':       { clase: 'st-tienda',           color: '#FF9500', bolita: '\u2699', msg: 'Las piezas ya se encuentran fisicamente en la tienda.' },
@@ -954,9 +969,26 @@
     }
 
     function showNoteFeaturePopup() {
-        if (!localStorage.getItem('noteFeaturePopupSeen')) {
-            document.getElementById('noteFeaturePopup').classList.remove('hidden');
-        }
+        if (localStorage.getItem('noteFeaturePopupSeen')) return;
+        const isCustomer = currentRole === 'customer';
+        const body = isCustomer ? `
+            <div class="feature-popup-icon">🆕</div>
+            <h2>Novedades en tu app</h2>
+            <p>Hay dos cosas nuevas que podés hacer desde ahora:</p>
+            <ul class="feature-popup-steps">
+                <li>🟢 <b>Borde verde parpadeante</b> = tu orden tiene una nota del taller. Tocá <b>"Notas"</b> para leerla</li>
+                <li>✅ <b>Aprobar Orden</b> = cuando una orden esté en <b>"Espera de Aprobacion"</b>, aparece un botón para que vos la apruebes directamente</li>
+            </ul>` : `
+            <div class="feature-popup-icon">🆕</div>
+            <h2>Novedades en la app</h2>
+            <p>Dos nuevos indicadores visuales para estar al tanto:</p>
+            <ul class="feature-popup-steps">
+                <li>🟢 <b>Borde verde parpadeante</b> = la orden tiene una nota nueva. Tocá <b>"Notas"</b> para leerla</li>
+                <li>🟠 <b>Borde naranja parpadeante</b> = el cliente aprobó una orden. Cambiá el status para confirmar y detener el parpadeo</li>
+                <li>✏️ Si la nota es <b>editada</b>, vuelve a parpadear para todos</li>
+            </ul>`;
+        document.getElementById('noteFeaturePopupBody').innerHTML = body;
+        document.getElementById('noteFeaturePopup').classList.remove('hidden');
     }
     window.closeNoteFeaturePopup = function() {
         document.getElementById('noteFeaturePopup').classList.add('hidden');
@@ -1363,7 +1395,18 @@
 
     window.actualizarStatus = async function(id, nuevoStatus) {
         if (!currentUser || currentRole === 'customer') return;
-        await updateDoc(doc(db, 'orders', getDocId(id)), { status: nuevoStatus });
+        await updateDoc(doc(db, 'orders', getDocId(id)), { status: nuevoStatus, needsAttention: false });
+    };
+
+    window.aprobarOrden = async function(id) {
+        if (!currentUser || currentRole !== 'customer') return;
+        if (!confirm('¿Confirmas la aprobación de esta orden?')) return;
+        try {
+            await updateDoc(doc(db, 'orders', getDocId(id)), { status: 'Aprobado', needsAttention: true });
+            mostrarToast('Orden aprobada');
+        } catch {
+            mostrarToast('No se pudo aprobar la orden');
+        }
     };
 
     window.deleteOrder = async function(id) {
@@ -1504,7 +1547,8 @@
         const noteText = o.notes || '';
         const seenNotes = JSON.parse(localStorage.getItem('seenNotes') || '{}');
         const noteUnseen = noteText && seenNotes[o.id] !== noteText;
-        let html = `<div class="order-card ${cfg.clase}${noteUnseen ? ' has-note' : ''}" ${esEditando ? 'style="outline: 2px solid var(--ios-purple);"' : ''}>
+        const hasAttention = o.needsAttention && currentRole !== 'customer';
+        let html = `<div class="order-card ${cfg.clase}${noteUnseen ? ' has-note' : ''}${hasAttention ? ' has-attention' : ''}" ${esEditando ? 'style="outline: 2px solid var(--ios-purple);"' : ''}>
             <span class="taller-title">${esc(o.taller)}</span>
             <div class="details">
                 Pedido: <b>${esc(o.pedido)}</b> | PO#: <b>${esc(o.po || '---')}</b><br>
@@ -1534,11 +1578,14 @@
         </div>`;
 
         if (readOnly) {
+            const canApprove = currentRole === 'customer' && o.status === 'Espera de Aprobacion';
             html += `<div style="margin-top:10px;padding:8px 12px;border-radius:8px;background:#F2F2F7;font-size:14px;font-weight:600;color:${cfg.color};">
                 ${cfg.bolita} ${o.status}
-            </div>${attachHtml}${notesHtml}</div>`;
+            </div>
+            ${canApprove ? `<button class="btn-aprobar" onclick="aprobarOrden('${o.id}')">✅ Aprobar Orden</button>` : ''}
+            ${attachHtml}${notesHtml}</div>`;
         } else {
-            html += `<select class="status-selector-mini" onchange="actualizarStatus('${o.id}', this.value)">
+            html += `<select class="status-selector-mini${hasAttention ? ' has-attention' : ''}" onchange="actualizarStatus('${o.id}', this.value)">
                 ${Object.keys(STATUS_CONFIG).map(s =>
                     `<option value="${s}" ${o.status === s ? 'selected' : ''}>${STATUS_CONFIG[s].bolita} ${s}</option>`
                 ).join('')}
