@@ -966,6 +966,10 @@
         const isHidden = body.style.display === 'none';
         body.style.display = isHidden ? 'block' : 'none';
         if (arrow) arrow.classList.toggle('open', isHidden);
+        if (isHidden) {
+            const card = body.closest('.order-card');
+            if (card) card.classList.remove('has-note');
+        }
     };
 
     window.editNote = function(orderId) {
