@@ -1031,30 +1031,31 @@
     }
 
     function showNoteFeaturePopup() {
-        if (localStorage.getItem('noteFeaturePopupSeen_v2')) return;
+        if (localStorage.getItem('noteFeaturePopupSeen_v3')) return;
         const isCustomer = currentRole === 'customer';
         const body = isCustomer ? `
             <div class="feature-popup-icon">🆕</div>
             <h2>Novedades en tu app</h2>
-            <p>Hay dos cosas nuevas que podés hacer desde ahora:</p>
             <ul class="feature-popup-steps">
-                <li>🟢 <b>Borde verde parpadeante</b> = tu orden tiene una nota del taller. Tocá <b>"Notas"</b> para leerla</li>
-                <li>✅ <b>Aprobar Orden</b> = cuando una orden esté en <b>"Espera de Aprobacion"</b>, aparece un botón para que vos la apruebes directamente</li>
+                <li>💬 <b>Chat por orden</b> — podés escribirle mensajes al taller directamente en cada orden y ver las respuestas en tiempo real</li>
+                <li>🟢 <b>Borde verde parpadeante</b> = hay un mensaje nuevo del taller. Tocá la orden para leerlo y el parpadeo se detiene</li>
+                <li>✅ <b>Aprobar Orden</b> — cuando una orden esté en <b>"Espera de Aprobacion"</b> aparece un botón para que la apruebes vos mismo</li>
             </ul>` : `
             <div class="feature-popup-icon">🆕</div>
             <h2>Novedades en la app</h2>
-            <p>Dos nuevos indicadores visuales para estar al tanto:</p>
             <ul class="feature-popup-steps">
-                <li>🟢 <b>Borde verde parpadeante</b> = la orden tiene una nota nueva. Tocá <b>"Notas"</b> para leerla</li>
-                <li>🟠 <b>Borde naranja parpadeante</b> = el cliente aprobó una orden. Cambiá el status para confirmar y detener el parpadeo</li>
-                <li>✏️ Si la nota es <b>editada</b>, vuelve a parpadear para todos</li>
+                <li>💬 <b>Chat por orden</b> — cada orden tiene un hilo de mensajes. El cliente y el taller pueden escribirse en tiempo real</li>
+                <li>🟢 <b>Borde verde</b> = mensaje nuevo sin leer. Tocá la orden para leerlo y detener el parpadeo</li>
+                <li>🟠 <b>Borde naranja</b> = el cliente aprobó una orden. Cambiá el status para confirmarlo</li>
+                <li>🔴 <b>Borde rojo</b> = fecha de entrega vencida y la orden no está entregada aún</li>
+                <li>📋 <b>Inventario</b> — ahora muestra todas las órdenes en forma de lista compacta. Tocá una fila para ver los detalles, chat y acciones</li>
             </ul>`;
         document.getElementById('noteFeaturePopupBody').innerHTML = body;
         document.getElementById('noteFeaturePopup').classList.remove('hidden');
     }
     window.closeNoteFeaturePopup = function() {
         document.getElementById('noteFeaturePopup').classList.add('hidden');
-        localStorage.setItem('noteFeaturePopupSeen_v2', '1');
+        localStorage.setItem('noteFeaturePopupSeen_v3', '1');
     };
 
     function mostrarToast(msg) {
