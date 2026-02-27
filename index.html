@@ -139,6 +139,10 @@
         .st-listo-entrega { border-left-color: var(--ios-lightblue) !important; background: #F2FBFF; }
         .st-entregado { border-left-color: var(--ios-green) !important; opacity: 0.6; }
 
+        .order-card.has-note {
+            box-shadow: 0 0 0 2.5px var(--ios-green), 0 2px 8px rgba(52,199,89,0.15);
+        }
+
         .taller-title { font-size: 19px; font-weight: 600; margin-bottom: 8px; display: block; }
 
         .status-selector-mini {
@@ -1417,7 +1421,8 @@
             attachHtml += '</div></div>';
         }
 
-        let html = `<div class="order-card ${cfg.clase}" ${esEditando ? 'style="outline: 2px solid var(--ios-purple);"' : ''}>
+        const noteText = o.notes || '';
+        let html = `<div class="order-card ${cfg.clase}${noteText ? ' has-note' : ''}" ${esEditando ? 'style="outline: 2px solid var(--ios-purple);"' : ''}>
             <span class="taller-title">${esc(o.taller)}</span>
             <div class="details">
                 Pedido: <b>${esc(o.pedido)}</b> | PO#: <b>${esc(o.po || '---')}</b><br>
@@ -1426,13 +1431,12 @@
             ${creatorLine}`;
 
         // Notes section (visible and editable by all roles)
-        const noteText = o.notes || '';
         const notesId = `notes-${o.id}`;
         const notesHtml = `<div class="notes-section">
             <div class="notes-toggle" onclick="toggleNotes('${notesId}')">
-                <span class="toggle-arrow" id="arrow-${notesId}">&#9654;</span> Notas${noteText ? '' : ' (vacío)'}
+                <span class="toggle-arrow${noteText ? ' open' : ''}" id="arrow-${notesId}">&#9654;</span> Notas${noteText ? '' : ' (vacío)'}
             </div>
-            <div class="notes-body" id="${notesId}" style="display:none;">
+            <div class="notes-body" id="${notesId}" style="display:${noteText ? 'block' : 'none'};">
                 <div id="view-${notesId}">
                     ${noteText ? `<div class="notes-display">${esc(noteText)}</div>` : '<div class="notes-empty">Sin notas</div>'}
                     <div class="notes-actions"><button class="notes-btn notes-btn-save" onclick="editNote('${o.id}')">Editar nota</button></div>
