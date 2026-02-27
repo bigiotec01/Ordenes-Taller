@@ -969,7 +969,7 @@
     }
 
     function showNoteFeaturePopup() {
-        if (localStorage.getItem('noteFeaturePopupSeen')) return;
+        if (localStorage.getItem('noteFeaturePopupSeen_v2')) return;
         const isCustomer = currentRole === 'customer';
         const body = isCustomer ? `
             <div class="feature-popup-icon">🆕</div>
@@ -992,7 +992,7 @@
     }
     window.closeNoteFeaturePopup = function() {
         document.getElementById('noteFeaturePopup').classList.add('hidden');
-        localStorage.setItem('noteFeaturePopupSeen', '1');
+        localStorage.setItem('noteFeaturePopupSeen_v2', '1');
     };
 
     function mostrarToast(msg) {
