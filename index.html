@@ -160,6 +160,14 @@
             font-size: 11px; font-weight: 700; padding: 2px 8px;
             border-radius: 6px; margin-left: 6px; vertical-align: middle;
         }
+        .order-card.is-due-today {
+            animation: attention-pulse 1s ease-in-out infinite;
+        }
+        .due-today-badge {
+            display: inline-block; background: #FF9500; color: #fff;
+            font-size: 11px; font-weight: 700; padding: 2px 8px;
+            border-radius: 6px; margin-left: 6px; vertical-align: middle;
+        }
 
         @keyframes attention-pulse {
             0%, 100% { box-shadow: 0 0 0 3px #FF9500, 0 0 10px 2px rgba(255,149,0,0.6); }
@@ -640,6 +648,18 @@
 
             /* ===== Admin List View ===== */
         .admin-list { display: flex; flex-direction: column; gap: 4px; }
+        .historial-section { margin-top: 16px; }
+        .historial-toggle {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 14px; background: #f0f0f5; border-radius: 10px;
+            cursor: pointer; font-size: 13px; font-weight: 600; color: #555;
+            user-select: none;
+        }
+        .historial-toggle:hover { background: #e5e5ea; }
+        .historial-arrow { transition: transform 0.2s; }
+        .historial-section.open .historial-arrow { transform: rotate(180deg); }
+        .historial-body { display: none; margin-top: 6px; }
+        .historial-section.open .historial-body { display: block; }
         .admin-row {
             background: #fff; border-radius: 10px;
             border-left: 5px solid #ddd;
@@ -647,7 +667,8 @@
         }
         .admin-row.has-note    { animation: note-pulse      1.2s ease-in-out infinite; }
         .admin-row.has-attention { animation: attention-pulse 1.2s ease-in-out infinite; }
-        .admin-row.is-overdue  { animation: overdue-pulse   1s   ease-in-out infinite; }
+        .admin-row.is-overdue    { animation: overdue-pulse   1s   ease-in-out infinite; }
+        .admin-row.is-due-today  { animation: attention-pulse 1s   ease-in-out infinite; }
         .admin-row-header {
             display: flex; align-items: center; gap: 10px;
             padding: 10px 12px; cursor: pointer;
@@ -673,6 +694,59 @@
         .admin-row.open .admin-row-expand { display: block; }
         .admin-row-actions {
             display: flex; gap: 8px; margin-top: 10px;
+        }
+
+        /* Inventario: forzar layout idéntico al desktop en móvil */
+        @media (max-width: 767px) {
+            #tabInventario .desktop-layout {
+                display: flex;
+                align-items: flex-start;
+            }
+            #tabInventario .sidebar {
+                width: 140px;
+                min-width: 120px;
+                max-width: 160px;
+                flex-shrink: 0;
+                background: #2C2C2E;
+                padding: 10px 8px 40px;
+                box-sizing: border-box;
+                position: sticky;
+                top: 0;
+                max-height: 100vh;
+                overflow-y: auto;
+            }
+            #tabInventario .sidebar-section {
+                background: #3A3A3C;
+                border-radius: 10px;
+                padding: 10px 8px;
+                margin-bottom: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            }
+            #tabInventario .sidebar-section:last-child { display: none; }
+            #tabInventario .sidebar-section-title {
+                display: block;
+                font-size: 10px; font-weight: 600;
+                color: #AEAEB2; text-transform: uppercase;
+                letter-spacing: 0.5px; margin-bottom: 8px;
+            }
+            #tabInventario .sidebar .search-bar {
+                background: #2C2C2E; border-radius: 8px;
+                padding: 6px 6px; gap: 4px;
+            }
+            #tabInventario .sidebar .search-bar input {
+                background: transparent; color: #fff;
+                font-size: 11px; min-width: 0;
+            }
+            #tabInventario .sidebar .search-bar span { color: #8E8E93; font-size: 12px; }
+            #tabInventario .main-content {
+                flex: 1;
+                padding: 12px 8px;
+                min-width: 0;
+                background: #E8E6E6;
+            }
+            #tabInventario .main-content-title {
+                font-size: 14px; margin-bottom: 8px;
+            }
         }
 
         /* Inventario: stat-grid inside dark sidebar */
@@ -1031,9 +1105,9 @@
     }
 
     function showNoteFeaturePopup() {
+        if (currentRole !== 'customer' && currentRole !== 'dealers') return;
         if (localStorage.getItem('noteFeaturePopupSeen_v3')) return;
-        const isCustomer = currentRole === 'customer';
-        const body = isCustomer ? `
+        const body = currentRole === 'customer' ? `
             <div class="feature-popup-icon">🆕</div>
             <h2>Novedades en tu app</h2>
             <ul class="feature-popup-steps">
@@ -1042,13 +1116,12 @@
                 <li>✅ <b>Aprobar Orden</b> — cuando una orden esté en <b>"Espera de Aprobacion"</b> aparece un botón para que la apruebes vos mismo</li>
             </ul>` : `
             <div class="feature-popup-icon">🆕</div>
-            <h2>Novedades en la app</h2>
+            <h2>Novedades en tu app</h2>
             <ul class="feature-popup-steps">
-                <li>💬 <b>Chat por orden</b> — cada orden tiene un hilo de mensajes. El cliente y el taller pueden escribirse en tiempo real</li>
-                <li>🟢 <b>Borde verde</b> = mensaje nuevo sin leer. Tocá la orden para leerlo y detener el parpadeo</li>
-                <li>🟠 <b>Borde naranja</b> = el cliente aprobó una orden. Cambiá el status para confirmarlo</li>
-                <li>🔴 <b>Borde rojo</b> = fecha de entrega vencida y la orden no está entregada aún</li>
-                <li>📋 <b>Inventario</b> — ahora muestra todas las órdenes en forma de lista compacta. Tocá una fila para ver los detalles, chat y acciones</li>
+                <li>💬 <b>Chat por orden</b> — cada orden tiene un hilo de mensajes. Podés comunicarte con el taller en tiempo real</li>
+                <li>🟢 <b>Borde verde parpadeante</b> = hay un mensaje nuevo sin leer. Tocá la orden para verlo y el parpadeo se detiene</li>
+                <li>🟠 <b>Borde naranja</b> = el cliente aprobó una orden. Revisá el status para confirmarlo</li>
+                <li>🔴 <b>Borde rojo</b> = fecha de entrega vencida y la orden todavía no fue entregada</li>
             </ul>`;
         document.getElementById('noteFeaturePopupBody').innerHTML = body;
         document.getElementById('noteFeaturePopup').classList.remove('hidden');
@@ -1156,7 +1229,8 @@
             const seen = JSON.parse(localStorage.getItem('seenComments') || '{}');
             seen[orderId] = (order?.comments || []).length + 1;
             localStorage.setItem('seenComments', JSON.stringify(seen));
-        } catch {
+        } catch(e) {
+            console.error('sendComment error:', e);
             mostrarToast('No se pudo enviar el mensaje');
         }
     };
@@ -1463,7 +1537,8 @@
         try {
             await updateDoc(doc(db, 'orders', getDocId(id)), { status: 'Aprobado', needsAttention: true });
             mostrarToast('Orden aprobada');
-        } catch {
+        } catch(e) {
+            console.error('aprobarOrden error:', e);
             mostrarToast('No se pudo aprobar la orden');
         }
     };
@@ -1534,6 +1609,7 @@
 
         const filtradas = visible
             .filter(o => {
+                if (filtroActual === 'Todos' && o.status === 'Entregado') return false;
                 if (filtroActual !== 'Todos' && o.status !== filtroActual) return false;
                 if (!query) return true;
                 return o.taller.toLowerCase().includes(query) ||
@@ -1568,10 +1644,11 @@
     function renderOrderCard(o, { readOnly = false, showCreator = false } = {}) {
         const cfg = STATUS_CONFIG[o.status] || STATUS_CONFIG['Ordenado'];
         const today = new Date(); today.setHours(0,0,0,0);
-        const isOverdue = o.fechaEntrega && o.status !== 'Entregado'
-            && new Date(o.fechaEntrega + 'T00:00:00') < today;
+        const deliveryDate = o.fechaEntrega ? new Date(o.fechaEntrega + 'T00:00:00') : null;
+        const isOverdue   = deliveryDate && o.status !== 'Entregado' && deliveryDate < today;
+        const isDueToday  = deliveryDate && o.status !== 'Entregado' && deliveryDate.getTime() === today.getTime();
         const entregaInfo = o.fechaEntrega
-            ? ` | Entrega: <b>${fechaEs(o.fechaEntrega)}</b>${isOverdue ? '<span class="overdue-badge">VENCIDA</span>' : ''}`
+            ? ` | Entrega: <b>${fechaEs(o.fechaEntrega)}</b>${isOverdue ? '<span class="overdue-badge">VENCIDA</span>' : isDueToday ? '<span class="due-today-badge">HOY</span>' : ''}`
             : '';
         const esEditando = String(o.id) === String(editandoId);
         const creatorLine = showCreator && o.createdBy
@@ -1613,7 +1690,7 @@
         const seenComments = JSON.parse(localStorage.getItem('seenComments') || '{}');
         const chatUnseen = comments.length > (seenComments[o.id] || 0);
         const hasAttention = o.needsAttention && currentRole !== 'customer';
-        let html = `<div class="order-card ${cfg.clase}${chatUnseen ? ' has-note' : ''}${hasAttention ? ' has-attention' : ''}${isOverdue ? ' is-overdue' : ''}" ${esEditando ? 'style="outline: 2px solid var(--ios-purple);"' : ''}>
+        let html = `<div class="order-card ${cfg.clase}${chatUnseen ? ' has-note' : ''}${hasAttention ? ' has-attention' : ''}${isOverdue ? ' is-overdue' : isDueToday ? ' is-due-today' : ''}" ${esEditando ? 'style="outline: 2px solid var(--ios-purple);"' : ''}>
             <span class="taller-title">${esc(o.taller)}</span>
             <div class="details">
                 Pedido: <b>${esc(o.pedido)}</b> | PO#: <b>${esc(o.po || '---')}</b><br>
@@ -1695,8 +1772,9 @@
     function renderAdminRow(o) {
         const cfg = STATUS_CONFIG[o.status] || STATUS_CONFIG['Ordenado'];
         const today = new Date(); today.setHours(0,0,0,0);
-        const isOverdue = o.fechaEntrega && o.status !== 'Entregado'
-            && new Date(o.fechaEntrega + 'T00:00:00') < today;
+        const deliveryDate = o.fechaEntrega ? new Date(o.fechaEntrega + 'T00:00:00') : null;
+        const isOverdue   = deliveryDate && o.status !== 'Entregado' && deliveryDate < today;
+        const isDueToday  = deliveryDate && o.status !== 'Entregado' && deliveryDate.getTime() === today.getTime();
         const comments = o.comments || [];
         const seenComments = JSON.parse(localStorage.getItem('seenComments') || '{}');
         const chatUnseen = comments.length > (seenComments[o.id] || 0);
@@ -1705,7 +1783,7 @@
         const classes = [
             chatUnseen    ? 'has-note'       : '',
             hasAttention  ? 'has-attention'  : '',
-            isOverdue     ? 'is-overdue'     : ''
+            isOverdue     ? 'is-overdue'     : isDueToday ? 'is-due-today' : ''
         ].filter(Boolean).join(' ');
 
         // Chat section (reuse same builder)
@@ -1767,7 +1845,7 @@
             </div>`;
         }
 
-        const entregaStr = o.fechaEntrega ? ` · ${fechaEs(o.fechaEntrega)}${isOverdue ? ' ⚠️' : ''}` : '';
+        const entregaStr = o.fechaEntrega ? ` · ${fechaEs(o.fechaEntrega)}${isOverdue ? ' ⚠️' : isDueToday ? ' 🔔' : ''}` : '';
         const creatorName = getCreatorName(o.createdBy);
 
         return `<div class="admin-row ${classes}" id="admin-row-${o.id}"
@@ -1802,22 +1880,43 @@
         if (!list || currentRole !== 'admin') return;
         const query = (document.getElementById('adminSearchInput')?.value || '').toLowerCase();
 
-        const filtradas = orders
-            .filter(o => {
-                if (!query) return true;
-                return o.taller.toLowerCase().includes(query) ||
-                       (o.pedido && o.pedido.toLowerCase().includes(query)) ||
-                       (o.po && o.po.toLowerCase().includes(query)) ||
-                       getCreatorName(o.createdBy).toLowerCase().includes(query);
-            })
-            .sort((a, b) => b.id - a.id);
+        const matchQuery = o => {
+            if (!query) return true;
+            return o.taller.toLowerCase().includes(query) ||
+                   (o.pedido && o.pedido.toLowerCase().includes(query)) ||
+                   (o.po && o.po.toLowerCase().includes(query)) ||
+                   getCreatorName(o.createdBy).toLowerCase().includes(query);
+        };
 
-        if (filtradas.length === 0) {
+        const activas    = orders.filter(o => o.status !== 'Entregado' && matchQuery(o)).sort((a, b) => b.id - a.id);
+        const entregadas = orders.filter(o => o.status === 'Entregado'  && matchQuery(o)).sort((a, b) => b.id - a.id);
+
+        if (activas.length === 0 && entregadas.length === 0) {
             list.innerHTML = `<div class="empty-state"><div class="icon">&#128203;</div><p>${query ? 'Sin resultados' : 'No hay ordenes'}</p></div>`;
             return;
         }
 
-        list.innerHTML = `<div class="admin-list">${filtradas.map(renderAdminRow).join('')}</div>`;
+        let html = '';
+        if (activas.length > 0) {
+            html += `<div class="admin-list">${activas.map(renderAdminRow).join('')}</div>`;
+        } else {
+            html += `<div class="empty-state" style="padding:20px 0"><div class="icon">&#128203;</div><p>No hay ordenes activas</p></div>`;
+        }
+
+        if (entregadas.length > 0) {
+            html += `
+            <div class="historial-section">
+                <div class="historial-toggle" onclick="this.parentElement.classList.toggle('open')">
+                    <span>Historial de entregadas (${entregadas.length})</span>
+                    <span class="historial-arrow">&#9660;</span>
+                </div>
+                <div class="historial-body">
+                    <div class="admin-list">${entregadas.map(renderAdminRow).join('')}</div>
+                </div>
+            </div>`;
+        }
+
+        list.innerHTML = html;
     }
     window.renderAdminOrders = renderAdminOrders;
 
