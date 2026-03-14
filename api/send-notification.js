@@ -1,10 +1,14 @@
-const webpush = require('web-push');
+const admin = require('firebase-admin');
 
-webpush.setVapidDetails(
-    'mailto:bigio_tec@me.com',
-    'BGaulXsZQCLUFbfhgPAGBZyRvf0LlYMd8_-tLycPOIbWvPiE4Xs9EuWv5bRvXe2VCfgJzgK71AwY5yUKNDVHO8Y',
-    'n86Hk8cWlKsKOJS1_n8PLXruFtoeT0M-66gZ2aEIV6c'
-);
+if (!admin.apps.length) {
+    admin.initializeApp({
+        credential: admin.credential.cert({
+            projectId: process.env.FIREBASE_PROJECT_ID,
+            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        }),
+    });
+}
 
 module.exports = async (req, res) => {
     if (req.method !== 'POST') {
@@ -12,21 +16,38 @@ module.exports = async (req, res) => {
     }
 
     try {
-        const { subscriptions, title, body } = req.body;
-        if (!subscriptions || !Array.isArray(subscriptions) || !title || !body) {
-            return res.status(400).json({ error: 'Missing subscriptions, title, or body' });
+        const { tokens, title, body } = req.body;
+        if (!tokens || !Array.isArray(tokens) || !title || !body) {
+            return res.status(400).json({ error: 'Missing tokens, title, or body' });
         }
 
-        const payload = JSON.stringify({ title, body });
         let sent = 0;
         let failed = 0;
 
-        for (const sub of subscriptions) {
+        for (const token of tokens) {
             try {
-                await webpush.sendNotification(sub, payload);
+                await admin.messaging().send({
+                    token,
+                    notification: { title, body },
+                    webpush: {
+                        notification: {
+                            icon: '/icon-512.png',
+                            badge: '/icon-192.png',
+                            tag: 'partspilot',
+                            renotify: true
+                        }
+                    }
+                });
                 sent++;
             } catch (err) {
                 failed++;
+                // Remove invalid tokens from Firestore
+                if (err.code === 'messaging/registration-token-not-registered' ||
+                    err.code === 'messaging/invalid-registration-token') {
+                    const usersSnap = await admin.firestore().collection('users')
+                        .where('fcmToken', '==', token).get();
+                    usersSnap.forEach(d => d.ref.update({ fcmToken: null }));
+                }
             }
         }
 

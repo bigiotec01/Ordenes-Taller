@@ -1051,6 +1051,7 @@
     import {
         getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+    import { getMessaging, getToken, deleteToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
     // --- Firebase ---
     const firebaseConfig = {
@@ -1066,6 +1067,8 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
     const storage = getStorage(app);
+    let messaging = null;
+    try { messaging = getMessaging(app); } catch(e) { console.log('FCM not supported:', e); }
     enableIndexedDbPersistence(db).catch(() => {});
     const ordersCol = collection(db, 'orders');
     const usersCol = collection(db, 'users');
@@ -1253,31 +1256,23 @@
         }
     };
 
-    // --- Push Notifications ---
-    const VAPID_PUBLIC_KEY = 'BGaulXsZQCLUFbfhgPAGBZyRvf0LlYMd8_-tLycPOIbWvPiE4Xs9EuWv5bRvXe2VCfgJzgK71AwY5yUKNDVHO8Y';
-
-    function urlBase64ToUint8Array(base64String) {
-        const padding = '='.repeat((4 - base64String.length % 4) % 4);
-        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-        const raw = atob(base64);
-        const arr = new Uint8Array(raw.length);
-        for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
-        return arr;
-    }
+    // --- Push Notifications (FCM) ---
+    const FCM_VAPID_KEY = 'BPYRL1vJf9wLVL8P5Id3ny_-HnJmVPmQYm4sbm3_cj1PHV62RvFByvfcUDj7bN9vKtvoAHQb_IqB9U5tFo8YVcQ';
 
     function pushSupported() {
-        return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+        return 'serviceWorker' in navigator && 'Notification' in window && messaging;
     }
 
     async function initPushUI() {
         const btn = document.getElementById('btnNotif');
-        if (!btn || !pushSupported()) { console.log('Push not supported or btn missing'); return; }
+        if (!btn || !pushSupported()) { console.log('FCM not supported or btn missing'); return; }
         btn.style.display = 'inline-flex';
         try {
-            const reg = await navigator.serviceWorker.ready;
-            const sub = await reg.pushManager.getSubscription();
-            btn.classList.toggle('active', !!sub);
-            console.log('Push init OK, subscribed:', !!sub);
+            if (currentUser) {
+                const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+                const hasToken = userDoc.exists() && userDoc.data().fcmToken;
+                btn.classList.toggle('active', !!hasToken);
+            }
         } catch (e) {
             console.error('initPushUI error:', e);
         }
@@ -1286,17 +1281,20 @@
     window.toggleNotifications = async function() {
         if (!pushSupported()) return mostrarToast('Tu navegador no soporta notificaciones');
         const btn = document.getElementById('btnNotif');
-        const reg = await navigator.serviceWorker.ready;
-        const existing = await reg.pushManager.getSubscription();
 
-        if (existing) {
-            await existing.unsubscribe();
-            if (currentUser) {
-                await updateDoc(doc(db, 'users', currentUser.uid), { pushSub: null }).catch(() => {});
+        // Check if already subscribed
+        if (currentUser) {
+            const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+            if (userDoc.exists() && userDoc.data().fcmToken) {
+                // Unsubscribe
+                try {
+                    await deleteToken(messaging);
+                } catch(e) { /* ignore */ }
+                await updateDoc(doc(db, 'users', currentUser.uid), { fcmToken: null }).catch(() => {});
+                btn.classList.remove('active');
+                mostrarToast('Notificaciones desactivadas');
+                return;
             }
-            btn.classList.remove('active');
-            mostrarToast('Notificaciones desactivadas');
-            return;
         }
 
         const perm = await Notification.requestPermission();
@@ -1306,45 +1304,42 @@
         }
 
         try {
-            const sub = await reg.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+            const swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+            const token = await getToken(messaging, {
+                vapidKey: FCM_VAPID_KEY,
+                serviceWorkerRegistration: swReg
             });
-            if (currentUser) {
-                await updateDoc(doc(db, 'users', currentUser.uid), {
-                    pushSub: JSON.parse(JSON.stringify(sub))
-                });
+            if (token && currentUser) {
+                await updateDoc(doc(db, 'users', currentUser.uid), { fcmToken: token });
             }
             btn.classList.add('active');
-            console.log('Push subscribed, saved to Firestore');
+            console.log('FCM token saved:', token?.slice(0, 20) + '...');
             mostrarToast('Notificaciones activadas');
         } catch (err) {
-            console.error('Push subscribe error:', err);
-            mostrarToast('Error: ' + (err.name || '') + ' ' + (err.message || err));
+            console.error('FCM subscribe error:', err);
+            mostrarToast('Error: ' + (err.message || err));
         }
     };
 
     async function notifyPush({ taller, createdBy, excludeUid, title, body }) {
         if (!currentUser) return;
         try {
-            // Collect push subscriptions from relevant users
-            const subs = [];
+            const tokens = [];
             const usersSnap = await getDocs(collection(db, 'users'));
             usersSnap.forEach(d => {
                 const u = d.data();
-                if (d.id === excludeUid || !u.pushSub) return;
-                // Notify customers with matching taller or the order creator
+                if (d.id === excludeUid || !u.fcmToken) return;
                 if ((taller && u.taller && u.taller.toLowerCase() === taller.toLowerCase()) || d.id === createdBy) {
-                    subs.push(typeof u.pushSub === 'string' ? JSON.parse(u.pushSub) : u.pushSub);
+                    tokens.push(u.fcmToken);
                 }
             });
-            console.log('notifyPush: found', subs.length, 'subscriptions');
-            if (subs.length === 0) return;
+            console.log('notifyPush: found', tokens.length, 'FCM tokens');
+            if (tokens.length === 0) return;
             fetch('/api/send-notification', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ subscriptions: subs, title, body })
-            }).then(r => r.json()).then(r => console.log('Push API result:', r)).catch(e => console.error('Push API error:', e));
+                body: JSON.stringify({ tokens, title, body })
+            }).then(r => r.json()).then(r => console.log('FCM API result:', r)).catch(e => console.error('FCM API error:', e));
         } catch (e) { console.error('notifyPush error:', e); }
     }
 
