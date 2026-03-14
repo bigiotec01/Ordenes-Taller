@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="./icon-512.png">
-    <link rel="manifest" href="manifest.json?v=3.6.2">
+    <link rel="manifest" href="manifest.json?v=3.6.3">
     <meta name="theme-color" content="#F2F2F7">
 
     <style>
@@ -935,7 +935,7 @@
             <!-- ===== MAIN: Lista de Ordenes ===== -->
             <main class="main-content">
                 <div id="orderList"></div>
-                <footer class="footer">v3.6.2 | PartsPilot</footer>
+                <footer class="footer">v3.6.3 | PartsPilot</footer>
             </main>
 
         </div>
@@ -964,7 +964,7 @@
             <main class="main-content">
                 <div class="main-content-title">&#128230; Todas las Ordenes</div>
                 <div id="adminOrderList"></div>
-                <footer class="footer">v3.6.2 | PartsPilot</footer>
+                <footer class="footer">v3.6.3 | PartsPilot</footer>
             </main>
 
         </div>
@@ -1002,7 +1002,7 @@
             <main class="main-content">
                 <div class="main-content-title">&#128101; Usuarios Registrados</div>
                 <div id="userList"></div>
-                <footer class="footer">v3.6.2 | PartsPilot</footer>
+                <footer class="footer">v3.6.3 | PartsPilot</footer>
             </main>
 
         </div>
@@ -1266,8 +1266,7 @@
     async function ensureFcmToken() {
         if (!currentUser) return;
         try {
-            const sw = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-            await navigator.serviceWorker.ready;
+            const sw = await navigator.serviceWorker.ready;
             const messaging = getMessaging(app);
             const token = await getToken(messaging, {
                 vapidKey: FCM_VAPID_KEY,
@@ -1275,7 +1274,7 @@
             });
             if (token) {
                 await updateDoc(doc(db, 'users', currentUser.uid), { fcmToken: token });
-                console.log('[FCM] Token stored');
+                console.log('[FCM] Token stored:', token.substring(0, 20) + '...');
             }
         } catch (e) {
             console.error('[FCM] Token error:', e.message);
@@ -2656,7 +2655,7 @@
 
     // --- Service Worker ---
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js?v=3.6.2').then((reg) => {
+        navigator.serviceWorker.register('sw.js?v=3.6.3').then((reg) => {
             // Check for updates every 60 seconds
             setInterval(() => reg.update(), 60000);
         });
