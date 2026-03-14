@@ -51,6 +51,11 @@
             background: none; border: 1px solid var(--ios-gray); color: var(--ios-gray);
             padding: 4px 12px; border-radius: 8px; font-size: 13px; font-weight: 600;
         }
+        .btn-notif {
+            background: none; border: 1px solid #E5E5EA; border-radius: 8px;
+            padding: 4px 8px; font-size: 16px; line-height: 1; cursor: pointer;
+        }
+        .btn-notif.active { background: #D1FAE5; border-color: #34C759; }
 
         h1 { margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -1px; }
 
@@ -837,7 +842,10 @@
                 <span id="userName" class="user-name"></span>
                 <span id="userRoleBadge" class="role-badge"></span>
             </div>
-            <button class="btn-logout" onclick="doLogout()">Salir</button>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <button id="btnNotif" class="btn-notif" onclick="toggleNotifications()" style="display:none;" title="Notificaciones">&#128276;</button>
+                <button class="btn-logout" onclick="doLogout()">Salir</button>
+            </div>
         </div>
         <h1>PartsPilot</h1>
         <div style="margin-top:4px;"><span id="syncBadge" class="sync-badge sync-offline">offline</span></div>
@@ -1229,11 +1237,98 @@
             const seen = JSON.parse(localStorage.getItem('seenComments') || '{}');
             seen[orderId] = (order?.comments || []).length + 1;
             localStorage.setItem('seenComments', JSON.stringify(seen));
+            if (order) {
+                const preview = text.length > 50 ? text.slice(0, 50) + '...' : text;
+                notifyPush({
+                    taller: order.taller,
+                    createdBy: order.createdBy,
+                    excludeUid: currentUser.uid,
+                    title: `Mensaje - ${order.taller}`,
+                    body: `${currentUserDoc?.name || 'Alguien'}: ${preview}`
+                });
+            }
         } catch(e) {
             console.error('sendComment error:', e);
             mostrarToast('No se pudo enviar el mensaje');
         }
     };
+
+    // --- Push Notifications ---
+    const VAPID_PUBLIC_KEY = 'BKowGpFdqzAFG_HrJfFUKMKWdVwwZytU5DGDHMCEqutecTjcJk9P7Xs_cOFaU6oRhjuMUR-h2tebYrvZ29pRU0Y';
+
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+        const raw = atob(base64);
+        const arr = new Uint8Array(raw.length);
+        for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+        return arr;
+    }
+
+    function pushSupported() {
+        return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+    }
+
+    async function initPushUI() {
+        const btn = document.getElementById('btnNotif');
+        if (!btn || !pushSupported()) return;
+        btn.style.display = 'inline-flex';
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        btn.classList.toggle('active', !!sub);
+    }
+
+    window.toggleNotifications = async function() {
+        if (!pushSupported()) return mostrarToast('Tu navegador no soporta notificaciones');
+        const btn = document.getElementById('btnNotif');
+        const reg = await navigator.serviceWorker.ready;
+        const existing = await reg.pushManager.getSubscription();
+
+        if (existing) {
+            await existing.unsubscribe();
+            if (currentUser) {
+                await updateDoc(doc(db, 'users', currentUser.uid), { pushSub: null }).catch(() => {});
+            }
+            btn.classList.remove('active');
+            mostrarToast('Notificaciones desactivadas');
+            return;
+        }
+
+        const perm = await Notification.requestPermission();
+        if (perm !== 'granted') {
+            mostrarToast('Permiso de notificaciones denegado');
+            return;
+        }
+
+        try {
+            const sub = await reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+            });
+            if (currentUser) {
+                await updateDoc(doc(db, 'users', currentUser.uid), {
+                    pushSub: JSON.parse(JSON.stringify(sub))
+                });
+            }
+            btn.classList.add('active');
+            mostrarToast('Notificaciones activadas');
+        } catch (err) {
+            console.error('Push subscribe error:', err);
+            mostrarToast('No se pudieron activar las notificaciones');
+        }
+    };
+
+    async function notifyPush({ taller, createdBy, excludeUid, title, body }) {
+        if (!currentUser) return;
+        try {
+            const token = await currentUser.getIdToken();
+            fetch('/api/send-notification', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ taller, createdBy, excludeUid, title, body })
+            }).catch(() => {});
+        } catch {}
+    }
 
     // --- Auth State ---
     onAuthStateChanged(auth, async (user) => {
@@ -1337,6 +1432,7 @@
         startListening();
         migrarLocalAFirestore();
         showNoteFeaturePopup();
+        initPushUI();
     }
 
     function showLogin() {
@@ -1529,6 +1625,17 @@
     window.actualizarStatus = async function(id, nuevoStatus) {
         if (!currentUser || currentRole === 'customer') return;
         await updateDoc(doc(db, 'orders', getDocId(id)), { status: nuevoStatus, needsAttention: false });
+        const order = orders.find(o => String(o.id) === String(id));
+        if (order) {
+            const cfg = STATUS_CONFIG[nuevoStatus] || {};
+            notifyPush({
+                taller: order.taller,
+                createdBy: order.createdBy,
+                excludeUid: currentUser.uid,
+                title: `${cfg.bolita || ''} ${nuevoStatus}`,
+                body: `${order.taller} - ${order.pedido}`
+            });
+        }
     };
 
     window.aprobarOrden = async function(id) {

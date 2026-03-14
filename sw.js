@@ -49,12 +49,30 @@ self.addEventListener('fetch', (e) => {
 
 // Push notifications
 self.addEventListener('push', (event) => {
+  let data = {};
+  try { data = event.data.json(); } catch { data = { body: event.data?.text() || 'Nueva notificacion' }; }
   const options = {
-    body: event.data ? event.data.text() : 'Tienes una entrega pendiente',
+    body: data.body || 'Nueva notificacion',
     icon: '/icon-512.png',
-    badge: '/icon-192.png'
+    badge: '/icon-192.png',
+    tag: data.tag || 'partspilot',
+    renotify: true,
+    data: { url: '/' }
   };
   event.waitUntil(
-    self.registration.showNotification('Pedidos Dealer', options)
+    self.registration.showNotification(data.title || 'PartsPilot', options)
+  );
+});
+
+// Notification click — focus or open app
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window' }).then((clientList) => {
+      for (const client of clientList) {
+        if ('focus' in client) return client.focus();
+      }
+      return clients.openWindow('/');
+    })
   );
 });
