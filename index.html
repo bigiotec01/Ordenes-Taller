@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="./icon-512.png">
-    <link rel="manifest" href="manifest.json?v=3.6.0">
+    <link rel="manifest" href="manifest.json?v=3.6.1">
     <meta name="theme-color" content="#F2F2F7">
 
     <style>
@@ -935,7 +935,7 @@
             <!-- ===== MAIN: Lista de Ordenes ===== -->
             <main class="main-content">
                 <div id="orderList"></div>
-                <footer class="footer">v3.6.0 | PartsPilot</footer>
+                <footer class="footer">v3.6.1 | PartsPilot</footer>
             </main>
 
         </div>
@@ -964,7 +964,7 @@
             <main class="main-content">
                 <div class="main-content-title">&#128230; Todas las Ordenes</div>
                 <div id="adminOrderList"></div>
-                <footer class="footer">v3.6.0 | PartsPilot</footer>
+                <footer class="footer">v3.6.1 | PartsPilot</footer>
             </main>
 
         </div>
@@ -1002,7 +1002,7 @@
             <main class="main-content">
                 <div class="main-content-title">&#128101; Usuarios Registrados</div>
                 <div id="userList"></div>
-                <footer class="footer">v3.6.0 | PartsPilot</footer>
+                <footer class="footer">v3.6.1 | PartsPilot</footer>
             </main>
 
         </div>
@@ -1263,6 +1263,25 @@
         return 'Notification' in window;
     }
 
+    async function ensureFcmToken() {
+        if (!currentUser) return;
+        try {
+            const sw = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+            await navigator.serviceWorker.ready;
+            const messaging = getMessaging(app);
+            const token = await getToken(messaging, {
+                vapidKey: FCM_VAPID_KEY,
+                serviceWorkerRegistration: sw
+            });
+            if (token) {
+                await updateDoc(doc(db, 'users', currentUser.uid), { fcmToken: token });
+                console.log('[FCM] Token stored');
+            }
+        } catch (e) {
+            console.error('[FCM] Token error:', e.message);
+        }
+    }
+
     async function initPushUI() {
         const btn = document.getElementById('btnNotif');
         if (!btn || !notifSupported()) return;
@@ -1271,7 +1290,11 @@
             const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
             const enabled = userDoc.exists() && userDoc.data().notificationsOn;
             btn.classList.toggle('active', !!enabled);
-            if (enabled && Notification.permission === 'granted') startNotifListener();
+            if (enabled && Notification.permission === 'granted') {
+                startNotifListener();
+                // Ensure FCM token exists for background push
+                if (!userDoc.data().fcmToken) ensureFcmToken();
+            }
         }
     }
 
@@ -1326,32 +1349,15 @@
             return;
         }
 
-        // Register FCM for background push notifications
-        let fcmToken = null;
-        try {
-            console.log('[FCM] Registering messaging SW...');
-            const sw = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-            await navigator.serviceWorker.ready;
-            console.log('[FCM] SW registered, getting token...');
-            const messaging = getMessaging(app);
-            fcmToken = await getToken(messaging, {
-                vapidKey: FCM_VAPID_KEY,
-                serviceWorkerRegistration: sw
-            });
-            console.log('[FCM] Token:', fcmToken ? fcmToken.substring(0, 20) + '...' : 'null');
-        } catch (e) {
-            console.error('[FCM] Failed:', e);
-            mostrarToast('Push: ' + e.message);
-        }
-
         if (currentUser) {
-            const updateData = { notificationsOn: true };
-            if (fcmToken) updateData.fcmToken = fcmToken;
-            await updateDoc(doc(db, 'users', currentUser.uid), updateData);
+            await updateDoc(doc(db, 'users', currentUser.uid), { notificationsOn: true });
         }
         startNotifListener();
         btn.classList.add('active');
-        mostrarToast(fcmToken ? 'Notificaciones activadas' : 'Notificaciones activadas (solo en app)');
+        // Register FCM token in background
+        ensureFcmToken().then(() => {
+            mostrarToast('Notificaciones activadas');
+        });
     };
 
     async function notifyPush({ taller, createdBy, excludeUid, title, body }) {
@@ -2650,7 +2656,7 @@
 
     // --- Service Worker ---
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js?v=3.6.0').then((reg) => {
+        navigator.serviceWorker.register('sw.js?v=3.6.1').then((reg) => {
             // Check for updates every 60 seconds
             setInterval(() => reg.update(), 60000);
         });
