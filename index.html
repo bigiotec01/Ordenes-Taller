@@ -1051,6 +1051,9 @@
     import {
         getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+    import {
+        getMessaging, getToken
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
     // --- Firebase ---
     const firebaseConfig = {
@@ -1300,6 +1303,8 @@
         if (notifUnsubscribe) { notifUnsubscribe(); notifUnsubscribe = null; }
     }
 
+    const FCM_VAPID_KEY = 'BPYRL1vJf9wLVL8P5Id3ny_-HnJmVPmQYm4sbm3_cj1PHV62RvFByvfcUDj7bN9vKtvoAHQb_IqB9U5tFo8YVcQ';
+
     window.toggleNotifications = async function() {
         if (!notifSupported()) return mostrarToast('Tu navegador no soporta notificaciones');
         const btn = document.getElementById('btnNotif');
@@ -1307,7 +1312,7 @@
         if (currentUser) {
             const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
             if (userDoc.exists() && userDoc.data().notificationsOn) {
-                await updateDoc(doc(db, 'users', currentUser.uid), { notificationsOn: false });
+                await updateDoc(doc(db, 'users', currentUser.uid), { notificationsOn: false, fcmToken: null });
                 stopNotifListener();
                 btn.classList.remove('active');
                 mostrarToast('Notificaciones desactivadas');
@@ -1321,12 +1326,28 @@
             return;
         }
 
+        // Register FCM for background push notifications
+        let fcmToken = null;
+        try {
+            const sw = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+            const messaging = getMessaging(app);
+            fcmToken = await getToken(messaging, {
+                vapidKey: FCM_VAPID_KEY,
+                serviceWorkerRegistration: sw
+            });
+            console.log('FCM token obtained:', fcmToken ? 'yes' : 'no');
+        } catch (e) {
+            console.warn('FCM registration failed, in-app notifications still work:', e.message);
+        }
+
         if (currentUser) {
-            await updateDoc(doc(db, 'users', currentUser.uid), { notificationsOn: true });
+            const updateData = { notificationsOn: true };
+            if (fcmToken) updateData.fcmToken = fcmToken;
+            await updateDoc(doc(db, 'users', currentUser.uid), updateData);
         }
         startNotifListener();
         btn.classList.add('active');
-        mostrarToast('Notificaciones activadas');
+        mostrarToast(fcmToken ? 'Notificaciones activadas' : 'Notificaciones activadas (solo en app)');
     };
 
     async function notifyPush({ taller, createdBy, excludeUid, title, body }) {
@@ -1334,6 +1355,7 @@
         try {
             const usersSnap = await getDocs(collection(db, 'users'));
             const batch = writeBatch(db);
+            const fcmTokens = [];
             let count = 0;
             usersSnap.forEach(d => {
                 const u = d.data();
@@ -1342,10 +1364,19 @@
                     const notifRef = doc(collection(db, 'users', d.id, 'notifications'));
                     batch.set(notifRef, { title, body, read: false, ts: new Date() });
                     count++;
+                    if (u.fcmToken) fcmTokens.push(u.fcmToken);
                 }
             });
             if (count > 0) await batch.commit();
-            console.log('Notifications sent to', count, 'users');
+            // Send FCM push for background/closed app notifications
+            if (fcmTokens.length > 0) {
+                fetch('/api/send-notification', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tokens: fcmTokens, title, body })
+                }).catch(e => console.error('FCM push error:', e));
+            }
+            console.log('Notifications sent to', count, 'users (' + fcmTokens.length + ' FCM)');
         } catch (e) { console.error('notifyPush error:', e); }
     }
 
