@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="./icon-512.png">
-    <link rel="manifest" href="manifest.json?v=3.6.1">
+    <link rel="manifest" href="manifest.json?v=3.6.2">
     <meta name="theme-color" content="#F2F2F7">
 
     <style>
@@ -935,7 +935,7 @@
             <!-- ===== MAIN: Lista de Ordenes ===== -->
             <main class="main-content">
                 <div id="orderList"></div>
-                <footer class="footer">v3.6.1 | PartsPilot</footer>
+                <footer class="footer">v3.6.2 | PartsPilot</footer>
             </main>
 
         </div>
@@ -964,7 +964,7 @@
             <main class="main-content">
                 <div class="main-content-title">&#128230; Todas las Ordenes</div>
                 <div id="adminOrderList"></div>
-                <footer class="footer">v3.6.1 | PartsPilot</footer>
+                <footer class="footer">v3.6.2 | PartsPilot</footer>
             </main>
 
         </div>
@@ -1002,7 +1002,7 @@
             <main class="main-content">
                 <div class="main-content-title">&#128101; Usuarios Registrados</div>
                 <div id="userList"></div>
-                <footer class="footer">v3.6.1 | PartsPilot</footer>
+                <footer class="footer">v3.6.2 | PartsPilot</footer>
             </main>
 
         </div>
@@ -2656,15 +2656,18 @@
 
     // --- Service Worker ---
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js?v=3.6.1').then((reg) => {
+        navigator.serviceWorker.register('sw.js?v=3.6.2').then((reg) => {
             // Check for updates every 60 seconds
             setInterval(() => reg.update(), 60000);
         });
 
-        // When SW sends update message, reload page
+        // When SW sends update message, reload page (once)
         navigator.serviceWorker.addEventListener('message', (event) => {
             if (event.data && event.data.type === 'SW_UPDATED') {
-                window.location.reload();
+                if (!sessionStorage.getItem('sw_reloaded')) {
+                    sessionStorage.setItem('sw_reloaded', '1');
+                    window.location.reload();
+                }
             }
         });
     }
