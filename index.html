@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="./icon-512.png">
-    <link rel="manifest" href="manifest.json?v=3.6.3">
+    <link rel="manifest" href="manifest.json?v=3.7.0">
     <meta name="theme-color" content="#F2F2F7">
 
     <style>
@@ -935,7 +935,7 @@
             <!-- ===== MAIN: Lista de Ordenes ===== -->
             <main class="main-content">
                 <div id="orderList"></div>
-                <footer class="footer">v3.6.3 | PartsPilot</footer>
+                <footer class="footer">v3.7.0 | PartsPilot</footer>
             </main>
 
         </div>
@@ -964,7 +964,7 @@
             <main class="main-content">
                 <div class="main-content-title">&#128230; Todas las Ordenes</div>
                 <div id="adminOrderList"></div>
-                <footer class="footer">v3.6.3 | PartsPilot</footer>
+                <footer class="footer">v3.7.0 | PartsPilot</footer>
             </main>
 
         </div>
@@ -1002,7 +1002,7 @@
             <main class="main-content">
                 <div class="main-content-title">&#128101; Usuarios Registrados</div>
                 <div id="userList"></div>
-                <footer class="footer">v3.6.3 | PartsPilot</footer>
+                <footer class="footer">v3.7.0 | PartsPilot</footer>
             </main>
 
         </div>
@@ -1234,12 +1234,13 @@
             ts: new Date().toISOString()
         };
         try {
-            await updateDoc(doc(db, 'orders', getDocId(orderId)), { comments: arrayUnion(comment) });
-            input.value = '';
+            // Update seenComments BEFORE Firestore write to prevent glow on sender's own card
             const order = orders.find(o => String(o.id) === String(orderId));
             const seen = JSON.parse(localStorage.getItem('seenComments') || '{}');
             seen[orderId] = (order?.comments || []).length + 1;
             localStorage.setItem('seenComments', JSON.stringify(seen));
+            await updateDoc(doc(db, 'orders', getDocId(orderId)), { comments: arrayUnion(comment) });
+            input.value = '';
             if (order) {
                 const preview = text.length > 50 ? text.slice(0, 50) + '...' : text;
                 notifyPush({
@@ -1267,16 +1268,6 @@
         if (!currentUser) return;
         try {
             const sw = await navigator.serviceWorker.ready;
-            console.log('[FCM] SW scope:', sw.scope, 'active:', !!sw.active);
-
-            // Test raw push API first to isolate issue
-            try {
-                const existingSub = await sw.pushManager.getSubscription();
-                console.log('[FCM] Existing push sub:', existingSub ? existingSub.endpoint.substring(0, 50) : 'none');
-            } catch (pe) {
-                console.error('[FCM] pushManager check failed:', pe.name, pe.message);
-            }
-
             const messaging = getMessaging(app);
             const token = await getToken(messaging, {
                 vapidKey: FCM_VAPID_KEY,
@@ -1284,24 +1275,9 @@
             });
             if (token) {
                 await updateDoc(doc(db, 'users', currentUser.uid), { fcmToken: token });
-                console.log('[FCM] Token stored:', token.substring(0, 20) + '...');
             }
         } catch (e) {
-            console.error('[FCM] Token error:', e.name, e.message);
-            // Try raw pushManager.subscribe to isolate if it's Firebase or browser
-            try {
-                const sw = await navigator.serviceWorker.ready;
-                const rawSub = await sw.pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: FCM_VAPID_KEY
-                });
-                console.log('[FCM] Raw push works! Endpoint:', rawSub.endpoint.substring(0, 50));
-                rawSub.unsubscribe();
-            } catch (rawErr) {
-                console.error('[FCM] Raw push also fails:', rawErr.name, rawErr.message);
-                console.error('[FCM] This means your browser is blocking push services.');
-                console.error('[FCM] Check: ad blocker, Brave shields, or browser push settings.');
-            }
+            console.warn('[Push] Background push unavailable:', e.message);
         }
     }
 
@@ -1315,8 +1291,7 @@
             btn.classList.toggle('active', !!enabled);
             if (enabled && Notification.permission === 'granted') {
                 startNotifListener();
-                // Ensure FCM token exists for background push
-                if (!userDoc.data().fcmToken) ensureFcmToken();
+                ensureFcmToken();
             }
         }
     }
@@ -1377,10 +1352,8 @@
         }
         startNotifListener();
         btn.classList.add('active');
-        // Register FCM token in background
-        ensureFcmToken().then(() => {
-            mostrarToast('Notificaciones activadas');
-        });
+        mostrarToast('Notificaciones activadas');
+        ensureFcmToken();
     };
 
     async function notifyPush({ taller, createdBy, excludeUid, title, body }) {
@@ -2679,7 +2652,7 @@
 
     // --- Service Worker ---
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js?v=3.6.3').then((reg) => {
+        navigator.serviceWorker.register('sw.js?v=3.7.0').then((reg) => {
             // Check for updates every 60 seconds
             setInterval(() => reg.update(), 60000);
         });

@@ -37,7 +37,7 @@ self.addEventListener('notificationclick', (event) => {
     );
 });
 
-const CACHE_NAME = 'pedidos-v3.6.3';
+const CACHE_NAME = 'pedidos-v3.7.0';
 const assets = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (e) => {
