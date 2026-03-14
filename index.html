@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="./icon-512.png">
-    <link rel="manifest" href="manifest.json?v=22">
+    <link rel="manifest" href="manifest.json?v=23">
     <meta name="theme-color" content="#F2F2F7">
 
     <style>
@@ -1320,7 +1320,7 @@
             mostrarToast('Notificaciones activadas');
         } catch (err) {
             console.error('Push subscribe error:', err);
-            mostrarToast('No se pudieron activar las notificaciones');
+            mostrarToast('Error: ' + (err.name || '') + ' ' + (err.message || err));
         }
     };
 
@@ -2614,7 +2614,7 @@
 
     // --- Service Worker ---
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js?v=22').then((reg) => {
+        navigator.serviceWorker.register('sw.js?v=23').then((reg) => {
             // Check for updates every 60 seconds
             setInterval(() => reg.update(), 60000);
         });
