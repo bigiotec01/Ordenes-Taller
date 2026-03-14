@@ -1046,7 +1046,7 @@
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import {
         getFirestore, collection, doc, setDoc, getDoc, deleteDoc, updateDoc,
-        onSnapshot, getDocs, writeBatch, enableIndexedDbPersistence, arrayUnion
+        onSnapshot, getDocs, writeBatch, enableMultiTabIndexedDbPersistence, arrayUnion
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import {
         getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject
@@ -1069,7 +1069,9 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
     const storage = getStorage(app);
-    enableIndexedDbPersistence(db).catch(() => {});
+    enableMultiTabIndexedDbPersistence(db).catch((err) => {
+        console.warn('[Firestore] Persistence error:', err.code || err.message);
+    });
     const ordersCol = collection(db, 'orders');
     const usersCol = collection(db, 'users');
 
