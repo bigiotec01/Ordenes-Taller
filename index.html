@@ -1271,11 +1271,16 @@
 
     async function initPushUI() {
         const btn = document.getElementById('btnNotif');
-        if (!btn || !pushSupported()) return;
+        if (!btn || !pushSupported()) { console.log('Push not supported or btn missing'); return; }
         btn.style.display = 'inline-flex';
-        const reg = await navigator.serviceWorker.ready;
-        const sub = await reg.pushManager.getSubscription();
-        btn.classList.toggle('active', !!sub);
+        try {
+            const reg = await navigator.serviceWorker.ready;
+            const sub = await reg.pushManager.getSubscription();
+            btn.classList.toggle('active', !!sub);
+            console.log('Push init OK, subscribed:', !!sub);
+        } catch (e) {
+            console.error('initPushUI error:', e);
+        }
     }
 
     window.toggleNotifications = async function() {
@@ -1311,10 +1316,11 @@
                 });
             }
             btn.classList.add('active');
+            console.log('Push subscribed, saved to Firestore');
             mostrarToast('Notificaciones activadas');
         } catch (err) {
             console.error('Push subscribe error:', err);
-            mostrarToast('No se pudieron activar las notificaciones');
+            mostrarToast('Error push: ' + (err.message || err));
         }
     };
 
@@ -1332,13 +1338,14 @@
                     subs.push(typeof u.pushSub === 'string' ? JSON.parse(u.pushSub) : u.pushSub);
                 }
             });
+            console.log('notifyPush: found', subs.length, 'subscriptions');
             if (subs.length === 0) return;
             fetch('/api/send-notification', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ subscriptions: subs, title, body })
-            }).catch(() => {});
-        } catch {}
+            }).then(r => r.json()).then(r => console.log('Push API result:', r)).catch(e => console.error('Push API error:', e));
+        } catch (e) { console.error('notifyPush error:', e); }
     }
 
     // --- Auth State ---
