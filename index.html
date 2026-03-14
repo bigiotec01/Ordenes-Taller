@@ -1321,11 +1321,22 @@
     async function notifyPush({ taller, createdBy, excludeUid, title, body }) {
         if (!currentUser) return;
         try {
-            const token = await currentUser.getIdToken();
+            // Collect push subscriptions from relevant users
+            const subs = [];
+            const usersSnap = await getDocs(collection(db, 'users'));
+            usersSnap.forEach(d => {
+                const u = d.data();
+                if (d.id === excludeUid || !u.pushSub) return;
+                // Notify customers with matching taller or the order creator
+                if ((taller && u.taller && u.taller.toLowerCase() === taller.toLowerCase()) || d.id === createdBy) {
+                    subs.push(typeof u.pushSub === 'string' ? JSON.parse(u.pushSub) : u.pushSub);
+                }
+            });
+            if (subs.length === 0) return;
             fetch('/api/send-notification', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                body: JSON.stringify({ taller, createdBy, excludeUid, title, body })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ subscriptions: subs, title, body })
             }).catch(() => {});
         } catch {}
     }
