@@ -1254,7 +1254,7 @@
     };
 
     // --- Push Notifications ---
-    const VAPID_PUBLIC_KEY = 'BKowGpFdqzAFG_HrJfFUKMKWdVwwZytU5DGDHMCEqutecTjcJk9P7Xs_cOFaU6oRhjuMUR-h2tebYrvZ29pRU0Y';
+    const VAPID_PUBLIC_KEY = 'BGaulXsZQCLUFbfhgPAGBZyRvf0LlYMd8_-tLycPOIbWvPiE4Xs9EuWv5bRvXe2VCfgJzgK71AwY5yUKNDVHO8Y';
 
     function urlBase64ToUint8Array(base64String) {
         const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -1320,7 +1320,7 @@
             mostrarToast('Notificaciones activadas');
         } catch (err) {
             console.error('Push subscribe error:', err);
-            mostrarToast('Error push: ' + (err.message || err));
+            mostrarToast('No se pudieron activar las notificaciones');
         }
     };
 

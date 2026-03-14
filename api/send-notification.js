@@ -2,8 +2,8 @@ const webpush = require('web-push');
 
 webpush.setVapidDetails(
     'mailto:bigio_tec@me.com',
-    'BKowGpFdqzAFG_HrJfFUKMKWdVwwZytU5DGDHMCEqutecTjcJk9P7Xs_cOFaU6oRhjuMUR-h2tebYrvZ29pRU0Y',
-    '4wkHnqQhw0yw-PpQmzQ2aDagzcD7XWnp25JtApbuRW8'
+    'BGaulXsZQCLUFbfhgPAGBZyRvf0LlYMd8_-tLycPOIbWvPiE4Xs9EuWv5bRvXe2VCfgJzgK71AwY5yUKNDVHO8Y',
+    'n86Hk8cWlKsKOJS1_n8PLXruFtoeT0M-66gZ2aEIV6c'
 );
 
 module.exports = async (req, res) => {
