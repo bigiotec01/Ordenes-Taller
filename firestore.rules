@@ -18,6 +18,11 @@ service cloud.firestore {
       );
       allow delete: if request.auth != null
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+
+      match /notifications/{notifId} {
+        allow read, update: if request.auth != null && request.auth.uid == userId;
+        allow create: if request.auth != null;
+      }
     }
   }
 }

@@ -1051,7 +1051,6 @@
     import {
         getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
-    import { getMessaging, getToken, deleteToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
     // --- Firebase ---
     const firebaseConfig = {
@@ -1067,8 +1066,6 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
     const storage = getStorage(app);
-    let messaging = null;
-    try { messaging = getMessaging(app); } catch(e) { console.log('FCM not supported:', e); }
     enableIndexedDbPersistence(db).catch(() => {});
     const ordersCol = collection(db, 'orders');
     const usersCol = collection(db, 'users');
@@ -1256,41 +1253,62 @@
         }
     };
 
-    // --- Push Notifications (FCM) ---
-    const FCM_VAPID_KEY = 'BPYRL1vJf9wLVL8P5Id3ny_-HnJmVPmQYm4sbm3_cj1PHV62RvFByvfcUDj7bN9vKtvoAHQb_IqB9U5tFo8YVcQ';
+    // --- Notifications (Firestore-based) ---
+    let notifUnsubscribe = null;
 
-    function pushSupported() {
-        return 'serviceWorker' in navigator && 'Notification' in window && messaging;
+    function notifSupported() {
+        return 'Notification' in window;
     }
 
     async function initPushUI() {
         const btn = document.getElementById('btnNotif');
-        if (!btn || !pushSupported()) { console.log('FCM not supported or btn missing'); return; }
+        if (!btn || !notifSupported()) return;
         btn.style.display = 'inline-flex';
-        try {
-            if (currentUser) {
-                const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-                const hasToken = userDoc.exists() && userDoc.data().fcmToken;
-                btn.classList.toggle('active', !!hasToken);
-            }
-        } catch (e) {
-            console.error('initPushUI error:', e);
+        if (currentUser) {
+            const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+            const enabled = userDoc.exists() && userDoc.data().notificationsOn;
+            btn.classList.toggle('active', !!enabled);
+            if (enabled && Notification.permission === 'granted') startNotifListener();
         }
     }
 
+    function startNotifListener() {
+        if (notifUnsubscribe || !currentUser) return;
+        const q = collection(db, 'users', currentUser.uid, 'notifications');
+        notifUnsubscribe = onSnapshot(q, (snap) => {
+            snap.docChanges().forEach(async (change) => {
+                if (change.type === 'added') {
+                    const n = change.doc.data();
+                    if (n.read) return;
+                    // Show browser notification
+                    if (Notification.permission === 'granted') {
+                        new Notification(n.title || 'PartsPilot', {
+                            body: n.body || '',
+                            icon: '/icon-512.png',
+                            tag: change.doc.id
+                        });
+                    }
+                    mostrarToast(n.body || n.title);
+                    // Mark as read
+                    await updateDoc(doc(db, 'users', currentUser.uid, 'notifications', change.doc.id), { read: true }).catch(() => {});
+                }
+            });
+        });
+    }
+
+    function stopNotifListener() {
+        if (notifUnsubscribe) { notifUnsubscribe(); notifUnsubscribe = null; }
+    }
+
     window.toggleNotifications = async function() {
-        if (!pushSupported()) return mostrarToast('Tu navegador no soporta notificaciones');
+        if (!notifSupported()) return mostrarToast('Tu navegador no soporta notificaciones');
         const btn = document.getElementById('btnNotif');
 
-        // Check if already subscribed
         if (currentUser) {
             const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-            if (userDoc.exists() && userDoc.data().fcmToken) {
-                // Unsubscribe
-                try {
-                    await deleteToken(messaging);
-                } catch(e) { /* ignore */ }
-                await updateDoc(doc(db, 'users', currentUser.uid), { fcmToken: null }).catch(() => {});
+            if (userDoc.exists() && userDoc.data().notificationsOn) {
+                await updateDoc(doc(db, 'users', currentUser.uid), { notificationsOn: false });
+                stopNotifListener();
                 btn.classList.remove('active');
                 mostrarToast('Notificaciones desactivadas');
                 return;
@@ -1303,43 +1321,31 @@
             return;
         }
 
-        try {
-            const swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-            const token = await getToken(messaging, {
-                vapidKey: FCM_VAPID_KEY,
-                serviceWorkerRegistration: swReg
-            });
-            if (token && currentUser) {
-                await updateDoc(doc(db, 'users', currentUser.uid), { fcmToken: token });
-            }
-            btn.classList.add('active');
-            console.log('FCM token saved:', token?.slice(0, 20) + '...');
-            mostrarToast('Notificaciones activadas');
-        } catch (err) {
-            console.error('FCM subscribe error:', err);
-            mostrarToast('Error: ' + (err.message || err));
+        if (currentUser) {
+            await updateDoc(doc(db, 'users', currentUser.uid), { notificationsOn: true });
         }
+        startNotifListener();
+        btn.classList.add('active');
+        mostrarToast('Notificaciones activadas');
     };
 
     async function notifyPush({ taller, createdBy, excludeUid, title, body }) {
         if (!currentUser) return;
         try {
-            const tokens = [];
             const usersSnap = await getDocs(collection(db, 'users'));
+            const batch = writeBatch(db);
+            let count = 0;
             usersSnap.forEach(d => {
                 const u = d.data();
-                if (d.id === excludeUid || !u.fcmToken) return;
+                if (d.id === excludeUid || !u.notificationsOn) return;
                 if ((taller && u.taller && u.taller.toLowerCase() === taller.toLowerCase()) || d.id === createdBy) {
-                    tokens.push(u.fcmToken);
+                    const notifRef = doc(collection(db, 'users', d.id, 'notifications'));
+                    batch.set(notifRef, { title, body, read: false, ts: new Date() });
+                    count++;
                 }
             });
-            console.log('notifyPush: found', tokens.length, 'FCM tokens');
-            if (tokens.length === 0) return;
-            fetch('/api/send-notification', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ tokens, title, body })
-            }).then(r => r.json()).then(r => console.log('FCM API result:', r)).catch(e => console.error('FCM API error:', e));
+            if (count > 0) await batch.commit();
+            console.log('Notifications sent to', count, 'users');
         } catch (e) { console.error('notifyPush error:', e); }
     }
 
