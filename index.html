@@ -1267,6 +1267,16 @@
         if (!currentUser) return;
         try {
             const sw = await navigator.serviceWorker.ready;
+            console.log('[FCM] SW scope:', sw.scope, 'active:', !!sw.active);
+
+            // Test raw push API first to isolate issue
+            try {
+                const existingSub = await sw.pushManager.getSubscription();
+                console.log('[FCM] Existing push sub:', existingSub ? existingSub.endpoint.substring(0, 50) : 'none');
+            } catch (pe) {
+                console.error('[FCM] pushManager check failed:', pe.name, pe.message);
+            }
+
             const messaging = getMessaging(app);
             const token = await getToken(messaging, {
                 vapidKey: FCM_VAPID_KEY,
@@ -1277,7 +1287,21 @@
                 console.log('[FCM] Token stored:', token.substring(0, 20) + '...');
             }
         } catch (e) {
-            console.error('[FCM] Token error:', e.message);
+            console.error('[FCM] Token error:', e.name, e.message);
+            // Try raw pushManager.subscribe to isolate if it's Firebase or browser
+            try {
+                const sw = await navigator.serviceWorker.ready;
+                const rawSub = await sw.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: FCM_VAPID_KEY
+                });
+                console.log('[FCM] Raw push works! Endpoint:', rawSub.endpoint.substring(0, 50));
+                rawSub.unsubscribe();
+            } catch (rawErr) {
+                console.error('[FCM] Raw push also fails:', rawErr.name, rawErr.message);
+                console.error('[FCM] This means your browser is blocking push services.');
+                console.error('[FCM] Check: ad blocker, Brave shields, or browser push settings.');
+            }
         }
     }
 
