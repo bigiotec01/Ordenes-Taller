@@ -2349,17 +2349,11 @@
 
         const filtradas = visible
             .filter(o => {
+                if (filtroActual === 'Todos' && o.status === 'Entregado') return false;
                 if (filtroActual !== 'Todos' && o.status !== filtroActual) return false;
                 return matchQuery(o);
             })
-            .sort((a, b) => {
-                // Entregadas siempre al final
-                if (filtroActual === 'Todos') {
-                    if (a.status === 'Entregado' && b.status !== 'Entregado') return 1;
-                    if (b.status === 'Entregado' && a.status !== 'Entregado') return -1;
-                }
-                return b.id - a.id;
-            });
+            .sort((a, b) => b.id - a.id);
 
         list.innerHTML = '';
 
@@ -2377,15 +2371,7 @@
 
         const isReadOnly = currentRole === 'customer';
 
-        let rows = '';
-        let entregadaDividerShown = false;
-        filtradas.forEach(o => {
-            if (filtroActual === 'Todos' && o.status === 'Entregado' && !entregadaDividerShown) {
-                rows += `<div class="pro-section-divider">Entregadas</div>`;
-                entregadaDividerShown = true;
-            }
-            rows += renderOrderCard(o, { readOnly: isReadOnly, showCreator: false });
-        });
+        const rows = filtradas.map(o => renderOrderCard(o, { readOnly: isReadOnly, showCreator: false })).join('');
         const filterLabel = filtroActual !== 'Todos' ? `<span class="pro-table-meta-tag">&#9679; ${filtroActual}</span>` : '';
         list.innerHTML = `
             <div class="pro-table">
