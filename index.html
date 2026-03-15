@@ -2105,6 +2105,10 @@
         if (tabBtnInventario) tabBtnInventario.style.display = isAdmin ? '' : 'none';
         if (tabBtnAdmin) tabBtnAdmin.style.display = isAdmin ? '' : 'none';
 
+        // Hide "Nueva Orden" button for customers
+        const btnNuevaOrden = document.getElementById('btnNuevaOrden');
+        if (btnNuevaOrden) btnNuevaOrden.style.display = currentRole === 'customer' ? 'none' : '';
+
         // Tab bar: only show for admin (they have 2 tabs)
         document.getElementById('tabBar').style.display = isAdmin ? 'flex' : 'none';
 
@@ -2193,6 +2197,7 @@
     };
 
     window.openOrderModal = function() {
+        if (currentRole === 'customer') return;
         document.getElementById('orderModal').style.display = 'flex';
         document.getElementById('modalTitle').textContent = 'Nueva Orden';
     };
