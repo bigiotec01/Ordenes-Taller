@@ -891,6 +891,86 @@
                 width: 26px; height: 26px; border-radius: 6px;
                 background: var(--pro-accent); flex-shrink: 0;
             }
+            /* Nueva Orden nav button */
+            .pro-nav-new {
+                background: var(--pro-accent) !important; color: #fff !important;
+                font-weight: 600 !important; margin-bottom: 8px;
+                justify-content: center; border-radius: var(--r-md);
+            }
+            .pro-nav-new:hover { background: var(--pro-accent-text) !important; }
+
+            /* Filter nav items */
+            .pro-nav-section-label {
+                font-size: 10px; font-weight: 700; text-transform: uppercase;
+                letter-spacing: 0.08em; color: rgba(255,255,255,0.28);
+                padding: 8px 10px 4px;
+            }
+            .pro-filter-item { justify-content: flex-start; }
+            .pro-filter-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+            .pro-filter-label { flex: 1; }
+            .pro-filter-count {
+                font-size: 11px; font-weight: 600;
+                background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.55);
+                padding: 1px 7px; border-radius: 10px; min-width: 20px; text-align: center;
+            }
+            .pro-filter-item.active .pro-filter-count {
+                background: var(--pro-accent-soft); color: #93C5FD;
+            }
+
+            /* Search bar in main content */
+            .pro-search-bar {
+                display: flex; align-items: center; gap: 8px;
+                background: var(--pro-white); border: 1px solid var(--pro-border);
+                border-radius: var(--r-md); padding: 8px 12px;
+                margin-bottom: 16px;
+            }
+            .pro-search-bar svg { color: var(--pro-muted); flex-shrink: 0; }
+            .pro-search-bar input {
+                flex: 1; border: none; outline: none; font-size: 13px;
+                font-family: inherit; color: var(--pro-text); background: transparent;
+            }
+            .pro-search-bar input::placeholder { color: var(--pro-subtle); }
+
+            /* Modal */
+            .pro-modal-backdrop {
+                position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+                z-index: 1000; display: flex; align-items: center; justify-content: center;
+                backdrop-filter: blur(2px);
+            }
+            .pro-modal {
+                background: var(--pro-white); border-radius: var(--r-lg);
+                width: 460px; max-width: 95vw; max-height: 90vh;
+                display: flex; flex-direction: column;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+                overflow: hidden;
+            }
+            .pro-modal-header {
+                display: flex; align-items: center; justify-content: space-between;
+                padding: 16px 20px; border-bottom: 1px solid var(--pro-border);
+            }
+            .pro-modal-title { font-size: 15px; font-weight: 700; color: var(--pro-text); }
+            .pro-modal-close {
+                background: none; border: none; font-size: 20px; cursor: pointer;
+                color: var(--pro-muted); line-height: 1; padding: 0 4px;
+            }
+            .pro-modal-close:hover { color: var(--pro-text); }
+            .pro-modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+            .pro-modal-footer {
+                display: flex; gap: 8px; justify-content: flex-end;
+                padding: 14px 20px; border-top: 1px solid var(--pro-border);
+                background: #F6F8FA;
+            }
+            .pro-modal-btn-cancel {
+                background: none; border: 1px solid var(--pro-border); border-radius: var(--r-md);
+                padding: 8px 16px; font-size: 13px; cursor: pointer; color: var(--pro-muted);
+            }
+            .pro-modal-btn-save {
+                background: var(--pro-accent); color: #fff; border: none;
+                border-radius: var(--r-md); padding: 8px 20px;
+                font-size: 13px; font-weight: 600; cursor: pointer;
+            }
+            .pro-modal-btn-save:hover { background: var(--pro-accent-text); }
+
             .pro-nav-logo-text {
                 font-size: 14px; font-weight: 700; color: #E6EDF3;
                 letter-spacing: -0.01em;
@@ -1180,10 +1260,97 @@
                     </div>
                 </div>
 
-                <!-- NUEVA ORDEN -->
-                <div class="sidebar-section">
-                    <div class="sidebar-section-title">Nueva Orden</div>
-                    <div id="formSection">
+                <!-- FILTROS NAV -->
+                <div class="pro-nav" style="margin-top:4px;">
+                    <div class="pro-nav-items">
+                        <div class="pro-nav-item pro-nav-new" id="btnNuevaOrden" onclick="openOrderModal()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Nueva Orden
+                        </div>
+                    </div>
+                    <div class="pro-nav-section-label">Filtros</div>
+                    <div class="pro-nav-items" id="filterNav">
+                        <div class="pro-nav-item pro-filter-item active" data-filter="Todos" onclick="setFilter('Todos')">
+                            <span class="pro-filter-dot" style="background:rgba(255,255,255,0.3)"></span>
+                            <span class="pro-filter-label">Todos</span>
+                            <span class="pro-filter-count" id="fc-Todos"></span>
+                        </div>
+                        <div class="pro-nav-item pro-filter-item" data-filter="Espera de Aprobacion" onclick="setFilter('Espera de Aprobacion')">
+                            <span class="pro-filter-dot" style="background:#A855F7"></span>
+                            <span class="pro-filter-label">Aprobacion</span>
+                            <span class="pro-filter-count" id="fc-Espera de Aprobacion"></span>
+                        </div>
+                        <div class="pro-nav-item pro-filter-item" data-filter="Ordenado" onclick="setFilter('Ordenado')">
+                            <span class="pro-filter-dot" style="background:#2563EB"></span>
+                            <span class="pro-filter-label">Ordenado</span>
+                            <span class="pro-filter-count" id="fc-Ordenado"></span>
+                        </div>
+                        <div class="pro-nav-item pro-filter-item" data-filter="Backorder" onclick="setFilter('Backorder')">
+                            <span class="pro-filter-dot" style="background:#DC2626"></span>
+                            <span class="pro-filter-label">Backorder</span>
+                            <span class="pro-filter-count" id="fc-Backorder"></span>
+                        </div>
+                        <div class="pro-nav-item pro-filter-item" data-filter="Piezas en Tienda" onclick="setFilter('Piezas en Tienda')">
+                            <span class="pro-filter-dot" style="background:#EA580C"></span>
+                            <span class="pro-filter-label">Tienda</span>
+                            <span class="pro-filter-count" id="fc-Piezas en Tienda"></span>
+                        </div>
+                        <div class="pro-nav-item pro-filter-item" data-filter="En Tránsito" onclick="setFilter('En Tránsito')">
+                            <span class="pro-filter-dot" style="background:#7C3AED"></span>
+                            <span class="pro-filter-label">En Tránsito</span>
+                            <span class="pro-filter-count" id="fc-En Tránsito"></span>
+                        </div>
+                        <div class="pro-nav-item pro-filter-item" data-filter="Listo para Recoger" onclick="setFilter('Listo para Recoger')">
+                            <span class="pro-filter-dot" style="background:#0891B2"></span>
+                            <span class="pro-filter-label">Listo Recoger</span>
+                            <span class="pro-filter-count" id="fc-Listo para Recoger"></span>
+                        </div>
+                        <div class="pro-nav-item pro-filter-item" data-filter="Listo para Entrega" onclick="setFilter('Listo para Entrega')">
+                            <span class="pro-filter-dot" style="background:#0D9488"></span>
+                            <span class="pro-filter-label">Listo Entrega</span>
+                            <span class="pro-filter-count" id="fc-Listo para Entrega"></span>
+                        </div>
+                        <div class="pro-nav-item pro-filter-item" data-filter="Entregado" onclick="setFilter('Entregado')">
+                            <span class="pro-filter-dot" style="background:#9CA3AF"></span>
+                            <span class="pro-filter-label">Entregado</span>
+                            <span class="pro-filter-count" id="fc-Entregado"></span>
+                        </div>
+                    </div>
+                    <div class="pro-nav-section-label" id="backupSection" style="margin-top:12px;">Herramientas</div>
+                    <div class="pro-nav-items" id="backupSection2">
+                        <div class="pro-nav-item" onclick="exportarDatos()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Exportar
+                        </div>
+                        <div class="pro-nav-item" onclick="document.getElementById('importFile').click()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            Importar
+                        </div>
+                        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importarDatos(event)">
+                    </div>
+                </div>
+
+            </aside>
+
+            <!-- ===== MAIN: Lista de Ordenes ===== -->
+            <main class="main-content">
+                <!-- Search bar -->
+                <div class="pro-search-bar">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="searchInput" placeholder="Buscar taller, pedido o PO..." oninput="render()">
+                </div>
+                <div id="orderList"></div>
+                <footer class="footer">v3.8.0 | PartsPilot</footer>
+            </main>
+
+            <!-- ===== MODAL: Nueva / Editar Orden ===== -->
+            <div id="orderModal" class="pro-modal-backdrop" onclick="closeOrderModal(event)" style="display:none;">
+                <div class="pro-modal">
+                    <div class="pro-modal-header">
+                        <span class="pro-modal-title" id="modalTitle">Nueva Orden</span>
+                        <button class="pro-modal-close" onclick="closeOrderModal()">&times;</button>
+                    </div>
+                    <div class="pro-modal-body" id="formSection">
                         <div class="ios-group">
                             <div class="ios-row"><label>Taller</label><input type="text" id="taller" placeholder="Ej. Morales"></div>
                             <div class="ios-row"><label>Pedido</label><input type="text" id="pedido" placeholder="Ej. M-100"></div>
@@ -1212,53 +1379,13 @@
                         </div>
                         <div id="pendingFiles" class="pending-files"></div>
                         <div id="uploadProgress" class="upload-progress"><div id="uploadProgressBar" class="upload-progress-bar"></div></div>
-                        <button id="btnGuardar" class="main-btn btn-blue" onclick="guardarOrden()">Guardar Nueva Orden</button>
-                        <button id="btnCancelar" class="btn-cancel" onclick="cancelarEdicion()">Cancelar Edicion</button>
+                    </div>
+                    <div class="pro-modal-footer">
+                        <button id="btnCancelar" class="pro-modal-btn-cancel" onclick="cancelarEdicion()">Cancelar</button>
+                        <button id="btnGuardar" class="pro-modal-btn-save" onclick="guardarOrden()">Guardar Orden</button>
                     </div>
                 </div>
-
-                <!-- BUSCADOR -->
-                <div class="sidebar-section">
-                    <div class="sidebar-section-title">Buscador</div>
-                    <div class="search-container">
-                        <div class="search-bar">
-                            <span>&#128269;</span>
-                            <input type="text" id="searchInput" placeholder="Buscar taller, pedido o PO..." oninput="render()">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- FILTROS -->
-                <div class="sidebar-section">
-                    <div class="sidebar-section-title">Filtros</div>
-                    <div id="statusCounter" class="status-counter"></div>
-                    <div id="filterBar" class="filter-bar">
-                        <button class="filter-chip active" onclick="setFilter('Todos')">Todos</button>
-                        <button class="filter-chip" onclick="setFilter('Espera de Aprobacion')">&#9995; Aprobacion</button>
-                        <button class="filter-chip" onclick="setFilter('Ordenado')">&#11088; Ordenado</button>
-                        <button class="filter-chip" onclick="setFilter('Backorder')">&#9888; Backorder</button>
-                        <button class="filter-chip" onclick="setFilter('Piezas en Tienda')">&#9881; Tienda</button>
-                        <button class="filter-chip" onclick="setFilter('En Tránsito')">&#10145; Transito</button>
-                        <button class="filter-chip" onclick="setFilter('Listo para Recoger')">&#9745; Recoger</button>
-                        <button class="filter-chip" onclick="setFilter('Listo para Entrega')">&#11014; Entrega</button>
-                        <button class="filter-chip" onclick="setFilter('Entregado')">&#9989; Entregado</button>
-                    </div>
-                </div>
-
-                <!-- RESPALDO -->
-                <div id="backupSection" class="backup-row">
-                    <button class="btn-backup" onclick="exportarDatos()">&#128229; Exportar</button>
-                    <button class="btn-backup" onclick="document.getElementById('importFile').click()">&#128228; Importar</button>
-                    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importarDatos(event)">
-                </div>
-
-            </aside>
-
-            <!-- ===== MAIN: Lista de Ordenes ===== -->
-            <main class="main-content">
-                <div id="orderList"></div>
-                <footer class="footer">v3.8.0 | PartsPilot</footer>
-            </main>
+            </div>
 
         </div>
     </div>
@@ -1919,31 +2046,49 @@
     // --- Filter ---
     window.setFilter = function(status) {
         filtroActual = status;
-        const chips = document.querySelectorAll('.filter-chip');
-        chips.forEach(c => c.classList.remove('active'));
-        chips.forEach(c => {
+        // Update filter nav items
+        document.querySelectorAll('.pro-filter-item').forEach(el => {
+            el.classList.toggle('active', el.dataset.filter === status);
+        });
+        // Legacy chips fallback
+        document.querySelectorAll('.filter-chip').forEach(c => {
+            c.classList.remove('active');
             if (status === 'Todos' && c.textContent.includes('Todos')) c.classList.add('active');
             else if (c.getAttribute('onclick')?.includes(status)) c.classList.add('active');
         });
         render();
     };
 
+    window.openOrderModal = function() {
+        document.getElementById('orderModal').style.display = 'flex';
+        document.getElementById('modalTitle').textContent = 'Nueva Orden';
+    };
+    window.closeOrderModal = function(e) {
+        if (e && e.target !== document.getElementById('orderModal')) return;
+        document.getElementById('orderModal').style.display = 'none';
+    };
+
     // --- Counter ---
     function renderContador(visibleOrders) {
-        const counter = document.getElementById('statusCounter');
-        if (!counter) return;
         const conteo = {};
         visibleOrders.forEach(o => { conteo[o.status] = (conteo[o.status] || 0) + 1; });
+        const total = visibleOrders.filter(o => o.status !== 'Entregado').length;
 
+        // Update filter nav counts
+        const todosEl = document.getElementById('fc-Todos');
+        if (todosEl) todosEl.textContent = total || '';
+        for (const status of Object.keys(STATUS_CONFIG)) {
+            const el = document.getElementById(`fc-${status}`);
+            if (el) el.textContent = conteo[status] || '';
+        }
+
+        // Legacy counter chips
+        const counter = document.getElementById('statusCounter');
+        if (!counter) return;
         let html = '';
         for (const [status, cfg] of Object.entries(STATUS_CONFIG)) {
             const n = conteo[status] || 0;
-            if (n > 0) {
-                html += `<div class="counter-chip">
-                    <span class="counter-dot" style="background:${cfg.color}"></span>
-                    ${n}
-                </div>`;
-            }
+            if (n > 0) html += `<div class="counter-chip"><span class="counter-dot" style="background:${cfg.color}"></span>${n}</div>`;
         }
         counter.innerHTML = html;
     }
@@ -1966,8 +2111,8 @@
 
         document.getElementById('btnGuardar').textContent = 'Actualizar Orden';
         document.getElementById('btnCancelar').style.display = 'block';
-
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.getElementById('modalTitle').textContent = 'Editar Orden';
+        document.getElementById('orderModal').style.display = 'flex';
     };
 
     window.cancelarEdicion = function() {
@@ -1981,9 +2126,10 @@
         const statusEl = document.getElementById('status');
         if (statusEl) statusEl.value = 'Ordenado';
         const btnGuardar = document.getElementById('btnGuardar');
-        if (btnGuardar) { btnGuardar.textContent = 'Guardar Nueva Orden'; btnGuardar.disabled = false; }
+        if (btnGuardar) { btnGuardar.textContent = 'Guardar Orden'; btnGuardar.disabled = false; }
         const btnCancelar = document.getElementById('btnCancelar');
-        if (btnCancelar) btnCancelar.style.display = 'none';
+        if (btnCancelar) btnCancelar.style.display = 'block';
+        document.getElementById('orderModal').style.display = 'none';
     };
 
     // --- CRUD ---
