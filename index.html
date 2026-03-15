@@ -2263,7 +2263,6 @@
 
         // Role-based visibility
         document.getElementById('formSection').style.display = currentRole === 'customer' ? 'none' : 'block';
-        document.getElementById('backupSection').style.display = currentRole === 'customer' ? 'none' : 'flex';
 
         // Hide sidebar nav items customer cannot access
         const isAdmin = currentRole === 'admin';
