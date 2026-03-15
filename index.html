@@ -214,6 +214,13 @@
             padding: 13px 20px; background: #F6F8FA;
             border-bottom: 1px solid var(--pro-border);
             font-size: 11px; font-weight: 600; color: var(--pro-muted);
+        }
+        .pro-table-head .sortable {
+            cursor: pointer; user-select: none; transition: color 0.15s;
+        }
+        .pro-table-head .sortable:hover { color: var(--pro-text); }
+        .pro-table-head .sort-active { color: var(--pro-accent); }
+        .pro-table-head {
             text-transform: uppercase; letter-spacing: 0.06em;
             position: sticky; top: 52px; z-index: 10;
         }
@@ -1690,6 +1697,8 @@
     let allUsers = [];
     let editandoId = null;
     let filtroActual = 'Todos';
+    let sortBy  = 'fecha';   // 'fecha' | 'entrega' | 'status' | 'po'
+    let sortDir = 'desc';    // 'asc' | 'desc'
     const openDetails = new Set(); // tracks which order detail panels are open
     let currentUser = null;
     let currentUserDoc = null;
@@ -2476,13 +2485,28 @@
             o.pedido.toLowerCase().includes(query) ||
             (o.po && o.po.toLowerCase().includes(query));
 
+        const STATUS_ORDER = Object.keys(STATUS_CONFIG); // defined order
         const filtradas = visible
             .filter(o => {
                 if (filtroActual === 'Todos' && o.status === 'Entregado') return false;
                 if (filtroActual !== 'Todos' && o.status !== filtroActual) return false;
                 return matchQuery(o);
             })
-            .sort((a, b) => b.id - a.id);
+            .sort((a, b) => {
+                let va, vb;
+                if (sortBy === 'entrega') {
+                    va = a.fechaEntrega || '9999'; vb = b.fechaEntrega || '9999';
+                } else if (sortBy === 'status') {
+                    va = STATUS_ORDER.indexOf(a.status); vb = STATUS_ORDER.indexOf(b.status);
+                } else if (sortBy === 'po') {
+                    va = (a.po || '').toLowerCase(); vb = (b.po || '').toLowerCase();
+                } else {
+                    va = a.id; vb = b.id;
+                }
+                if (va < vb) return sortDir === 'asc' ? -1 : 1;
+                if (va > vb) return sortDir === 'asc' ? 1 : -1;
+                return 0;
+            });
 
         list.innerHTML = '';
 
@@ -2509,10 +2533,10 @@
                     ${filterLabel}
                 </div>
                 <div class="pro-table-head">
-                    <div>Orden / Taller</div>
-                    <div>Entrega</div>
-                    <div>Estatus</div>
-                    <div>PO#</div>
+                    <div onclick="setSortBy('fecha')" class="sortable${sortBy==='fecha'?' sort-active':''}">Orden / Taller ${sortBy==='fecha'?(sortDir==='asc'?'↑':'↓'):'↕'}</div>
+                    <div onclick="setSortBy('entrega')" class="sortable${sortBy==='entrega'?' sort-active':''}">Entrega ${sortBy==='entrega'?(sortDir==='asc'?'↑':'↓'):'↕'}</div>
+                    <div onclick="setSortBy('status')" class="sortable${sortBy==='status'?' sort-active':''}">Estatus ${sortBy==='status'?(sortDir==='asc'?'↑':'↓'):'↕'}</div>
+                    <div onclick="setSortBy('po')" class="sortable${sortBy==='po'?' sort-active':''}">PO# ${sortBy==='po'?(sortDir==='asc'?'↑':'↓'):'↕'}</div>
                 </div>
                 ${rows}
             </div>`;
@@ -2530,6 +2554,16 @@
         });
     }
     window.render = render;
+
+    window.setSortBy = function(col) {
+        if (sortBy === col) {
+            sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            sortBy = col;
+            sortDir = col === 'fecha' ? 'desc' : 'asc';
+        }
+        render();
+    };
 
     // ===== Settings / Avatar =====
     const AVATAR_EMOJIS = [
