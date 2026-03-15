@@ -1385,6 +1385,26 @@
                 justify-content: center;
             }
         }
+
+        /* ===== FAB Nueva Orden (mobile only) ===== */
+        .fab-nueva {
+            display: none;
+        }
+        @media (max-width: 767px) {
+            .fab-nueva {
+                display: flex; align-items: center; gap: 8px;
+                position: fixed; bottom: calc(70px + env(safe-area-inset-bottom, 8px));
+                right: 18px; z-index: 200;
+                background: var(--pro-accent); color: #fff;
+                border: none; border-radius: 28px;
+                padding: 13px 20px; font-size: 14px; font-weight: 700;
+                font-family: 'Montserrat', sans-serif;
+                box-shadow: 0 4px 18px rgba(37,99,235,0.35);
+                cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+            }
+            .fab-nueva:active { transform: scale(0.95); box-shadow: 0 2px 10px rgba(37,99,235,0.3); }
+            .fab-nueva svg { flex-shrink: 0; }
+        }
     </style>
 </head>
 <body>
@@ -1737,6 +1757,11 @@
     </div>
 
     <!-- ===== BOTTOM TAB BAR ===== -->
+    <button id="fabNuevaOrden" class="fab-nueva" style="display:none;" onclick="openOrderModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nueva Orden
+    </button>
+
     <div id="tabBar" class="tab-bar" style="display:none;">
         <button class="tab-btn active" id="tabBtnOrdenes" onclick="switchTab('ordenes')">
             <span class="tab-icon">&#128203;</span>
@@ -2278,6 +2303,8 @@
         // Hide "Nueva Orden" button for customers
         const btnNuevaOrden = document.getElementById('btnNuevaOrden');
         if (btnNuevaOrden) btnNuevaOrden.style.display = currentRole === 'customer' ? 'none' : '';
+        const fabNueva = document.getElementById('fabNuevaOrden');
+        if (fabNueva) fabNueva.style.display = currentRole === 'customer' ? 'none' : '';
 
         // Tab bar: only show for admin (they have 2 tabs)
         document.getElementById('tabBar').style.display = isAdmin ? 'flex' : 'none';
