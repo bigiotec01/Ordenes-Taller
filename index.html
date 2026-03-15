@@ -1746,7 +1746,8 @@
                     </div>
                     <div class="pro-modal-body" id="formSection">
                         <div class="ios-group">
-                            <div class="ios-row"><label>Taller</label><input type="text" id="taller" placeholder="Ej. Morales"></div>
+                            <div class="ios-row"><label>Taller</label><input type="text" id="taller" list="tallerList" placeholder="Seleccionar o escribir..." autocomplete="off"></div>
+                            <datalist id="tallerList"></datalist>
                             <div class="ios-row"><label>Pedido</label><input type="text" id="pedido" placeholder="Ej. M-100"></div>
                             <div class="ios-row"><label>PO#</label><input type="text" id="po" placeholder="Opcional"></div>
                             <div class="ios-row"><label>Dia de Pedido</label><input type="date" id="fecha"></div>
@@ -2493,8 +2494,20 @@
         render();
     };
 
+    function populateTallerDatalist() {
+        const dl = document.getElementById('tallerList');
+        if (!dl) return;
+        const talleres = [...new Set(
+            allUsers
+                .filter(u => u.role === 'customer' && u.taller)
+                .map(u => u.taller)
+        )].sort((a, b) => a.localeCompare(b));
+        dl.innerHTML = talleres.map(t => `<option value="${t}">`).join('');
+    }
+
     window.openOrderModal = function() {
         if (currentRole === 'customer') return;
+        populateTallerDatalist();
         document.getElementById('orderModal').style.display = 'flex';
         document.getElementById('modalTitle').textContent = 'Nueva Orden';
     };
@@ -2534,6 +2547,7 @@
         const o = orders.find(item => String(item.id) === String(id));
         if (!o) return;
 
+        populateTallerDatalist();
         if (activeTab !== 'ordenes') switchTab('ordenes');
 
         editandoId = id;
