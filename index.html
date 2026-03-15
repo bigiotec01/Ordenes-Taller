@@ -61,7 +61,30 @@
         .header {
             background: var(--pro-white);
             border-bottom: 1px solid var(--pro-border);
-            padding: 12px 16px 10px; position: sticky; top: 0; z-index: 100;
+            padding: 0 16px; position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 52px; gap: 8px;
+        }
+        /* hide brand on mobile — only visible on desktop center column */
+        .header-brand { display: none; }
+        /* page title as main label on mobile */
+        .header-page-title {
+            font-size: 15px; font-weight: 700; color: var(--pro-text);
+            letter-spacing: -0.01em; flex: 1; min-width: 0;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        /* right actions: compact on mobile */
+        .header-right {
+            display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+        }
+        /* hide user name + role on mobile */
+        .header-user-info { display: none; }
+        /* hide divider on mobile */
+        .header-divider { display: none; }
+        /* slim avatar pill on mobile */
+        .header-user {
+            padding: 2px 6px; border-radius: 20px;
+            border: 1px solid var(--pro-border); background: transparent;
         }
 
         .header-top {
