@@ -1735,6 +1735,8 @@
 
     // --- Tab Navigation ---
     window.switchTab = function(tab) {
+        // Block non-admin from accessing restricted tabs
+        if (currentRole !== 'admin' && (tab === 'admin' || tab === 'inventario')) return;
         activeTab = tab;
         document.getElementById('tabOrdenes').style.display = tab === 'ordenes' ? 'block' : 'none';
         document.getElementById('tabInventario').style.display = tab === 'inventario' ? 'block' : 'none';
@@ -2092,8 +2094,19 @@
         document.getElementById('formSection').style.display = currentRole === 'customer' ? 'none' : 'block';
         document.getElementById('backupSection').style.display = currentRole === 'customer' ? 'none' : 'flex';
 
+        // Hide sidebar nav items customer cannot access
+        const isAdmin = currentRole === 'admin';
+        const navInventario = document.getElementById('navInventario');
+        const navAdmin = document.getElementById('navAdmin');
+        const tabBtnInventario = document.getElementById('tabBtnInventario');
+        const tabBtnAdmin = document.getElementById('tabBtnAdmin');
+        if (navInventario) navInventario.style.display = isAdmin ? '' : 'none';
+        if (navAdmin) navAdmin.style.display = isAdmin ? '' : 'none';
+        if (tabBtnInventario) tabBtnInventario.style.display = isAdmin ? '' : 'none';
+        if (tabBtnAdmin) tabBtnAdmin.style.display = isAdmin ? '' : 'none';
+
         // Tab bar: only show for admin (they have 2 tabs)
-        document.getElementById('tabBar').style.display = currentRole === 'admin' ? 'flex' : 'none';
+        document.getElementById('tabBar').style.display = isAdmin ? 'flex' : 'none';
 
         // Reset to ordenes tab
         activeTab = 'ordenes';
