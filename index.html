@@ -784,32 +784,69 @@
         .footer { text-align: center; color: var(--text-muted); font-size: 11px; padding: 24px; font-weight: 500; }
 
         /* ===== Login Screen ===== */
+        /* ===== Login Screen ===== */
         #loginScreen {
             display: flex; align-items: center; justify-content: center;
             min-height: 100vh; min-height: 100dvh;
-            background: var(--pro-sidebar); padding: 20px;
+            background: #0D1117;
+            background-image:
+                radial-gradient(ellipse 80% 50% at 50% -10%, rgba(37,99,235,0.18) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 30% at 80% 80%, rgba(124,58,237,0.08) 0%, transparent 60%);
+            padding: 24px;
         }
         .login-box {
-            width: 100%; max-width: 360px;
-            background: var(--pro-white); border-radius: var(--r-lg);
-            padding: 32px 28px; border: 1px solid var(--pro-border);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            width: 100%; max-width: 400px;
+            background: transparent; border: none; box-shadow: none; padding: 0;
         }
-        .login-icon { text-align: center; font-size: 40px; margin-bottom: 6px; }
+        .login-brand {
+            text-align: center; margin-bottom: 36px;
+        }
+        .login-icon-wrap {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 68px; height: 68px; background: var(--pro-accent);
+            border-radius: 20px; font-size: 34px; margin-bottom: 18px;
+            box-shadow: 0 0 0 8px rgba(37,99,235,0.12), 0 8px 32px rgba(37,99,235,0.35);
+        }
         .login-title {
-            text-align: center; font-size: 20px; font-weight: 700;
-            margin: 0 0 4px; letter-spacing: -0.02em; color: var(--pro-text);
+            font-size: 30px; font-weight: 800; color: #F0F6FC;
+            margin: 0 0 6px; letter-spacing: -0.03em;
             font-family: 'Inter', sans-serif;
         }
         .login-subtitle {
-            text-align: center; color: var(--pro-muted); font-size: 13px; margin: 0 0 20px;
+            color: rgba(255,255,255,0.38); font-size: 14px; margin: 0;
         }
+        .login-form { display: flex; flex-direction: column; gap: 12px; }
+        .login-field { display: flex; flex-direction: column; gap: 7px; }
+        .login-field label {
+            font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.45);
+            text-transform: uppercase; letter-spacing: 0.07em;
+        }
+        .login-field input {
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px; padding: 13px 15px;
+            color: #F0F6FC; font-size: 15px; font-family: 'Inter', sans-serif;
+            outline: none; transition: border-color 0.15s, background 0.15s;
+        }
+        .login-field input:focus {
+            border-color: var(--pro-accent); background: rgba(37,99,235,0.1);
+        }
+        .login-field input::placeholder { color: rgba(255,255,255,0.2); font-weight: 400; }
+        .btn-login-submit {
+            width: 100%; padding: 14px; margin-top: 4px;
+            background: var(--pro-accent); color: #fff; border: none;
+            border-radius: 12px; font-size: 15px; font-weight: 700;
+            font-family: 'Montserrat', sans-serif; cursor: pointer;
+            box-shadow: 0 4px 24px rgba(37,99,235,0.4);
+            transition: opacity 0.15s, transform 0.12s;
+        }
+        .btn-login-submit:active { transform: scale(0.98); opacity: 0.9; }
         .login-error {
-            color: var(--ios-danger); text-align: center; font-size: 12px;
-            font-weight: 600; min-height: 18px; margin: 6px 0 0; display: none;
+            color: #F87171; text-align: center; font-size: 12px;
+            font-weight: 600; min-height: 18px; margin: 0; display: none;
         }
         .login-hint {
-            text-align: center; color: var(--pro-subtle); font-size: 11px; margin: 8px 0 0;
+            text-align: center; color: rgba(255,255,255,0.2);
+            font-size: 11px; margin-top: 24px; line-height: 1.6;
         }
 
         /* ===== Tab Bar ===== */
@@ -1482,25 +1519,26 @@
 <!-- ===== LOGIN SCREEN ===== -->
 <div id="loginScreen">
     <div class="login-box">
-        <div class="login-icon">&#128203;</div>
-        <h2 class="login-title">PartsPilot</h2>
-        <p class="login-subtitle">Inicia sesion para continuar</p>
-        <div class="ios-group">
-            <div class="ios-row">
+        <div class="login-brand">
+            <div class="login-icon-wrap">&#128203;</div>
+            <h2 class="login-title">PartsPilot</h2>
+            <p class="login-subtitle">Gestión de pedidos de taller</p>
+        </div>
+        <div class="login-form">
+            <div class="login-field">
                 <label>Usuario</label>
                 <input type="text" id="loginUser" placeholder="nombre.apellido" autocapitalize="none" autocorrect="off" spellcheck="false">
             </div>
-            <div class="ios-row">
-                <label>Clave</label>
-                <input type="password" id="loginPass" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;">
+            <div class="login-field">
+                <label>Contraseña</label>
+                <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
             </div>
+            <button class="btn-login-submit" id="btnLogin" onclick="doLogin()">Iniciar Sesión</button>
+            <p id="loginError" class="login-error"></p>
         </div>
-        <button class="main-btn btn-blue" id="btnLogin" onclick="doLogin()">Iniciar Sesion</button>
-        <p id="loginError" class="login-error"></p>
-        <p class="login-hint">Ingrese su usuario y clave<br>Support: bigio_tec@me.com</p>
-
+        <p class="login-hint">Support: bigio_tec@me.com</p>
         <div id="seedSection" style="display:none;margin-top:24px;">
-            <button class="main-btn" style="background:var(--ios-purple);" onclick="seedUsers()">Configurar Usuarios Iniciales</button>
+            <button class="main-btn" style="background:var(--ios-purple);width:100%;" onclick="seedUsers()">Configurar Usuarios Iniciales</button>
             <div id="seedLog" class="seed-log" style="display:none;"></div>
         </div>
     </div>
