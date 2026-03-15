@@ -463,13 +463,6 @@
                 white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
                 min-width: 0; flex: 1;
             }
-            /* Copy button — never shrinks */
-            .po-copy-btn {
-                background: none; border: none; cursor: pointer; padding: 4px;
-                color: var(--pro-muted); line-height: 1; border-radius: 4px;
-                transition: color 0.15s; flex-shrink: 0;
-            }
-            .po-copy-btn:active { color: var(--pro-accent); }
         }
 
         /* Entregadas section divider */
@@ -2589,14 +2582,6 @@
         }
     };
 
-    window.copyPO = function(btn, text) {
-        navigator.clipboard.writeText(text).then(() => {
-            btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>';
-            setTimeout(() => {
-                btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
-            }, 1500);
-        });
-    };
 
     // --- Status pill styles ---
     const PILL_STYLES = {
@@ -2814,7 +2799,6 @@
                 </div>
                 <div>
                     <span class="pro-id pro-id-chip">${esc(o.po || '—')}</span>
-                    ${o.po ? `<button class="po-copy-btn" onclick="event.stopPropagation();copyPO(this,'${esc(o.po)}')" title="Copiar PO#"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>` : ''}
                 </div>
             </div>
             <div class="pro-row-detail" id="detail-${o.id}">
