@@ -112,11 +112,6 @@
             cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s;
         }
         .btn-logout:hover { border-color: var(--pro-text); color: var(--pro-text); }
-        .btn-notif {
-            background: none; border: 1px solid var(--pro-border); border-radius: var(--r-md);
-            padding: 5px 9px; font-size: 15px; line-height: 1; cursor: pointer; transition: all 0.15s;
-        }
-        .btn-notif.active { background: #D1FAE5; border-color: #16A34A; }
 
         h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.02em; color: var(--pro-text); }
 
@@ -1476,6 +1471,7 @@
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     Importar
                 </button>
+                <input type="file" id="importFile" accept=".json" style="display:none" onchange="importarDatos(event)">
             </div>
         </div>
 
@@ -1498,7 +1494,6 @@
         <!-- Right: actions -->
         <div class="header-right">
             <span id="syncBadge" class="sync-badge sync-offline">offline</span>
-            <button id="btnNotif" class="btn-notif" onclick="toggleNotifications()" style="display:none;" title="Notificaciones" aria-hidden="true">&#128276;</button>
             <div class="header-divider"></div>
             <div class="header-user">
                 <div class="header-avatar" id="headerAvatar" onclick="openSettings()" style="cursor:pointer;" title="Configuración">A</div>
@@ -1606,18 +1601,6 @@
                             <span class="pro-filter-label">Entregado</span>
                             <span class="pro-filter-count" id="fc-Entregado"></span>
                         </div>
-                    </div>
-                    <div class="pro-nav-section-label" id="backupSection" style="margin-top:12px;">Herramientas</div>
-                    <div class="pro-nav-items" id="backupSection2">
-                        <div class="pro-nav-item" onclick="exportarDatos()">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                            Exportar
-                        </div>
-                        <div class="pro-nav-item" onclick="document.getElementById('importFile').click()">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                            Importar
-                        </div>
-                        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importarDatos(event)">
                     </div>
                 </div>
 
@@ -2024,6 +2007,7 @@
 
     // --- Notifications (Firestore-based) ---
     let notifUnsubscribe = null;
+    let notifEnabled = false;
 
     function notifSupported() {
         return 'Notification' in window;
@@ -2052,14 +2036,11 @@
     }
 
     async function initPushUI() {
-        const btn = document.getElementById('btnNotif');
-        if (!btn || !notifSupported()) return;
-        btn.style.display = 'inline-flex';
+        if (!notifSupported()) return;
         if (currentUser) {
             const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-            const enabled = userDoc.exists() && userDoc.data().notificationsOn;
-            btn.classList.toggle('active', !!enabled);
-            if (enabled && Notification.permission === 'granted') {
+            notifEnabled = userDoc.exists() && !!userDoc.data().notificationsOn;
+            if (notifEnabled && Notification.permission === 'granted') {
                 startNotifListener();
                 ensureFcmToken();
             }
@@ -2122,14 +2103,13 @@
 
     window.toggleNotifications = async function() {
         if (!notifSupported()) return mostrarToast('Tu navegador no soporta notificaciones');
-        const btn = document.getElementById('btnNotif');
 
         if (currentUser) {
             const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
             if (userDoc.exists() && userDoc.data().notificationsOn) {
                 await updateDoc(doc(db, 'users', currentUser.uid), { notificationsOn: false, fcmToken: null });
                 stopNotifListener();
-                btn.classList.remove('active');
+                notifEnabled = false;
                 mostrarToast('Notificaciones desactivadas');
                 return;
             }
@@ -2145,7 +2125,7 @@
             await updateDoc(doc(db, 'users', currentUser.uid), { notificationsOn: true });
         }
         startNotifListener();
-        btn.classList.add('active');
+        notifEnabled = true;
         mostrarToast('Notificaciones activadas');
         ensureFcmToken();
     };
@@ -2801,9 +2781,8 @@
     function updateNotifToggleUI() {
         const btn = document.getElementById('settingsNotifBtn');
         if (!btn) return;
-        const isOn = document.getElementById('btnNotif')?.classList.contains('active');
-        btn.textContent = isOn ? 'Activado ✓' : 'Activar';
-        btn.classList.toggle('on', !!isOn);
+        btn.textContent = notifEnabled ? 'Activado ✓' : 'Activar';
+        btn.classList.toggle('on', notifEnabled);
     }
 
     window.toggleNotificationsFromSettings = async function() {
