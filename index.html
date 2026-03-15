@@ -344,6 +344,45 @@
         .pro-comment-avatar.role-worker   { background: #D1FAE5; color: #065F46; }
         .pro-comment-avatar.role-customer { background: #DBEAFE; color: #1E40AF; }
         .pro-comment-avatar.role-legacy   { background: #F3F4F6; color: #6B7280; }
+
+        /* ===== Settings Modal ===== */
+        .settings-modal-backdrop {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            z-index: 200; display: flex; align-items: center; justify-content: center;
+        }
+        .settings-modal {
+            position: relative; background: #fff; border-radius: 14px; padding: 24px;
+            max-width: 340px; width: calc(100% - 32px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .settings-modal-title {
+            font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--pro-text);
+        }
+        .settings-avatar-preview {
+            width: 64px; height: 64px; border-radius: 50%; background: #EDE9FE;
+            color: #5B21B6; font-size: 28px; display: flex; align-items: center;
+            justify-content: center; margin: 0 auto 16px; border: 3px solid var(--pro-accent);
+        }
+        .settings-emoji-grid {
+            display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 20px;
+        }
+        .settings-emoji-btn {
+            width: 40px; height: 40px; border-radius: 8px; border: 2px solid transparent;
+            background: #F6F8FA; font-size: 20px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+        }
+        .settings-emoji-btn:hover { background: #EDE9FE; border-color: #A855F7; }
+        .settings-emoji-btn.selected { background: #EDE9FE; border-color: #7C3AED; }
+        .settings-save-btn {
+            width: 100%; background: var(--pro-accent); color: white; border: none;
+            border-radius: 8px; padding: 10px; font-size: 14px; font-weight: 600;
+            cursor: pointer; font-family: inherit;
+        }
+        .settings-close-btn {
+            position: absolute; top: 12px; right: 12px; background: none; border: none;
+            font-size: 20px; cursor: pointer; color: var(--pro-muted); line-height: 1;
+        }
+
         .pro-comment-body { flex: 1; min-width: 0; }
         .pro-comment-meta {
             display: flex; align-items: center; gap: 6px; margin-bottom: 3px; flex-wrap: wrap;
@@ -1303,6 +1342,18 @@
     </div>
 </div>
 
+<!-- ===== SETTINGS MODAL ===== -->
+<div id="settingsModal" class="settings-modal-backdrop" onclick="closeSettings(event)" style="display:none;">
+    <div class="settings-modal">
+        <button class="settings-close-btn" onclick="closeSettings()">&times;</button>
+        <div class="settings-modal-title">Configuración</div>
+        <div class="settings-avatar-preview" id="settingsAvatarPreview">😀</div>
+        <p style="text-align:center;font-size:12px;color:var(--pro-muted);margin-bottom:12px;">Elige tu avatar para el chat</p>
+        <div class="settings-emoji-grid" id="settingsEmojiGrid"></div>
+        <button class="settings-save-btn" onclick="saveAvatarEmoji()">Guardar</button>
+    </div>
+</div>
+
 <!-- ===== APP CONTENT ===== -->
 <div id="appContent" style="display:none">
 
@@ -1321,7 +1372,7 @@
             <button id="btnNotif" class="btn-notif" onclick="toggleNotifications()" style="display:none;" title="Notificaciones">&#128276;</button>
             <div class="header-divider"></div>
             <div class="header-user">
-                <div class="header-avatar" id="headerAvatar">A</div>
+                <div class="header-avatar" id="headerAvatar" onclick="openSettings()" style="cursor:pointer;" title="Configuración">A</div>
                 <div class="header-user-info">
                     <span id="userName" class="user-name"></span>
                     <span id="userRoleBadge" class="role-badge"></span>
@@ -1362,7 +1413,7 @@
 
                 <!-- USUARIO FOOTER -->
                 <div class="pro-sidebar-footer">
-                    <div class="pro-sidebar-avatar" id="sidebarAvatar">A</div>
+                    <div class="pro-sidebar-avatar" id="sidebarAvatar" onclick="openSettings()" style="cursor:pointer;" title="Configuración">A</div>
                     <div>
                         <div class="pro-sidebar-uname" id="sidebarUserName">Usuario</div>
                         <div class="pro-sidebar-ver">v3.8.0</div>
@@ -1811,7 +1862,8 @@
             text,
             name: currentUserDoc.name,
             role: currentRole,
-            ts: new Date().toISOString()
+            ts: new Date().toISOString(),
+            ...(currentUserDoc.avatarEmoji ? { avatarEmoji: currentUserDoc.avatarEmoji } : {})
         };
         try {
             // Update seenComments BEFORE Firestore write to prevent glow on sender's own card
@@ -2082,7 +2134,7 @@
         badge.className = 'role-badge role-' + currentRole;
 
         // Pro sidebar footer + header avatar
-        const initial = (currentUserDoc.name || 'U')[0].toUpperCase();
+        const initial = currentUserDoc.avatarEmoji || (currentUserDoc.name || 'U')[0].toUpperCase();
         const sidebarName = document.getElementById('sidebarUserName');
         const sidebarAvatar = document.getElementById('sidebarAvatar');
         const headerAvatar = document.getElementById('headerAvatar');
@@ -2483,6 +2535,60 @@
     }
     window.render = render;
 
+    // ===== Settings / Avatar =====
+    const AVATAR_EMOJIS = [
+        '😀','😎','🤩','🧐','🤠','😴',
+        '🐶','🐱','🦊','🐻','🐼','🦁',
+        '🚀','⚡','🎯','🔧','🏆','🎸',
+    ];
+
+    let selectedEmoji = null;
+
+    window.openSettings = function() {
+        selectedEmoji = currentUserDoc?.avatarEmoji || null;
+        // Build grid
+        const grid = document.getElementById('settingsEmojiGrid');
+        grid.innerHTML = AVATAR_EMOJIS.map(e =>
+            `<button class="settings-emoji-btn${selectedEmoji === e ? ' selected' : ''}"
+                onclick="selectEmoji('${e}')">${e}</button>`
+        ).join('');
+        // Preview
+        const preview = document.getElementById('settingsAvatarPreview');
+        preview.textContent = selectedEmoji || (currentUserDoc?.name || 'U')[0].toUpperCase();
+        document.getElementById('settingsModal').style.display = 'flex';
+    };
+
+    window.closeSettings = function(e) {
+        if (e && e.target !== document.getElementById('settingsModal')) return;
+        document.getElementById('settingsModal').style.display = 'none';
+    };
+
+    window.selectEmoji = function(emoji) {
+        selectedEmoji = emoji;
+        document.getElementById('settingsAvatarPreview').textContent = emoji;
+        document.querySelectorAll('.settings-emoji-btn').forEach(btn => {
+            btn.classList.toggle('selected', btn.textContent === emoji);
+        });
+    };
+
+    window.saveAvatarEmoji = async function() {
+        try {
+            await updateDoc(doc(db, 'users', currentUser.uid), { avatarEmoji: selectedEmoji || '' });
+            currentUserDoc.avatarEmoji = selectedEmoji || '';
+            // Update visible avatars
+            const display = selectedEmoji || (currentUserDoc.name || 'U')[0].toUpperCase();
+            const ha = document.getElementById('headerAvatar');
+            const sa = document.getElementById('sidebarAvatar');
+            if (ha) ha.textContent = display;
+            if (sa) sa.textContent = display;
+            document.getElementById('settingsModal').style.display = 'none';
+            mostrarToast('Avatar actualizado ✓');
+            render();
+        } catch(e) {
+            mostrarToast('Error al guardar');
+        }
+    };
+
     window.copyPO = function(btn, text) {
         navigator.clipboard.writeText(text).then(() => {
             btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>';
@@ -2609,7 +2715,7 @@
 
         const commentItems = comments.map(c => `
             <div class="pro-comment">
-                <div class="pro-comment-avatar ${avatarClass(c.role)}">${(c.name||'?')[0].toUpperCase()}</div>
+                <div class="pro-comment-avatar ${avatarClass(c.role)}">${c.avatarEmoji || (c.name||'?')[0].toUpperCase()}</div>
                 <div class="pro-comment-body">
                     <div class="pro-comment-meta">
                         <span class="pro-comment-name">${esc(c.name || 'Usuario')}</span>
