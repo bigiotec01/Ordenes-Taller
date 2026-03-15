@@ -816,17 +816,11 @@
             max-height: 220px; overflow-y: auto; margin-top: 12px;
         }
 
-        /* ===== Sidebar layout: mobile defaults (transparent, stacked) ===== */
+        /* ===== Sidebar layout: mobile defaults — sidebar hidden ===== */
         .desktop-layout { display: block; }
-        .sidebar { background: transparent; }
-        .sidebar-section {
-            background: transparent; border-radius: 0; padding: 0;
-            margin: 0; box-shadow: none;
-        }
-        .sidebar-section-title { display: none; }
+        .sidebar { display: none; }
         .main-content { display: block; }
         #formSection { padding: 0 16px; }
-        .sidebar .backup-row { padding: 0 16px; margin-bottom: 8px; }
         #orderList { margin-top: 16px; }
 
         /* ===== Desktop (768px+) — Sidebar Layout ===== */
@@ -897,6 +891,7 @@
 
             /* ── LEFT SIDEBAR — Dark navy ── */
             .sidebar {
+                display: block;
                 width: 260px; min-width: 240px; max-width: 280px;
                 flex-shrink: 0; height: 100%; overflow-y: auto;
                 background: var(--pro-sidebar);
