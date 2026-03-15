@@ -139,7 +139,7 @@
         /* ── Sync badge ── */
         .sync-badge {
             display: inline-block; padding: 2px 7px; border-radius: var(--r-sm);
-            font-size: 10px; font-weight: 700; margin-left: 8px; vertical-align: middle;
+            font-size: 10px; font-weight: 700; vertical-align: middle;
             text-transform: uppercase; letter-spacing: 0.05em;
         }
         .sync-online  { background: rgba(22,163,74,0.2); color: #4ADE80; }
@@ -1621,7 +1621,6 @@
 
         <!-- Right: actions -->
         <div class="header-right">
-            <span id="syncBadge" class="sync-badge sync-offline">offline</span>
             <div class="header-divider"></div>
             <div class="header-user">
                 <div class="header-avatar" id="headerAvatar" onclick="openSettings()" style="cursor:pointer;" title="Configuración">A</div>
@@ -1631,6 +1630,7 @@
                 </div>
             </div>
             <button class="btn-settings" onclick="openSettings()" title="Configuración">&#9881;&#65039;</button>
+            <span id="syncBadge" class="sync-badge sync-offline">offline</span>
             <button class="btn-logout" onclick="doLogout()">Salir</button>
         </div>
     </div>
@@ -2085,7 +2085,7 @@
         const navMap = { ordenes: 'navOrdenes', inventario: 'navInventario', admin: 'navAdmin' };
         const navEl = document.getElementById(navMap[tab]);
         if (navEl) navEl.classList.add('active');
-        const titleMap = { ordenes: 'Órdenes Activas', inventario: 'Inventario', admin: 'Clientes / Admin' };
+        const titleMap = { ordenes: currentUserDoc?.name || 'PartsPilot', inventario: 'Inventario', admin: 'Clientes / Admin' };
         const titleEl = document.getElementById('headerPageTitle');
         if (titleEl) titleEl.textContent = titleMap[tab] || '';
 
@@ -2406,6 +2406,8 @@
 
         // Update user bar
         document.getElementById('userName').textContent = currentUserDoc.name;
+        const pageTitleEl = document.getElementById('headerPageTitle');
+        if (pageTitleEl) pageTitleEl.textContent = currentUserDoc.name;
         const badge = document.getElementById('userRoleBadge');
         badge.textContent = currentRole;
         badge.className = 'role-badge role-' + currentRole;
