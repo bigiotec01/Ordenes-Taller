@@ -451,7 +451,7 @@
             .pro-row > div:nth-child(4) {
                 grid-column: 2; grid-row: 1;
                 display: flex; align-items: center; justify-content: flex-end;
-                gap: 4px; flex-wrap: nowrap; overflow: hidden;
+                gap: 4px; flex-wrap: nowrap; min-width: 0;
             }
 
             /* PO# chip */
@@ -461,13 +461,13 @@
                 background: #F0F1F3; border: 1px solid var(--pro-border);
                 border-radius: 6px; padding: 4px 7px;
                 white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-                max-width: 88px;
+                min-width: 0; flex: 1;
             }
-            /* Copy button */
+            /* Copy button — never shrinks */
             .po-copy-btn {
                 background: none; border: none; cursor: pointer; padding: 4px;
                 color: var(--pro-muted); line-height: 1; border-radius: 4px;
-                transition: color 0.15s;
+                transition: color 0.15s; flex-shrink: 0;
             }
             .po-copy-btn:active { color: var(--pro-accent); }
         }
