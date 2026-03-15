@@ -797,22 +797,46 @@
         @media (min-width: 768px) {
             body { padding-bottom: 0; background: var(--pro-sidebar); }
 
-            /* ── Top bar: clean white ── */
+            /* ── Top bar ── */
             .header {
                 max-width: none; margin: 0; padding: 0 24px;
                 background: var(--pro-white);
                 border-bottom: 1px solid var(--pro-border);
                 height: 52px; display: flex; align-items: center;
+                justify-content: space-between; gap: 16px;
             }
-            .header h1 { font-size: 16px; color: var(--pro-text); font-weight: 700; }
-            .header .header-top { margin-bottom: 0; flex: 1; }
-            .header .user-name { color: var(--pro-text); font-weight: 500; }
-            .btn-logout { border-color: var(--pro-border); color: var(--pro-muted); }
+            .header-page-title {
+                font-size: 15px; font-weight: 700; color: var(--pro-text);
+                letter-spacing: -0.01em;
+            }
+            .header-right {
+                display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+            }
+            .header-user {
+                display: flex; align-items: center; gap: 8px;
+                padding: 4px 10px 4px 4px;
+                border: 1px solid var(--pro-border); border-radius: 20px;
+            }
+            .header-avatar {
+                width: 26px; height: 26px; border-radius: 50%;
+                background: var(--pro-accent-soft); color: var(--pro-accent-text);
+                display: flex; align-items: center; justify-content: center;
+                font-size: 11px; font-weight: 700; flex-shrink: 0;
+            }
+            .header-user-info { display: flex; align-items: center; gap: 6px; }
+            .header .user-name { font-size: 12px; font-weight: 600; color: var(--pro-text); }
+            .header .role-badge { font-size: 9px; padding: 1px 6px; }
+            .btn-logout {
+                font-size: 12px; padding: 5px 12px; border-radius: var(--r-md);
+                border: 1px solid var(--pro-border); background: none;
+                color: var(--pro-muted); cursor: pointer; font-family: inherit;
+            }
             .btn-logout:hover { border-color: var(--pro-text); color: var(--pro-text); }
             /* hide search/filter/counter from header on desktop */
             .header .search-container,
             .header .status-counter,
             .header .filter-bar { display: none; }
+            .header .header-top { display: none; }
 
             /* ── Two-column layout ── */
             .desktop-layout { display: flex; align-items: flex-start; height: calc(100vh - 52px); }
@@ -1217,18 +1241,19 @@
 <div id="appContent" style="display:none">
 
     <div class="header">
-        <div class="header-top">
-            <div class="user-info">
-                <span id="userName" class="user-name"></span>
-                <span id="userRoleBadge" class="role-badge"></span>
+        <span id="headerPageTitle" class="header-page-title">Órdenes Activas</span>
+        <div class="header-right">
+            <span id="syncBadge" class="sync-badge sync-offline">offline</span>
+            <button id="btnNotif" class="btn-notif" onclick="toggleNotifications()" style="display:none;" title="Notificaciones">&#128276;</button>
+            <div class="header-user">
+                <div class="header-avatar" id="headerAvatar">A</div>
+                <div class="header-user-info">
+                    <span id="userName" class="user-name"></span>
+                    <span id="userRoleBadge" class="role-badge"></span>
+                </div>
             </div>
-            <div style="display:flex;align-items:center;gap:8px;">
-                <button id="btnNotif" class="btn-notif" onclick="toggleNotifications()" style="display:none;" title="Notificaciones">&#128276;</button>
-                <button class="btn-logout" onclick="doLogout()">Salir</button>
-            </div>
+            <button class="btn-logout" onclick="doLogout()">Salir</button>
         </div>
-        <h1>PartsPilot</h1>
-        <div style="margin-top:4px;"><span id="syncBadge" class="sync-badge sync-offline">offline</span></div>
     </div>
 
     <!-- ===== TAB: ORDENES ===== -->
@@ -1639,7 +1664,7 @@
         document.getElementById('tabBtnInventario').classList.toggle('active', tab === 'inventario');
         document.getElementById('tabBtnAdmin').classList.toggle('active', tab === 'admin');
 
-        // Pro sidebar nav active state
+        // Pro sidebar nav active state + header title
         ['navOrdenes','navInventario','navAdmin'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.classList.remove('active');
@@ -1647,6 +1672,9 @@
         const navMap = { ordenes: 'navOrdenes', inventario: 'navInventario', admin: 'navAdmin' };
         const navEl = document.getElementById(navMap[tab]);
         if (navEl) navEl.classList.add('active');
+        const titleMap = { ordenes: 'Órdenes Activas', inventario: 'Inventario', admin: 'Clientes / Admin' };
+        const titleEl = document.getElementById('headerPageTitle');
+        if (titleEl) titleEl.textContent = titleMap[tab] || '';
 
         if (tab === 'inventario') { renderAdminStats(); renderAdminOrders(); }
         if (tab === 'admin') renderUsers();
@@ -1971,11 +1999,14 @@
         badge.textContent = currentRole;
         badge.className = 'role-badge role-' + currentRole;
 
-        // Pro sidebar footer
+        // Pro sidebar footer + header avatar
+        const initial = (currentUserDoc.name || 'U')[0].toUpperCase();
         const sidebarName = document.getElementById('sidebarUserName');
         const sidebarAvatar = document.getElementById('sidebarAvatar');
+        const headerAvatar = document.getElementById('headerAvatar');
         if (sidebarName) sidebarName.textContent = currentUserDoc.name;
-        if (sidebarAvatar) sidebarAvatar.textContent = (currentUserDoc.name || 'U')[0].toUpperCase();
+        if (sidebarAvatar) sidebarAvatar.textContent = initial;
+        if (headerAvatar) headerAvatar.textContent = initial;
 
         // Role-based visibility
         document.getElementById('formSection').style.display = currentRole === 'customer' ? 'none' : 'block';
