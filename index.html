@@ -1052,8 +1052,8 @@
                 transition: all 0.15s;
             }
             .btn-logout:hover { border-color: rgba(255,255,255,0.35); color: rgba(255,255,255,0.75); }
-            /* hide settings btn on desktop — sidebar avatar handles it */
-            .btn-settings { display: none; }
+            /* hide settings btn from mobile header on desktop — sidebar footer has it */
+            .header .btn-settings { display: none; }
             /* hide search/filter/counter from header on desktop */
             .header .search-container,
             .header .status-counter,
@@ -1245,6 +1245,15 @@
                 padding: 12px 16px; border-top: 1px solid var(--pro-sidebar-border);
                 display: flex; align-items: center; gap: 10px;
                 background: var(--pro-sidebar);
+            }
+            .pro-sidebar-footer .btn-settings {
+                display: flex; align-items: center; justify-content: center;
+                margin-left: auto; width: 28px; height: 28px;
+                border-radius: var(--r-md); font-size: 16px;
+                color: rgba(255,255,255,0.4); transition: all 0.15s;
+            }
+            .pro-sidebar-footer .btn-settings:hover {
+                background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8);
             }
             .pro-sidebar-avatar {
                 width: 30px; height: 30px; border-radius: 50%;
@@ -1534,11 +1543,12 @@
 
                 <!-- USUARIO FOOTER -->
                 <div class="pro-sidebar-footer">
-                    <div class="pro-sidebar-avatar" id="sidebarAvatar" onclick="openSettings()" style="cursor:pointer;" title="Configuración">A</div>
+                    <div class="pro-sidebar-avatar" id="sidebarAvatar">A</div>
                     <div>
                         <div class="pro-sidebar-uname" id="sidebarUserName">Usuario</div>
                         <div class="pro-sidebar-ver">v3.8.0</div>
                     </div>
+                    <button class="btn-settings" onclick="openSettings()" title="Configuración">&#9881;&#65039;</button>
                 </div>
 
                 <!-- FILTROS NAV -->
