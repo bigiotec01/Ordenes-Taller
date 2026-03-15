@@ -77,14 +77,20 @@
         .header-right {
             display: flex; align-items: center; gap: 4px; flex-shrink: 0;
         }
-        /* hide user name + role on mobile */
-        .header-user-info { display: none; }
+        /* show user name + role on mobile (now on left side) */
+        .header-user-info { display: flex; align-items: center; gap: 5px; }
         /* hide divider on mobile */
         .header-divider { display: none; }
         /* slim avatar pill on mobile */
         .header-user {
-            padding: 2px 6px; border-radius: 20px;
-            border: 1px solid var(--pro-border); background: transparent;
+            display: flex; align-items: center; gap: 8px;
+            padding: 2px 4px; border-radius: 20px;
+            border: none; background: transparent;
+            min-width: 0; flex-shrink: 1; overflow: hidden;
+        }
+        .header-user .user-name {
+            font-size: 14px; font-weight: 700; color: var(--pro-text);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         /* settings gear button */
         .btn-settings {
@@ -1611,28 +1617,29 @@
 <div id="appContent" style="display:none">
 
     <div class="header">
-        <!-- Left: page title -->
-        <span id="headerPageTitle" class="header-page-title">Órdenes Activas</span>
+        <!-- Left: user identity -->
+        <div class="header-user" onclick="openSettings()" style="cursor:pointer;" title="Configuración">
+            <div class="header-avatar" id="headerAvatar">A</div>
+            <div class="header-user-info">
+                <span id="userName" class="user-name"></span>
+                <span id="userRoleBadge" class="role-badge"></span>
+            </div>
+        </div>
 
-        <!-- Center: brand -->
+        <!-- Center: brand (desktop only) -->
         <div class="header-brand">
             <span class="header-brand-name">PartsPilot</span>
         </div>
 
         <!-- Right: actions -->
         <div class="header-right">
-            <div class="header-divider"></div>
-            <div class="header-user">
-                <div class="header-avatar" id="headerAvatar" onclick="openSettings()" style="cursor:pointer;" title="Configuración">A</div>
-                <div class="header-user-info">
-                    <span id="userName" class="user-name"></span>
-                    <span id="userRoleBadge" class="role-badge"></span>
-                </div>
-            </div>
             <button class="btn-settings" onclick="openSettings()" title="Configuración">&#9881;&#65039;</button>
             <span id="syncBadge" class="sync-badge sync-offline">offline</span>
             <button class="btn-logout" onclick="doLogout()">Salir</button>
         </div>
+
+        <!-- hidden title for tab name updates (JS uses this) -->
+        <span id="headerPageTitle" style="display:none;"></span>
     </div>
 
     <!-- ===== TAB: ORDENES ===== -->
