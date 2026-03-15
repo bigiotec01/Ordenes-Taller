@@ -777,6 +777,51 @@
             .sidebar .backup-row { padding: 0; margin: 0; }
             .sidebar .btn-backup { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); border: 1px solid var(--pro-sidebar-border); border-radius: var(--r-md); }
 
+            /* ── Sidebar nav ── */
+            .pro-nav { margin-bottom: 20px; }
+            .pro-nav-logo {
+                display: flex; align-items: center; gap: 10px;
+                padding: 4px 8px 16px; margin-bottom: 4px;
+                border-bottom: 1px solid var(--pro-sidebar-border);
+            }
+            .pro-nav-logo-icon {
+                width: 26px; height: 26px; border-radius: 6px;
+                background: var(--pro-accent); flex-shrink: 0;
+            }
+            .pro-nav-logo-text {
+                font-size: 14px; font-weight: 700; color: #E6EDF3;
+                letter-spacing: -0.01em;
+            }
+            .pro-nav-items { padding-top: 10px; display: flex; flex-direction: column; gap: 2px; }
+            .pro-nav-item {
+                display: flex; align-items: center; gap: 9px;
+                padding: 7px 10px; border-radius: var(--r-md);
+                font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.55);
+                cursor: pointer; transition: background 0.12s, color 0.12s;
+                user-select: none; text-decoration: none;
+            }
+            .pro-nav-item:hover { background: var(--pro-sidebar-hover); color: rgba(255,255,255,0.85); }
+            .pro-nav-item.active {
+                background: var(--pro-sidebar-active); color: #93C5FD; font-weight: 600;
+            }
+            .pro-nav-item svg { flex-shrink: 0; opacity: 0.7; }
+            .pro-nav-item.active svg { opacity: 1; }
+            .pro-sidebar-footer {
+                position: absolute; bottom: 0; left: 0; right: 0;
+                padding: 12px 16px; border-top: 1px solid var(--pro-sidebar-border);
+                display: flex; align-items: center; gap: 10px;
+                background: var(--pro-sidebar);
+            }
+            .pro-sidebar-avatar {
+                width: 30px; height: 30px; border-radius: 50%;
+                background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.7);
+                display: flex; align-items: center; justify-content: center;
+                font-size: 12px; font-weight: 700; flex-shrink: 0;
+            }
+            .pro-sidebar-uname { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.8); }
+            .pro-sidebar-ver   { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 1px; }
+            .sidebar { position: relative; padding-bottom: 64px !important; }
+
             /* ── RIGHT MAIN CONTENT ── */
             .main-content {
                 flex: 1; padding: 20px 24px; min-width: 0;
@@ -1000,6 +1045,37 @@
 
             <!-- ===== SIDEBAR (izquierda en desktop) ===== -->
             <aside class="sidebar">
+
+                <!-- PRO NAV -->
+                <nav class="pro-nav">
+                    <div class="pro-nav-logo">
+                        <div class="pro-nav-logo-icon"></div>
+                        <span class="pro-nav-logo-text">PartsPilot</span>
+                    </div>
+                    <div class="pro-nav-items">
+                        <div class="pro-nav-item active" id="navOrdenes" onclick="switchTab('ordenes')">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                            Órdenes Activas
+                        </div>
+                        <div class="pro-nav-item" id="navInventario" onclick="switchTab('inventario')">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                            Inventario
+                        </div>
+                        <div class="pro-nav-item" id="navAdmin" onclick="switchTab('admin')">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            Clientes / Admin
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- USUARIO FOOTER -->
+                <div class="pro-sidebar-footer">
+                    <div class="pro-sidebar-avatar" id="sidebarAvatar">A</div>
+                    <div>
+                        <div class="pro-sidebar-uname" id="sidebarUserName">Usuario</div>
+                        <div class="pro-sidebar-ver">v3.8.0</div>
+                    </div>
+                </div>
 
                 <!-- NUEVA ORDEN -->
                 <div class="sidebar-section">
@@ -1323,6 +1399,15 @@
         document.getElementById('tabBtnInventario').classList.toggle('active', tab === 'inventario');
         document.getElementById('tabBtnAdmin').classList.toggle('active', tab === 'admin');
 
+        // Pro sidebar nav active state
+        ['navOrdenes','navInventario','navAdmin'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('active');
+        });
+        const navMap = { ordenes: 'navOrdenes', inventario: 'navInventario', admin: 'navAdmin' };
+        const navEl = document.getElementById(navMap[tab]);
+        if (navEl) navEl.classList.add('active');
+
         if (tab === 'inventario') { renderAdminStats(); renderAdminOrders(); }
         if (tab === 'admin') renderUsers();
     };
@@ -1645,6 +1730,12 @@
         const badge = document.getElementById('userRoleBadge');
         badge.textContent = currentRole;
         badge.className = 'role-badge role-' + currentRole;
+
+        // Pro sidebar footer
+        const sidebarName = document.getElementById('sidebarUserName');
+        const sidebarAvatar = document.getElementById('sidebarAvatar');
+        if (sidebarName) sidebarName.textContent = currentUserDoc.name;
+        if (sidebarAvatar) sidebarAvatar.textContent = (currentUserDoc.name || 'U')[0].toUpperCase();
 
         // Role-based visibility
         document.getElementById('formSection').style.display = currentRole === 'customer' ? 'none' : 'block';
