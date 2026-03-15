@@ -54,16 +54,16 @@
             font-family: 'Inter', -apple-system, sans-serif;
             margin: 0; background: var(--pro-bg); color: var(--pro-text);
             -webkit-font-smoothing: antialiased;
-            padding-bottom: 80px; font-size: 14px; line-height: 1.5;
+            padding-bottom: calc(80px + env(safe-area-inset-bottom)); font-size: 14px; line-height: 1.5;
         }
 
         /* ── Mobile header ── */
         .header {
             background: var(--pro-white);
             border-bottom: 1px solid var(--pro-border);
-            padding: 0 16px; position: sticky; top: 0; z-index: 100;
+            padding: env(safe-area-inset-top) 16px 0; position: sticky; top: 0; z-index: 100;
             display: flex; align-items: center; justify-content: space-between;
-            height: 52px; gap: 8px;
+            min-height: 52px; height: calc(52px + env(safe-area-inset-top)); gap: 8px;
         }
         /* hide brand on mobile — only visible on desktop center column */
         .header-brand { display: none; }
