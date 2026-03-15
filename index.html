@@ -2327,9 +2327,14 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ tokens: fcmTokens, title, body })
-                }).catch(e => console.error('FCM push error:', e));
+                })
+                .then(r => r.json())
+                .then(r => console.log('[FCM] API response:', r))
+                .catch(e => console.error('[FCM] push error:', e));
+            } else {
+                console.warn('[FCM] No tokens found — fcmToken not saved for recipients');
             }
-            console.log('Notifications sent to', count, 'users (' + fcmTokens.length + ' FCM)');
+            console.log('[FCM] Notifications sent to', count, 'users (' + fcmTokens.length + ' tokens)');
         } catch (e) { console.error('notifyPush error:', e); }
     }
 
