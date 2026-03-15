@@ -3,44 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>PartsPilot</title>
+    <title>PartsPilot OS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="./icon-512.png">
     <link rel="manifest" href="manifest.json?v=3.8.0">
-    <meta name="theme-color" content="#F8F9FB">
+    <meta name="theme-color" content="#0B0E14">
 
     <style>
         :root {
-            --bg-main: #F8F9FB;
+            /* PartsPilot OS — Palette Linear/Vercel */
+            --app-bg: #0B0E14;
+            --sidebar-bg: #151921;
+            --accent: #0066FF;
+            --accent-soft: rgba(0, 102, 255, 0.12);
+            --border: #E2E8F0;
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            --success: #10B981;
+            --radius: 8px;
+            --sidebar-width: 260px;
+            --shadow-soft: 0 1px 3px rgba(0,0,0,0.06);
+
+            /* Legacy aliases */
+            --bg-main: #F1F5F9;
             --card-bg: #FFFFFF;
-            --accent-blue: #2D60FF;
-            --text-main: #1A1D1F;
-            --text-muted: #6F767E;
-            --border-radius: 16px;
-            --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
-            /* Functional colors */
-            --ios-blue: #2D60FF; --ios-green: #34C759; --ios-bg: #F8F9FB;
-            --ios-card: #FFFFFF; --ios-text: #1A1D1F; --ios-gray: #6F767E;
-            --ios-danger: #FF3B30; --ios-orange: #FF9500; --ios-purple: #6C5CE7;
-            --ios-yellow: #FFCC00; --ios-lightblue: #5AC8FA;
+            --accent-blue: #0066FF;
+            --border-radius: 8px;
+            --ios-blue: #0066FF; --ios-green: #10B981; --ios-bg: #F1F5F9;
+            --ios-card: #FFFFFF; --ios-text: #1E293B; --ios-gray: #64748B;
+            --ios-danger: #EF4444; --ios-orange: #F97316; --ios-purple: #8B5CF6;
+            --ios-yellow: #EAB308; --ios-lightblue: #38BDF8;
         }
 
         body {
-            font-family: 'Montserrat', -apple-system, sans-serif;
-            margin: 0; background: var(--bg-main); color: var(--text-main);
+            font-family: 'Inter', -apple-system, sans-serif;
+            margin: 0; background: var(--app-bg); color: var(--text-main);
             -webkit-font-smoothing: antialiased;
             padding-bottom: 80px;
-            font-weight: 500;
         }
 
         .header {
-            background: rgba(248, 249, 251, 0.85); backdrop-filter: blur(20px);
-            padding: 54px 20px 12px 20px; position: sticky; top: 0; z-index: 100;
-            text-align: center;
+            background: #FFFFFF;
+            padding: 12px 20px 10px 20px; position: sticky; top: 0; z-index: 100;
+            text-align: center; border-bottom: 1px solid var(--border);
         }
 
         .header-top {
@@ -68,20 +77,20 @@
         }
         .btn-notif.active { background: #E7F7EF; border-color: #34C759; }
 
-        h1 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.02em; color: var(--text-main); }
+        h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: var(--text-main); }
 
         .search-container { padding: 10px 16px 0; }
         .search-bar {
-            background: white; border-radius: 12px; padding: 10px 15px;
+            background: #F1F5F9; border-radius: var(--radius); padding: 8px 12px;
             display: flex; align-items: center;
-            box-shadow: var(--shadow-soft); border: 1px solid rgba(0,0,0,0.04);
+            border: 1px solid var(--border);
         }
         .search-bar input {
-            border: none; background: transparent; width: 100%; font-size: 15px;
+            border: none; background: transparent; width: 100%; font-size: 14px;
             outline: none; margin-left: 8px; color: var(--text-main);
-            font-family: 'Montserrat', sans-serif; font-weight: 500;
+            font-family: 'Inter', sans-serif;
         }
-        .search-bar input::placeholder { color: #B2B8C3; }
+        .search-bar input::placeholder { color: var(--text-muted); }
 
         .sync-badge {
             display: inline-block; padding: 3px 10px; border-radius: 8px;
@@ -110,41 +119,38 @@
         }
         .filter-bar::-webkit-scrollbar { display: none; }
         .filter-chip {
-            padding: 7px 14px; border-radius: 10px; font-size: 12px; font-weight: 600;
-            border: none; white-space: nowrap; background: #ECEDF0; color: var(--text-muted);
-            flex-shrink: 0; transition: all 0.2s; letter-spacing: 0.01em;
+            padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
+            border: 1px solid var(--border); white-space: nowrap; background: #fff; color: var(--text-muted);
+            flex-shrink: 0; transition: all 0.15s;
         }
-        .filter-chip.active { background: var(--accent-blue); color: white; box-shadow: 0 4px 12px rgba(45, 96, 255, 0.25); }
+        .filter-chip.active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
 
         .container { padding: 16px; }
 
         .ios-group {
-            background: var(--card-bg); border-radius: var(--border-radius);
-            margin-bottom: 25px; overflow: hidden; box-shadow: var(--shadow-soft);
-            border: 1px solid rgba(0,0,0,0.03);
+            background: var(--card-bg); border-radius: var(--radius);
+            margin-bottom: 16px; overflow: hidden;
+            border: 1px solid var(--border);
         }
 
         .ios-row {
-            display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid #F0F1F3;
+            display: flex; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--border);
         }
 
         .ios-row:last-child { border-bottom: none; }
-        .ios-row label { width: 125px; font-size: 14px; color: var(--text-muted); font-weight: 600; }
+        .ios-row label { width: 125px; font-size: 13px; color: var(--text-muted); font-weight: 500; }
         .ios-row input, .ios-row select {
-            flex: 1; border: none; font-size: 15px; outline: none;
-            background: transparent; color: var(--accent-blue); font-weight: 500;
-            font-family: 'Montserrat', sans-serif;
+            flex: 1; border: none; font-size: 14px; outline: none;
+            background: transparent; color: var(--accent); font-weight: 500;
+            font-family: 'Inter', sans-serif;
         }
 
         .main-btn {
-            width: 100%; color: white; border: none; padding: 14px;
-            border-radius: 12px; font-size: 16px; font-weight: 700; margin-bottom: 10px;
-            font-family: 'Montserrat', sans-serif; letter-spacing: -0.01em;
-            box-shadow: 0 4px 12px rgba(45, 96, 255, 0.25);
-            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%; color: white; border: none; padding: 12px;
+            border-radius: var(--radius); font-size: 14px; font-weight: 600; margin-bottom: 10px;
+            font-family: 'Inter', sans-serif; cursor: pointer;
         }
-        .main-btn:active { transform: scale(0.98); }
-        .btn-blue { background: var(--accent-blue); }
+        .btn-blue { background: var(--accent); }
         .btn-cancel {
             width: 100%; border: 2px solid #E2E4E9; background: transparent;
             color: var(--text-muted); padding: 12px; border-radius: 12px;
@@ -152,14 +158,58 @@
             font-family: 'Montserrat', sans-serif; box-shadow: none;
         }
 
-        .order-card {
-            background: var(--card-bg); border-radius: var(--border-radius); padding: 20px;
-            margin-bottom: 12px; box-shadow: var(--shadow-soft);
-            border: 1px solid rgba(0,0,0,0.02);
-            border-left: 5px solid #E2E4E9;
-            transition: transform 0.2s ease;
+        /* ===== Software Card / Table Layout ===== */
+        .software-card {
+            background: #fff; border: 1px solid var(--border);
+            border-radius: var(--radius); box-shadow: var(--shadow-soft);
+            overflow: hidden; margin-bottom: 20px;
         }
-        .order-card:active { transform: scale(0.985); }
+        .table-header-row {
+            padding: 11px 18px; background: #F8FAFC; border-bottom: 1px solid var(--border);
+            display: grid; grid-template-columns: 1fr 160px 140px 110px;
+            font-size: 11px; font-weight: 700; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.06em;
+        }
+        .order-row {
+            padding: 13px 18px; border-bottom: 1px solid #F1F5F9;
+            display: grid; grid-template-columns: 1fr 160px 140px 110px;
+            align-items: center; cursor: pointer; background: #fff;
+            transition: background 0.15s;
+        }
+        .order-row:last-child { border-bottom: none; }
+        .order-row:hover { background: #F8FAFC; }
+        .order-row-title { font-weight: 600; font-size: 14px; color: var(--text-main); }
+        .order-row-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+        .order-row-taller { font-size: 13px; color: var(--text-main); font-weight: 500; }
+        .order-id-badge {
+            font-family: 'JetBrains Mono', monospace; font-size: 12px;
+            color: var(--accent); background: var(--accent-soft);
+            padding: 3px 7px; border-radius: 4px; display: inline-block;
+        }
+        .status-pill {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 3px 9px; border-radius: 4px;
+            font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+        }
+        .status-pill-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+        /* ===== Order Card Wrap & Expand ===== */
+        .order-card-wrap { border-bottom: 1px solid #F1F5F9; }
+        .order-card-wrap:last-child { border-bottom: none; }
+        .order-card-wrap.has-note    { animation: note-pulse      1.2s ease-in-out infinite; }
+        .order-card-wrap.has-attention { animation: attention-pulse 1.2s ease-in-out infinite; }
+        .order-card-wrap.is-overdue    { animation: overdue-pulse   1s   ease-in-out infinite; }
+        .order-card-wrap.is-due-today  { animation: attention-pulse 1s   ease-in-out infinite; }
+        .order-detail-expand {
+            padding: 16px 18px; background: #FAFBFC; border-top: 1px solid #F1F5F9;
+        }
+
+        /* Legacy card fallback */
+        .order-card {
+            background: var(--card-bg); border-radius: var(--radius); padding: 16px;
+            margin-bottom: 10px; box-shadow: var(--shadow-soft);
+            border-left: 5px solid #E2E4E9;
+        }
 
         .st-aprobacion { border-left-color: #A855F7 !important; }
         .st-aprobado   { border-left-color: #34C759 !important; }
@@ -325,16 +375,22 @@
         #loginScreen {
             display: flex; align-items: center; justify-content: center;
             min-height: 100vh; min-height: 100dvh;
-            background: var(--bg-main); padding: 20px;
+            background: var(--app-bg); padding: 20px;
         }
-        .login-box { width: 100%; max-width: 380px; }
-        .login-icon { text-align: center; font-size: 56px; margin-bottom: 8px; }
+        .login-box {
+            width: 100%; max-width: 380px;
+            background: #fff; border-radius: 12px; padding: 36px 32px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .login-icon { text-align: center; font-size: 44px; margin-bottom: 8px; }
         .login-title {
-            text-align: center; font-size: 28px; font-weight: 800;
-            margin: 0 0 4px; letter-spacing: -0.02em; color: var(--text-main);
+            text-align: center; font-size: 22px; font-weight: 700;
+            margin: 0 0 4px; letter-spacing: -0.5px; color: var(--text-main);
+            font-family: 'Inter', sans-serif;
         }
         .login-subtitle {
-            text-align: center; color: var(--text-muted); font-size: 14px; margin: 0 0 24px; font-weight: 500;
+            text-align: center; color: var(--text-muted); font-size: 14px; margin: 0 0 20px;
         }
         .login-error {
             color: var(--ios-danger); text-align: center; font-size: 13px;
@@ -574,138 +630,90 @@
 
         /* ===== Desktop (768px+) — Sidebar Layout ===== */
         @media (min-width: 768px) {
-            body { padding-bottom: 60px; background: #F0F1F5; }
+            body { padding-bottom: 60px; background: var(--app-bg); }
 
-            /* Compact header — dark theme */
+            /* Top bar — white software style */
             .header {
                 max-width: none; margin: 0; padding: 12px 28px 10px;
-                background: #1C1C1E;
-                border-bottom: none;
+                background: #FFFFFF; border-bottom: 1px solid var(--border);
             }
-            .header h1 {
-                font-size: 24px; color: #FFFFFF;
-                font-family: 'Montserrat', sans-serif;
-                font-weight: 800; letter-spacing: -0.02em;
-            }
-            .header .user-name { color: #AEAEB2; }
-
-            .btn-logout {
-                border-color: #48484A; color: #AEAEB2;
-            }
-            .btn-logout:hover { border-color: #FFFFFF; color: #FFFFFF; }
+            .header h1 { font-size: 20px; color: var(--text-main); font-weight: 700; }
+            .header .user-name { color: var(--text-muted); }
+            .btn-logout { border-color: var(--border); color: var(--text-muted); }
+            .btn-logout:hover { border-color: var(--accent); color: var(--accent); }
 
             /* Two-column layout */
-            .desktop-layout {
-                display: flex;
-                align-items: flex-start;
-            }
+            .desktop-layout { display: flex; align-items: flex-start; }
 
-            /* LEFT SIDEBAR — Gris Carbón */
+            /* LEFT SIDEBAR — Deep dark (Linear style) */
             .sidebar {
-                width: 300px;
-                min-width: 270px;
-                max-width: 320px;
-                flex-shrink: 0;
-                position: sticky;
-                top: 112px;
-                max-height: calc(100vh - 112px);
-                overflow-y: auto;
-                background: #2C2C2E;
-                border-right: none;
-                padding: 16px 12px 80px;
-                box-sizing: border-box;
-                scrollbar-width: thin;
+                width: var(--sidebar-width); min-width: 240px; max-width: 280px;
+                flex-shrink: 0; position: sticky; top: 57px;
+                max-height: calc(100vh - 57px); overflow-y: auto;
+                background: var(--sidebar-bg);
+                border-right: 1px solid rgba(255,255,255,0.05);
+                padding: 20px 16px 80px; box-sizing: border-box; scrollbar-width: thin;
             }
             .sidebar::-webkit-scrollbar { width: 4px; }
-            .sidebar::-webkit-scrollbar-thumb { background: #48484A; border-radius: 4px; }
+            .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 
             .sidebar-section {
-                background: #3A3A3C;
-                border-radius: 14px;
-                padding: 14px;
-                margin-bottom: 10px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+                background: rgba(255,255,255,0.04);
+                border-radius: var(--radius);
+                border: 1px solid rgba(255,255,255,0.06);
+                padding: 14px; margin-bottom: 10px;
             }
 
             .sidebar-section-title {
-                display: block;
-                font-size: 10px;
-                font-weight: 800;
-                text-transform: uppercase;
-                letter-spacing: 0.7px;
-                color: #AEAEB2;
-                margin-bottom: 10px;
+                display: block; font-size: 10px; font-weight: 700;
+                text-transform: uppercase; letter-spacing: 0.08em;
+                color: #475569; margin-bottom: 10px;
             }
 
             /* Form fields inside dark sidebar */
             .sidebar .ios-group {
-                background: #2C2C2E;
-                border-radius: 12px;
-                box-shadow: none;
+                background: rgba(0,0,0,0.2); border-radius: var(--radius);
+                box-shadow: none; border: 1px solid rgba(255,255,255,0.06);
             }
-            .sidebar .ios-row {
-                border-bottom-color: #48484A;
+            .sidebar .ios-row { border-bottom-color: rgba(255,255,255,0.06); }
+            .sidebar .ios-row label { font-size: 13px; width: 110px; color: #64748B; }
+            .sidebar .ios-row input, .sidebar .ios-row select {
+                font-size: 14px; color: #E2E8F0; background: transparent;
             }
-            .sidebar .ios-row label { font-size: 13px; width: 110px; color: #AEAEB2; }
-            .sidebar .ios-row input,
-            .sidebar .ios-row select {
-                font-size: 14px; color: #FFFFFF; background: transparent;
-            }
-            .sidebar .ios-row input::placeholder { color: #636366; }
-            .sidebar .ios-row select option { background: #2C2C2E; color: #FFFFFF; }
+            .sidebar .ios-row input::placeholder { color: #334155; }
+            .sidebar .ios-row select option { background: #151921; color: #E2E8F0; }
 
             /* Search bar inside dark sidebar */
             .sidebar .search-container { padding: 0; }
             .sidebar .search-bar {
-                background: #48484A; border-radius: 10px;
+                background: rgba(0,0,0,0.3); border-radius: var(--radius);
+                border: 1px solid rgba(255,255,255,0.08);
             }
-            .sidebar .search-bar input {
-                color: #FFFFFF;
-            }
-            .sidebar .search-bar input::placeholder { color: #8E8E93; }
-            .sidebar .search-bar span { color: #8E8E93; }
+            .sidebar .search-bar input { color: #E2E8F0; }
+            .sidebar .search-bar input::placeholder { color: #475569; }
+            .sidebar .search-bar span { color: #475569; }
 
             /* Filter chips inside dark sidebar */
             .sidebar .status-counter { padding: 0 0 6px; flex-wrap: wrap; }
-            .sidebar .counter-chip {
-                background: #48484A; color: #EBEBF5;
-            }
-            .sidebar .filter-bar {
-                padding: 0; flex-wrap: wrap; overflow: visible; gap: 5px;
-                justify-content: flex-start;
-            }
-            .sidebar .filter-chip {
-                background: #48484A; color: #AEAEB2;
-            }
-            .sidebar .filter-chip.active {
-                background: var(--ios-blue); color: #FFFFFF;
-            }
+            .sidebar .counter-chip { background: rgba(255,255,255,0.06); color: #94A3B8; box-shadow: none; border: none; }
+            .sidebar .filter-bar { padding: 0; flex-wrap: wrap; overflow: visible; gap: 5px; }
+            .sidebar .filter-chip { background: rgba(255,255,255,0.06); color: #64748B; border-color: transparent; }
+            .sidebar .filter-chip.active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
 
             /* Buttons inside dark sidebar */
             .sidebar #formSection { padding: 0; }
-            .sidebar .main-btn { font-size: 15px; padding: 12px; }
-            .sidebar .btn-cancel { border-color: #636366; color: #AEAEB2; }
-            .sidebar .form-attach-row .btn-camera { background: #1A3A24; color: #34C759; }
-            .sidebar .form-attach-row .btn-attach { background: #2D2250; color: #A78BFA; }
+            .sidebar .main-btn { font-size: 14px; padding: 11px; }
+            .sidebar .btn-cancel { border-color: rgba(255,255,255,0.1); color: #64748B; }
+            .sidebar .form-attach-row .btn-camera { background: rgba(16,185,129,0.12); color: #10B981; }
+            .sidebar .form-attach-row .btn-attach { background: rgba(139,92,246,0.12); color: #8B5CF6; }
             .sidebar .backup-row { padding: 0; margin: 0; }
-            .sidebar .btn-backup { background: #48484A; color: #EBEBF5; }
+            .sidebar .btn-backup { background: rgba(255,255,255,0.06); color: #94A3B8; }
 
             /* RIGHT MAIN CONTENT */
-            .main-content {
-                flex: 1;
-                padding: 20px 24px;
-                min-width: 0;
-                background: #F0F1F5;
-            }
+            .main-content { flex: 1; padding: 24px 28px; min-width: 0; background: #F1F5F9; }
 
-            #orderList {
-                display: grid;
-                grid-template-columns: 1fr 1fr 1fr;
-                gap: 14px;
-                margin-top: 0;
-            }
-            #orderList .order-card { margin-bottom: 0; }
-            #orderList .empty-state { grid-column: 1 / -1; }
+            #orderList { margin-top: 0; }
+            #orderList .empty-state { padding: 40px; }
 
             /* ===== Admin List View ===== */
         .admin-list { display: flex; flex-direction: column; gap: 4px; }
@@ -862,6 +870,29 @@
                 border: 0.5px solid #C6C6C8; border-bottom: none;
                 justify-content: center;
             }
+
+            /* Sidebar stat cards dark */
+            .sidebar .stat-card { background: rgba(0,0,0,0.2); border-radius: var(--radius); box-shadow: none; }
+            .sidebar .stat-number { color: #FFFFFF; }
+            .sidebar .stat-label { color: #475569; }
+            .sidebar .stat-row { border-bottom-color: rgba(255,255,255,0.06); }
+            .sidebar .stat-row-name { color: #94A3B8; }
+            .sidebar .stat-row-count { color: var(--accent); }
+            .sidebar .section-title { color: #E2E8F0; }
+            .sidebar .main-content-title { color: #E2E8F0; }
+        }
+
+        /* Mobile: order table collapses to 2 columns */
+        @media (max-width: 600px) {
+            .table-header-row { display: none; }
+            .order-row {
+                grid-template-columns: 1fr auto;
+                grid-template-rows: auto auto;
+                gap: 4px 10px; padding: 12px 14px;
+            }
+            .order-row > div:nth-child(2) { display: none; }
+            .order-row > div:nth-child(3) { grid-column: 2; grid-row: 1; }
+            .order-row > div:nth-child(4) { grid-column: 2; grid-row: 2; }
         }
     </style>
 </head>
@@ -871,7 +902,7 @@
 <div id="loginScreen">
     <div class="login-box">
         <div class="login-icon">&#128203;</div>
-        <h2 class="login-title">PartsPilot</h2>
+        <h2 class="login-title">PartsPilot OS</h2>
         <p class="login-subtitle">Inicia sesion para continuar</p>
         <div class="ios-group">
             <div class="ios-row">
@@ -908,7 +939,7 @@
                 <button class="btn-logout" onclick="doLogout()">Salir</button>
             </div>
         </div>
-        <h1>PartsPilot</h1>
+        <h1>PartsPilot OS</h1>
         <div style="margin-top:4px;"><span id="syncBadge" class="sync-badge sync-offline">offline</span></div>
     </div>
 
@@ -1889,26 +1920,43 @@
 
         const isReadOnly = currentRole === 'customer';
 
-        filtradas.forEach(o => {
-            list.innerHTML += renderOrderCard(o, { readOnly: isReadOnly, showCreator: false });
-        });
+        let html = `<div class="software-card">
+            <div class="table-header-row">
+                <span>Detalles del Pedido</span>
+                <span>Taller</span>
+                <span>Estado</span>
+                <span>ID / PO#</span>
+            </div>`;
+        filtradas.forEach(o => { html += renderOrderCard(o, { readOnly: isReadOnly, showCreator: false }); });
+        html += '</div>';
+        list.innerHTML = html;
     }
     window.render = render;
 
-    // --- Render Order Card (shared) ---
+    // --- Render Order Card (shared) — PartsPilot OS row style ---
+    const PILL_STYLES = {
+        'Espera de Aprobacion': { bg: '#EDE9FE', color: '#6D28D9', dot: '#6D28D9' },
+        'Aprobado':             { bg: '#D1FAE5', color: '#065F46', dot: '#10B981' },
+        'Ordenado':             { bg: '#FEF9C3', color: '#854D0E', dot: '#EAB308' },
+        'Backorder':            { bg: '#FEE2E2', color: '#991B1B', dot: '#EF4444' },
+        'Piezas en Tienda':     { bg: '#FFEDD5', color: '#9A3412', dot: '#F97316' },
+        'En Tránsito':          { bg: '#EDE9FE', color: '#3730A3', dot: '#8B5CF6' },
+        'Listo para Recoger':   { bg: '#DBEAFE', color: '#1D4ED8', dot: '#3B82F6' },
+        'Listo para Entrega':   { bg: '#CFFAFE', color: '#0E7490', dot: '#22D3EE' },
+        'Entregado':            { bg: '#D1FAE5', color: '#065F46', dot: '#10B981' }
+    };
+
     function renderOrderCard(o, { readOnly = false, showCreator = false } = {}) {
         const cfg = STATUS_CONFIG[o.status] || STATUS_CONFIG['Ordenado'];
         const today = new Date(); today.setHours(0,0,0,0);
         const deliveryDate = o.fechaEntrega ? new Date(o.fechaEntrega + 'T00:00:00') : null;
         const isOverdue   = deliveryDate && o.status !== 'Entregado' && deliveryDate < today;
         const isDueToday  = deliveryDate && o.status !== 'Entregado' && deliveryDate.getTime() === today.getTime();
-        const entregaInfo = o.fechaEntrega
-            ? ` | Entrega: <b>${fechaEs(o.fechaEntrega)}</b>${isOverdue ? '<span class="overdue-badge">VENCIDA</span>' : isDueToday ? '<span class="due-today-badge">HOY</span>' : ''}`
-            : '';
         const esEditando = String(o.id) === String(editandoId);
         const creatorLine = showCreator && o.createdBy
             ? `<div class="created-by">Creado por: ${esc(getCreatorName(o.createdBy))}</div>` : '';
 
+        // Attachments
         const attachments = o.attachments || [];
         let attachHtml = '';
         if (attachments.length > 0 || !readOnly) {
@@ -1940,25 +1988,15 @@
             attachHtml += '</div></div>';
         }
 
+        // Chat
         const noteText = o.notes || '';
         const comments = o.comments || [];
         const seenComments = JSON.parse(localStorage.getItem('seenComments') || '{}');
         const chatUnseen = comments.length > (seenComments[o.id] || 0);
         const hasAttention = o.needsAttention && currentRole !== 'customer';
-        let html = `<div class="order-card ${cfg.clase}${chatUnseen ? ' has-note' : ''}${hasAttention ? ' has-attention' : ''}${isOverdue ? ' is-overdue' : isDueToday ? ' is-due-today' : ''}" ${esEditando ? 'style="outline: 2px solid var(--ios-purple);"' : ''}>
-            <span class="taller-title">${esc(o.taller)}</span>
-            <div class="details">
-                Pedido: <b>${esc(o.pedido)}</b> | PO#: <b>${esc(o.po || '---')}</b><br>
-                Pedido el: <b>${fechaEs(o.fecha)}</b>${entregaInfo}
-            </div>
-            ${creatorLine}`;
-
-        // Chat section
         const isMine = (c) => currentRole === 'customer' ? c.role === 'customer' : c.role !== 'customer';
         const fmtTs = (ts) => ts ? new Date(ts).toLocaleString('es-AR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
-        const legacyBubble = noteText
-            ? `<div class="chat-bubble legacy"><div class="chat-text">📋 ${esc(noteText)}</div></div>`
-            : '';
+        const legacyBubble = noteText ? `<div class="chat-bubble legacy"><div class="chat-text">📋 ${esc(noteText)}</div></div>` : '';
         const bubbles = comments.map(c =>
             `<div class="chat-bubble ${isMine(c) ? 'mine' : 'theirs'}">
                 <div class="chat-text">${esc(c.text)}</div>
@@ -1982,29 +2020,76 @@
             </div>
         </div>`;
 
+        // Expanded detail
+        const entregaLine = o.fechaEntrega
+            ? `Entrega: <b>${fechaEs(o.fechaEntrega)}</b>${isOverdue ? ' <span class="overdue-badge">VENCIDA</span>' : isDueToday ? ' <span class="due-today-badge">HOY</span>' : ''}`
+            : '';
+        let detailInner = `<div class="details" style="margin-bottom:10px;">
+            Pedido: <b>${esc(o.pedido)}</b> | PO#: <b>${esc(o.po || '---')}</b><br>
+            Pedido el: <b>${fechaEs(o.fecha)}</b>${entregaLine ? ' | ' + entregaLine : ''}
+        </div>${creatorLine}`;
+
         if (readOnly) {
             const canApprove = currentRole === 'customer' && o.status === 'Espera de Aprobacion';
-            html += `<div style="margin-top:10px;padding:8px 12px;border-radius:8px;background:#F2F2F7;font-size:14px;font-weight:600;color:${cfg.color};">
-                ${cfg.bolita} ${o.status}
-            </div>
-            ${canApprove ? `<button class="btn-aprobar" onclick="aprobarOrden('${o.id}')">✅ Aprobar Orden</button>` : ''}
-            ${attachHtml}${chatHtml}</div>`;
+            detailInner += `${canApprove ? `<button class="btn-aprobar" onclick="aprobarOrden('${o.id}')">✅ Aprobar Orden</button>` : ''}${attachHtml}${chatHtml}`;
         } else {
-            html += `<select class="status-selector-mini${hasAttention ? ' has-attention' : ''}" onchange="actualizarStatus('${o.id}', this.value)">
+            detailInner += `<select class="status-selector-mini${hasAttention ? ' has-attention' : ''}" onchange="actualizarStatus('${o.id}', this.value)">
                 ${Object.keys(STATUS_CONFIG).map(s =>
                     `<option value="${s}" ${o.status === s ? 'selected' : ''}>${STATUS_CONFIG[s].bolita} ${s}</option>`
                 ).join('')}
-            </select>
-            ${attachHtml}
-            ${chatHtml}
+            </select>${attachHtml}${chatHtml}
             <div class="actions">
                 <button class="btn-action btn-edit" onclick="editarOrden('${o.id}')">&#9999;&#65039; Editar</button>
                 <button class="btn-action btn-ws" onclick="enviarWhatsApp('${o.id}')">&#128172; WhatsApp</button>
                 <button class="btn-action btn-del" onclick="deleteOrder('${o.id}')">&#128465;&#65039;</button>
-            </div></div>`;
+            </div>`;
         }
-        return html;
+
+        // Status pill
+        const ps = PILL_STYLES[o.status] || { bg: '#F1F5F9', color: '#475569', dot: '#94A3B8' };
+        const statusPill = `<span class="status-pill" style="background:${ps.bg};color:${ps.color};">
+            <span class="status-pill-dot" style="background:${ps.dot};"></span>${esc(o.status)}
+        </span>`;
+
+        const alerts = (chatUnseen ? '🟢 ' : '') + (hasAttention ? '🟡 ' : '') + (isOverdue ? '🔴 ' : '') + (isDueToday ? '🟠 ' : '');
+        const wrapClass = `order-card-wrap${chatUnseen ? ' has-note' : ''}${hasAttention ? ' has-attention' : ''}${isOverdue ? ' is-overdue' : isDueToday ? ' is-due-today' : ''}`;
+
+        return `<div class="${wrapClass}" id="card-wrap-${o.id}"${esEditando ? ' style="outline:2px solid var(--ios-purple);"' : ''}>
+            <div class="order-row" onclick="toggleOrderDetail('${o.id}')">
+                <div>
+                    <div class="order-row-title">${alerts}${esc(o.pedido)}</div>
+                    <div class="order-row-sub">Pedido: ${fechaEs(o.fecha)}${o.fechaEntrega ? ' · Entrega: ' + fechaEs(o.fechaEntrega) : ''}</div>
+                </div>
+                <div class="order-row-taller">${esc(o.taller)}</div>
+                <div>${statusPill}</div>
+                <div>
+                    <span class="order-id-badge">#${o.id}</span>
+                    ${o.po ? `<div style="font-size:11px;color:var(--text-muted);margin-top:3px;">PO: ${esc(o.po)}</div>` : ''}
+                </div>
+            </div>
+            <div class="order-detail-expand" id="detail-${o.id}" style="display:none;">
+                ${detailInner}
+            </div>
+        </div>`;
     }
+
+    window.toggleOrderDetail = function(orderId) {
+        const detail = document.getElementById(`detail-${orderId}`);
+        const wrap = document.getElementById(`card-wrap-${orderId}`);
+        if (!detail) return;
+        const isOpen = detail.style.display !== 'none';
+        detail.style.display = isOpen ? 'none' : 'block';
+        if (!isOpen) {
+            const order = orders.find(o => String(o.id) === String(orderId));
+            if (wrap) wrap.classList.remove('has-note');
+            const count = (order?.comments || []).length;
+            const seen = JSON.parse(localStorage.getItem('seenComments') || '{}');
+            seen[orderId] = count;
+            localStorage.setItem('seenComments', JSON.stringify(seen));
+            const thread = document.getElementById(`chat-thread-${orderId}`);
+            if (thread) thread.scrollTop = thread.scrollHeight;
+        }
+    };
 
     // --- Admin: All Orders ---
     window.toggleAdminRow = function(orderId) {
