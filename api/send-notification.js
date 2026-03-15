@@ -28,14 +28,9 @@ module.exports = async (req, res) => {
             try {
                 await admin.messaging().send({
                     token,
-                    notification: { title, body },
+                    data: { title: String(title), body: String(body) },
                     webpush: {
-                        notification: {
-                            icon: '/icon-512.png',
-                            badge: '/icon-192.png',
-                            tag: 'partspilot',
-                            renotify: true
-                        }
+                        headers: { Urgency: 'high' }
                     }
                 });
                 sent++;
