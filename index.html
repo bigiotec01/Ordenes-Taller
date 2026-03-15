@@ -243,8 +243,106 @@
         .pro-row-wrap.is-overdue    { animation: overdue-pulse   1s   ease-in-out infinite; }
         .pro-row-wrap.is-due-today  { animation: attention-pulse 1s   ease-in-out infinite; }
         .pro-row-detail {
-            display: none; padding: 14px 16px 16px;
-            background: #FAFBFC; border-top: 1px solid var(--pro-border-subtle);
+            display: none; background: #FAFBFC;
+            border-top: 1px solid var(--pro-border-subtle);
+        }
+
+        /* ===== Two-column detail panel ===== */
+        .pro-detail-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 0; min-height: 200px;
+        }
+        .pro-detail-left {
+            padding: 18px 20px; border-right: 1px solid var(--pro-border-subtle);
+        }
+        .pro-detail-right {
+            padding: 0; display: flex; flex-direction: column;
+        }
+        .pro-detail-section-title {
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: var(--pro-subtle); margin-bottom: 12px;
+        }
+        .pro-detail-fields { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+        .pro-detail-field {
+            display: flex; align-items: baseline; gap: 8px; font-size: 13px;
+        }
+        .pro-detail-label { color: var(--pro-muted); font-size: 11px; min-width: 80px; flex-shrink: 0; }
+        .pro-detail-value { color: var(--pro-text); font-weight: 500; }
+        .pro-detail-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+
+        /* ===== GitHub-style comment thread ===== */
+        .pro-chat-header {
+            padding: 12px 16px 10px;
+            border-bottom: 1px solid var(--pro-border-subtle);
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: var(--pro-subtle);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .pro-chat-count {
+            background: var(--pro-accent-soft); color: var(--pro-accent-text);
+            font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px;
+        }
+        .pro-chat-thread {
+            flex: 1; overflow-y: auto; padding: 8px 0; max-height: 260px;
+        }
+        .pro-chat-empty {
+            padding: 24px 16px; text-align: center;
+            font-size: 12px; color: var(--pro-subtle);
+        }
+        .pro-comment {
+            display: flex; gap: 10px; padding: 10px 16px;
+            transition: background 0.1s;
+        }
+        .pro-comment:hover { background: rgba(0,0,0,0.02); }
+        .pro-comment-avatar {
+            width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 700; margin-top: 1px;
+        }
+        .pro-comment-avatar.role-admin    { background: #EDE9FE; color: #5B21B6; }
+        .pro-comment-avatar.role-worker   { background: #D1FAE5; color: #065F46; }
+        .pro-comment-avatar.role-customer { background: #DBEAFE; color: #1E40AF; }
+        .pro-comment-avatar.role-legacy   { background: #F3F4F6; color: #6B7280; }
+        .pro-comment-body { flex: 1; min-width: 0; }
+        .pro-comment-meta {
+            display: flex; align-items: center; gap: 6px; margin-bottom: 3px; flex-wrap: wrap;
+        }
+        .pro-comment-name { font-size: 12px; font-weight: 600; color: var(--pro-text); }
+        .pro-comment-role {
+            font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 4px;
+            text-transform: uppercase; letter-spacing: 0.04em;
+        }
+        .pro-comment-role.role-admin    { background: #EDE9FE; color: #5B21B6; }
+        .pro-comment-role.role-worker   { background: #D1FAE5; color: #065F46; }
+        .pro-comment-role.role-customer { background: #DBEAFE; color: #1E40AF; }
+        .pro-comment-ts { font-size: 11px; color: var(--pro-subtle); }
+        .pro-comment-text { font-size: 13px; color: var(--pro-text); line-height: 1.5; }
+        .pro-comment-legacy {
+            font-size: 12px; color: var(--pro-muted); font-style: italic;
+        }
+        .pro-chat-input-area {
+            padding: 10px 12px; border-top: 1px solid var(--pro-border-subtle);
+            display: flex; gap: 8px; align-items: center; background: var(--pro-white);
+        }
+        .pro-chat-input {
+            flex: 1; border: 1px solid var(--pro-border); border-radius: var(--r-md);
+            padding: 7px 12px; font-size: 13px; font-family: inherit;
+            background: var(--pro-white); color: var(--pro-text); outline: none;
+            transition: border-color 0.15s;
+        }
+        .pro-chat-input:focus { border-color: var(--pro-accent); }
+        .pro-chat-input::placeholder { color: var(--pro-subtle); }
+        .pro-chat-send {
+            background: var(--pro-accent); color: #fff; border: none;
+            border-radius: var(--r-md); padding: 7px 14px; font-size: 12px;
+            font-weight: 600; cursor: pointer; transition: background 0.15s; white-space: nowrap;
+        }
+        .pro-chat-send:hover { background: var(--pro-accent-text); }
+
+        /* Mobile: stack columns */
+        @media (max-width: 767px) {
+            .pro-detail-grid { grid-template-columns: 1fr; }
+            .pro-detail-left { border-right: none; border-bottom: 1px solid var(--pro-border-subtle); }
         }
 
         /* ===== Mobile: collapse pro-table to card-like rows ===== */
@@ -2160,56 +2258,117 @@
             attachHtml += '</div></div>';
         }
 
-        // Chat
-        const isMine = (c) => currentRole === 'customer' ? c.role === 'customer' : c.role !== 'customer';
-        const fmtTs = (ts) => ts ? new Date(ts).toLocaleString('es-AR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
-        const legacyBubble = noteText ? `<div class="chat-bubble legacy"><div class="chat-text">📋 ${esc(noteText)}</div></div>` : '';
-        const bubbles = comments.map(c =>
-            `<div class="chat-bubble ${isMine(c) ? 'mine' : 'theirs'}">
-                <div class="chat-text">${esc(c.text)}</div>
-                <div class="chat-meta">${esc(c.name)} · ${fmtTs(c.ts)}</div>
-            </div>`
-        ).join('');
-        const totalLabel = comments.length > 0 ? ` (${comments.length})` : '';
-        const chatHtml = `<div class="chat-section" style="border-top:none;margin-top:12px;">
-            <div class="chat-toggle" onclick="toggleChat('${o.id}')">
-                <span class="toggle-arrow" id="chat-arrow-${o.id}">&#9654;</span> 💬 Chat${totalLabel}
-            </div>
-            <div class="chat-body" id="chat-body-${o.id}" style="display:none;">
-                <div class="chat-thread" id="chat-thread-${o.id}">
-                    ${legacyBubble}${bubbles || (!noteText ? '<div class="chat-empty">Sin mensajes aún</div>' : '')}
-                </div>
-                <div class="chat-input-row">
-                    <input class="chat-input" id="chat-input-${o.id}" type="text" placeholder="Escribir mensaje..."
-                        onkeydown="if(event.key==='Enter')sendComment('${o.id}')">
-                    <button class="chat-send-btn" onclick="sendComment('${o.id}')">&#9658;</button>
-                </div>
-            </div>
-        </div>`;
+        // Chat — GitHub-style comment thread
+        const fmtTs = (ts) => {
+            if (!ts) return '';
+            const d = new Date(ts);
+            const now = new Date();
+            const diff = (now - d) / 1000;
+            if (diff < 60) return 'ahora';
+            if (diff < 3600) return `hace ${Math.floor(diff/60)}m`;
+            if (diff < 86400) return `hace ${Math.floor(diff/3600)}h`;
+            return d.toLocaleDateString('es-AR', {day:'2-digit', month:'short'});
+        };
+        const avatarClass = (role) => {
+            if (role === 'admin') return 'role-admin';
+            if (role === 'worker') return 'role-worker';
+            if (role === 'customer') return 'role-customer';
+            return 'role-legacy';
+        };
+        const roleLabel = (role) => {
+            if (role === 'admin') return 'Admin';
+            if (role === 'worker') return 'Taller';
+            if (role === 'customer') return 'Cliente';
+            return '';
+        };
 
-        // Actions
-        let detailContent = '';
-        if (readOnly) {
-            const canApprove = currentRole === 'customer' && o.status === 'Espera de Aprobacion';
-            detailContent = `
-                ${canApprove ? `<button class="btn-aprobar" onclick="aprobarOrden('${o.id}')">✅ Aprobar Orden</button>` : ''}
-                ${attachHtml}${chatHtml}`;
-        } else {
-            detailContent = `
-                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
-                    <select class="status-selector-mini${hasAttention ? ' has-attention' : ''}" onchange="actualizarStatus('${o.id}', this.value)">
-                        ${Object.keys(STATUS_CONFIG).map(s =>
-                            `<option value="${s}" ${o.status === s ? 'selected' : ''}>${STATUS_CONFIG[s].bolita} ${s}</option>`
-                        ).join('')}
-                    </select>
-                    <div class="actions" style="margin-top:0;">
-                        <button class="btn-action btn-edit" onclick="editarOrden('${o.id}')">&#9999;&#65039; Editar</button>
-                        <button class="btn-action btn-ws" onclick="enviarWhatsApp('${o.id}')">&#128172; WhatsApp</button>
-                        <button class="btn-action btn-del" onclick="deleteOrder('${o.id}')">&#128465;&#65039;</button>
+        const legacyComment = noteText ? `
+            <div class="pro-comment">
+                <div class="pro-comment-avatar role-legacy">📋</div>
+                <div class="pro-comment-body">
+                    <div class="pro-comment-meta">
+                        <span class="pro-comment-name">Nota</span>
+                        <span class="pro-comment-ts">registro previo</span>
                     </div>
+                    <div class="pro-comment-text pro-comment-legacy">${esc(noteText)}</div>
                 </div>
-                ${attachHtml}${chatHtml}`;
-        }
+            </div>` : '';
+
+        const commentItems = comments.map(c => `
+            <div class="pro-comment">
+                <div class="pro-comment-avatar ${avatarClass(c.role)}">${(c.name||'?')[0].toUpperCase()}</div>
+                <div class="pro-comment-body">
+                    <div class="pro-comment-meta">
+                        <span class="pro-comment-name">${esc(c.name || 'Usuario')}</span>
+                        ${c.role ? `<span class="pro-comment-role ${avatarClass(c.role)}">${roleLabel(c.role)}</span>` : ''}
+                        <span class="pro-comment-ts">${fmtTs(c.ts)}</span>
+                    </div>
+                    <div class="pro-comment-text">${esc(c.text)}</div>
+                </div>
+            </div>`).join('');
+
+        const chatThread = `
+            <div class="pro-chat-header">
+                <span>Comentarios</span>
+                ${comments.length > 0 ? `<span class="pro-chat-count">${comments.length}</span>` : ''}
+            </div>
+            <div class="pro-chat-thread" id="chat-thread-${o.id}">
+                ${legacyComment || commentItems
+                    ? legacyComment + commentItems
+                    : '<div class="pro-chat-empty">Sin comentarios aún</div>'}
+            </div>
+            ${!readOnly || currentRole === 'customer' ? `
+            <div class="pro-chat-input-area">
+                <input class="pro-chat-input" id="chat-input-${o.id}" type="text"
+                    placeholder="Escribir comentario..."
+                    onkeydown="if(event.key==='Enter')sendComment('${o.id}')">
+                <button class="pro-chat-send" onclick="sendComment('${o.id}')">Enviar</button>
+            </div>` : ''}`;
+
+        // Left panel: order details + actions
+        const leftPanel = readOnly ? `
+            <div class="pro-detail-section-title">Detalles</div>
+            <div class="pro-detail-fields">
+                <div class="pro-detail-field"><span class="pro-detail-label">Pedido</span><span class="pro-detail-value">${esc(o.pedido)}</span></div>
+                <div class="pro-detail-field"><span class="pro-detail-label">Taller</span><span class="pro-detail-value">${esc(o.taller)}</span></div>
+                <div class="pro-detail-field"><span class="pro-detail-label">PO#</span><span class="pro-detail-value">${esc(o.po || '—')}</span></div>
+                <div class="pro-detail-field"><span class="pro-detail-label">Pedido el</span><span class="pro-detail-value">${fechaEs(o.fecha)}</span></div>
+                ${o.fechaEntrega ? `<div class="pro-detail-field"><span class="pro-detail-label">Entrega</span><span class="pro-detail-value">${fechaEs(o.fechaEntrega)}${isOverdue ? ' <span class="overdue-badge">VENCIDA</span>' : isDueToday ? ' <span class="due-today-badge">HOY</span>' : ''}</span></div>` : ''}
+            </div>
+            <div class="pro-detail-section-title">Estatus</div>
+            <span class="pro-status" style="background:${pill.bg};color:${pill.color};margin-bottom:12px;display:inline-flex;">
+                <span class="pro-status-dot" style="background:${pill.dot};"></span>${esc(o.status)}
+            </span>
+            ${currentRole === 'customer' && o.status === 'Espera de Aprobacion' ? `<br><button class="btn-aprobar" onclick="aprobarOrden('${o.id}')" style="margin-top:10px;">✅ Aprobar Orden</button>` : ''}
+            ${attachHtml}` :
+        `
+            <div class="pro-detail-section-title">Detalles</div>
+            <div class="pro-detail-fields">
+                <div class="pro-detail-field"><span class="pro-detail-label">Pedido</span><span class="pro-detail-value">${esc(o.pedido)}</span></div>
+                <div class="pro-detail-field"><span class="pro-detail-label">Taller</span><span class="pro-detail-value">${esc(o.taller)}</span></div>
+                <div class="pro-detail-field"><span class="pro-detail-label">PO#</span><span class="pro-detail-value">${esc(o.po || '—')}</span></div>
+                <div class="pro-detail-field"><span class="pro-detail-label">Pedido el</span><span class="pro-detail-value">${fechaEs(o.fecha)}</span></div>
+                ${o.fechaEntrega ? `<div class="pro-detail-field"><span class="pro-detail-label">Entrega</span><span class="pro-detail-value">${fechaEs(o.fechaEntrega)}${isOverdue ? ' <span class="overdue-badge">VENCIDA</span>' : isDueToday ? ' <span class="due-today-badge">HOY</span>' : ''}</span></div>` : ''}
+            </div>
+            <div class="pro-detail-section-title">Estatus</div>
+            <select class="status-selector-mini${hasAttention ? ' has-attention' : ''}" onchange="actualizarStatus('${o.id}', this.value)" style="margin-bottom:14px;">
+                ${Object.keys(STATUS_CONFIG).map(s =>
+                    `<option value="${s}" ${o.status === s ? 'selected' : ''}>${STATUS_CONFIG[s].bolita} ${s}</option>`
+                ).join('')}
+            </select>
+            <div class="pro-detail-section-title">Acciones</div>
+            <div class="pro-detail-actions">
+                <button class="btn-action btn-edit" onclick="editarOrden('${o.id}')">&#9999;&#65039; Editar</button>
+                <button class="btn-action btn-ws" onclick="enviarWhatsApp('${o.id}')">&#128172; WhatsApp</button>
+                <button class="btn-action btn-del" onclick="deleteOrder('${o.id}')">&#128465;&#65039; Eliminar</button>
+            </div>
+            ${attachHtml}`;
+
+        const detailContent = `
+            <div class="pro-detail-grid">
+                <div class="pro-detail-left">${leftPanel}</div>
+                <div class="pro-detail-right">${chatThread}</div>
+            </div>`;
 
         return `<div class="${wrapClasses}" id="wrap-${o.id}">
             <div class="pro-row" onclick="toggleOrderDetail('${o.id}')" ${esEditando ? 'style="outline:2px solid var(--ios-purple);"' : ''}>
