@@ -187,6 +187,21 @@
             border-bottom: 1px solid var(--pro-border);
             font-size: 11px; font-weight: 600; color: var(--pro-muted);
             text-transform: uppercase; letter-spacing: 0.06em;
+            position: sticky; top: 52px; z-index: 10;
+        }
+        .pro-table-meta {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 16px 8px;
+            background: var(--pro-white);
+            border-bottom: 1px solid var(--pro-border);
+            font-size: 12px; color: var(--pro-muted);
+        }
+        .pro-table-meta strong { color: var(--pro-text); font-weight: 600; }
+        .pro-table-meta-tag {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: var(--pro-accent-soft); color: var(--pro-accent-text);
+            font-size: 11px; font-weight: 600; padding: 2px 8px;
+            border-radius: 20px;
         }
         .pro-row {
             display: grid; grid-template-columns: 1fr 150px 160px 100px;
@@ -212,7 +227,16 @@
         .pro-status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 
         /* ===== Expandable row detail ===== */
-        .pro-row-wrap { border-bottom: 1px solid var(--pro-border-subtle); }
+        .pro-row-wrap { border-bottom: 1px solid var(--pro-border-subtle); border-left: 3px solid transparent; }
+        .pro-row-wrap.st-aprobacion   { border-left-color: #A855F7; }
+        .pro-row-wrap.st-aprobado     { border-left-color: #16A34A; }
+        .pro-row-wrap.st-ordenado     { border-left-color: #2563EB; }
+        .pro-row-wrap.st-backorder    { border-left-color: #DC2626; }
+        .pro-row-wrap.st-tienda       { border-left-color: #EA580C; }
+        .pro-row-wrap.st-transito     { border-left-color: #7C3AED; }
+        .pro-row-wrap.st-listo-recoger{ border-left-color: #0891B2; }
+        .pro-row-wrap.st-listo-entrega{ border-left-color: #0D9488; }
+        .pro-row-wrap.st-entregado    { border-left-color: #9CA3AF; opacity: 0.6; }
         .pro-row-wrap:last-child { border-bottom: none; }
         .pro-row-wrap.has-note      { animation: note-pulse      1.2s ease-in-out infinite; }
         .pro-row-wrap.has-attention { animation: attention-pulse 1.2s ease-in-out infinite; }
@@ -1948,11 +1972,16 @@
         const isReadOnly = currentRole === 'customer';
 
         const rows = filtradas.map(o => renderOrderCard(o, { readOnly: isReadOnly, showCreator: false })).join('');
+        const filterLabel = filtroActual !== 'Todos' ? `<span class="pro-table-meta-tag">&#9679; ${filtroActual}</span>` : '';
         list.innerHTML = `
             <div class="pro-table">
+                <div class="pro-table-meta">
+                    <span><strong>${filtradas.length}</strong> orden${filtradas.length !== 1 ? 'es' : ''} ${query ? `para "<strong>${query}</strong>"` : ''}</span>
+                    ${filterLabel}
+                </div>
                 <div class="pro-table-head">
                     <div>Orden / Taller</div>
-                    <div>Fecha</div>
+                    <div>Entrega</div>
                     <div>Estatus</div>
                     <div>PO#</div>
                 </div>
@@ -1992,6 +2021,7 @@
         // State classes
         const wrapClasses = [
             'pro-row-wrap',
+            cfg.clase || '',
             chatUnseen   ? 'has-note'      : '',
             hasAttention ? 'has-attention' : '',
             isOverdue    ? 'is-overdue'    : isDueToday ? 'is-due-today' : ''
