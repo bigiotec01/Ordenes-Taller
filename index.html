@@ -111,8 +111,8 @@
             font-size: 10px; font-weight: 700; margin-left: 8px; vertical-align: middle;
             text-transform: uppercase; letter-spacing: 0.05em;
         }
-        .sync-online  { background: #D1FAE5; color: #065F46; }
-        .sync-offline { background: #FEE2E2; color: #991B1B; }
+        .sync-online  { background: rgba(22,163,74,0.2); color: #4ADE80; }
+        .sync-offline { background: rgba(220,38,38,0.2); color: #F87171; }
 
         /* ── Status counters ── */
         .status-counter { display: flex; flex-wrap: wrap; gap: 5px; padding: 8px 16px 0; }
@@ -800,13 +800,13 @@
             /* ── Top bar ── */
             .header {
                 max-width: none; margin: 0; padding: 0 24px;
-                background: var(--pro-white);
-                border-bottom: 1px solid var(--pro-border);
+                background: #161B22;
+                border-bottom: 1px solid rgba(255,255,255,0.08);
                 height: 52px; display: flex; align-items: center;
                 justify-content: space-between; gap: 16px;
             }
             .header-page-title {
-                font-size: 15px; font-weight: 700; color: var(--pro-text);
+                font-size: 15px; font-weight: 700; color: #E6EDF3;
                 letter-spacing: -0.01em;
             }
             .header-right {
@@ -815,23 +815,23 @@
             .header-user {
                 display: flex; align-items: center; gap: 8px;
                 padding: 4px 10px 4px 4px;
-                border: 1px solid var(--pro-border); border-radius: 20px;
+                border: 1px solid rgba(255,255,255,0.12); border-radius: 20px;
             }
             .header-avatar {
                 width: 26px; height: 26px; border-radius: 50%;
-                background: var(--pro-accent-soft); color: var(--pro-accent-text);
+                background: rgba(37,99,235,0.3); color: #93C5FD;
                 display: flex; align-items: center; justify-content: center;
                 font-size: 11px; font-weight: 700; flex-shrink: 0;
             }
             .header-user-info { display: flex; align-items: center; gap: 6px; }
-            .header .user-name { font-size: 12px; font-weight: 600; color: var(--pro-text); }
+            .header .user-name { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.85); }
             .header .role-badge { font-size: 9px; padding: 1px 6px; }
             .btn-logout {
                 font-size: 12px; padding: 5px 12px; border-radius: var(--r-md);
-                border: 1px solid var(--pro-border); background: none;
-                color: var(--pro-muted); cursor: pointer; font-family: inherit;
+                border: 1px solid rgba(255,255,255,0.15); background: none;
+                color: rgba(255,255,255,0.45); cursor: pointer; font-family: inherit;
             }
-            .btn-logout:hover { border-color: var(--pro-text); color: var(--pro-text); }
+            .btn-logout:hover { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.8); }
             /* hide search/filter/counter from header on desktop */
             .header .search-container,
             .header .status-counter,
