@@ -86,6 +86,11 @@
             padding: 2px 6px; border-radius: 20px;
             border: 1px solid var(--pro-border); background: transparent;
         }
+        /* settings gear button */
+        .btn-settings {
+            background: none; border: none; font-size: 18px; line-height: 1;
+            cursor: pointer; padding: 4px; border-radius: var(--r-md);
+        }
 
         .header-top {
             display: flex; align-items: center; justify-content: space-between;
@@ -947,6 +952,8 @@
                 transition: all 0.15s;
             }
             .btn-logout:hover { border-color: rgba(255,255,255,0.35); color: rgba(255,255,255,0.75); }
+            /* hide settings btn on desktop — sidebar avatar handles it */
+            .btn-settings { display: none; }
             /* hide search/filter/counter from header on desktop */
             .header .search-container,
             .header .status-counter,
@@ -1371,6 +1378,7 @@
                     <span id="userRoleBadge" class="role-badge"></span>
                 </div>
             </div>
+            <button class="btn-settings" onclick="openSettings()" title="Configuración">&#9881;&#65039;</button>
             <button class="btn-logout" onclick="doLogout()">Salir</button>
         </div>
     </div>
