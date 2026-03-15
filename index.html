@@ -1397,6 +1397,7 @@
     let allUsers = [];
     let editandoId = null;
     let filtroActual = 'Todos';
+    const openDetails = new Set(); // tracks which order detail panels are open
     let currentUser = null;
     let currentUserDoc = null;
     let currentRole = null;
@@ -2176,6 +2177,18 @@
                 </div>
                 ${rows}
             </div>`;
+
+        // Restore any panels that were open before re-render
+        openDetails.forEach(orderId => {
+            const detail = document.getElementById(`detail-${orderId}`);
+            if (detail) {
+                detail.style.display = 'block';
+                const thread = document.getElementById(`chat-thread-${orderId}`);
+                if (thread) thread.scrollTop = thread.scrollHeight;
+            } else {
+                openDetails.delete(orderId); // order no longer visible
+            }
+        });
     }
     window.render = render;
 
@@ -2397,7 +2410,10 @@
         if (!detail) return;
         const isOpen = detail.style.display === 'block';
         detail.style.display = isOpen ? 'none' : 'block';
-        if (!isOpen) {
+        if (isOpen) {
+            openDetails.delete(String(orderId));
+        } else {
+            openDetails.add(String(orderId));
             // mark chat as seen
             const order = orders.find(o => String(o.id) === String(orderId));
             if (wrap) wrap.classList.remove('has-note');
