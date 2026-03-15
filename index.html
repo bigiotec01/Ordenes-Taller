@@ -359,41 +359,109 @@
 
         /* ===== Settings Modal ===== */
         .settings-modal-backdrop {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.45);
             z-index: 200; display: flex; align-items: center; justify-content: center;
+            padding: 16px;
         }
         .settings-modal {
-            position: relative; background: #fff; border-radius: 14px; padding: 24px;
-            max-width: 340px; width: calc(100% - 32px);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            position: relative; background: var(--pro-white);
+            border-radius: 16px; width: 100%; max-width: 360px;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.22);
+            max-height: 90vh; overflow-y: auto;
+        }
+        .settings-modal-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 18px 20px 0;
         }
         .settings-modal-title {
-            font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--pro-text);
+            display: flex; align-items: center; gap: 8px;
+            font-size: 16px; font-weight: 700; color: var(--pro-text);
+        }
+        .settings-close-btn {
+            background: none; border: none; font-size: 22px; cursor: pointer;
+            color: var(--pro-muted); line-height: 1; padding: 0 4px;
+        }
+        .settings-section {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--pro-border-subtle);
+        }
+        .settings-section:last-of-type { border-bottom: none; }
+        .settings-section-title {
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: var(--pro-muted); margin-bottom: 12px;
+        }
+        /* Avatar row */
+        .settings-avatar-row {
+            display: flex; align-items: center; gap: 14px; margin-bottom: 14px;
         }
         .settings-avatar-preview {
-            width: 64px; height: 64px; border-radius: 50%; background: #EDE9FE;
-            color: #5B21B6; font-size: 28px; display: flex; align-items: center;
-            justify-content: center; margin: 0 auto 16px; border: 3px solid var(--pro-accent);
+            width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0;
+            background: #EDE9FE; color: #5B21B6;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 26px; font-weight: 700;
+            border: 2px solid var(--pro-accent); overflow: hidden;
         }
+        .settings-avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .settings-avatar-actions { display: flex; flex-direction: column; gap: 6px; }
+        .settings-photo-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: #F6F8FA; border: 1px solid var(--pro-border);
+            border-radius: var(--r-md); padding: 6px 12px;
+            font-size: 12px; font-weight: 600; color: var(--pro-text);
+            cursor: pointer; font-family: inherit; transition: background 0.15s;
+        }
+        .settings-photo-btn:hover { background: #EDE9FE; border-color: #A855F7; }
+        .settings-remove-photo-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: none; border: 1px solid #FCA5A5;
+            border-radius: var(--r-md); padding: 5px 12px;
+            font-size: 12px; font-weight: 600; color: #DC2626;
+            cursor: pointer; font-family: inherit; transition: background 0.15s;
+        }
+        .settings-remove-photo-btn:hover { background: #FEF2F2; }
         .settings-emoji-grid {
-            display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 20px;
+            display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px;
         }
         .settings-emoji-btn {
-            width: 40px; height: 40px; border-radius: 8px; border: 2px solid transparent;
-            background: #F6F8FA; font-size: 20px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+            width: 36px; height: 36px; border-radius: 8px;
+            border: 2px solid transparent; background: #F6F8FA;
+            font-size: 18px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.12s;
         }
         .settings-emoji-btn:hover { background: #EDE9FE; border-color: #A855F7; }
         .settings-emoji-btn.selected { background: #EDE9FE; border-color: #7C3AED; }
+        /* Notifications row */
+        .settings-notif-row {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        }
+        .settings-notif-info {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 13px; font-weight: 500; color: var(--pro-text);
+        }
+        .settings-notif-toggle {
+            padding: 6px 16px; border-radius: 20px; border: none;
+            font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
+            background: #F0F1F3; color: var(--pro-muted); transition: all 0.15s;
+        }
+        .settings-notif-toggle.on { background: #D1FAE5; color: #065F46; }
+        /* Data row */
+        .settings-data-row { display: flex; gap: 8px; }
+        .settings-data-btn {
+            flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+            background: #F6F8FA; border: 1px solid var(--pro-border);
+            border-radius: var(--r-md); padding: 9px; font-size: 12px; font-weight: 600;
+            color: var(--pro-text); cursor: pointer; font-family: inherit; transition: background 0.15s;
+        }
+        .settings-data-btn:hover { background: #EDE9FE; border-color: #A855F7; }
+        /* Save button */
         .settings-save-btn {
-            width: 100%; background: var(--pro-accent); color: white; border: none;
-            border-radius: 8px; padding: 10px; font-size: 14px; font-weight: 600;
-            cursor: pointer; font-family: inherit;
+            display: block; width: calc(100% - 40px); margin: 0 20px 20px;
+            background: var(--pro-accent); color: white; border: none;
+            border-radius: 8px; padding: 11px; font-size: 14px; font-weight: 600;
+            cursor: pointer; font-family: inherit; transition: background 0.15s;
         }
-        .settings-close-btn {
-            position: absolute; top: 12px; right: 12px; background: none; border: none;
-            font-size: 20px; cursor: pointer; color: var(--pro-muted); line-height: 1;
-        }
+        .settings-save-btn:hover { background: var(--pro-accent-text); }
 
         .pro-comment-body { flex: 1; min-width: 0; }
         .pro-comment-meta {
@@ -1347,11 +1415,61 @@
 <!-- ===== SETTINGS MODAL ===== -->
 <div id="settingsModal" class="settings-modal-backdrop" onclick="closeSettings(event)" style="display:none;">
     <div class="settings-modal">
-        <button class="settings-close-btn" onclick="closeSettings()">&times;</button>
-        <div class="settings-modal-title">Configuración</div>
-        <div class="settings-avatar-preview" id="settingsAvatarPreview">😀</div>
-        <p style="text-align:center;font-size:12px;color:var(--pro-muted);margin-bottom:12px;">Elige tu avatar para el chat</p>
-        <div class="settings-emoji-grid" id="settingsEmojiGrid"></div>
+        <div class="settings-modal-header">
+            <div class="settings-modal-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                Configuración
+            </div>
+            <button class="settings-close-btn" onclick="closeSettings()">&times;</button>
+        </div>
+
+        <!-- SECTION: Avatar -->
+        <div class="settings-section">
+            <div class="settings-section-title">Avatar</div>
+            <div class="settings-avatar-row">
+                <div class="settings-avatar-preview" id="settingsAvatarPreview">A</div>
+                <div class="settings-avatar-actions">
+                    <label class="settings-photo-btn" title="Subir foto">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        Subir foto
+                        <input type="file" id="avatarPhotoInput" accept="image/*" style="display:none" onchange="handleAvatarPhoto(event)">
+                    </label>
+                    <button class="settings-remove-photo-btn" id="btnRemovePhoto" onclick="removeAvatarPhoto()" style="display:none;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                        Quitar foto
+                    </button>
+                </div>
+            </div>
+            <div class="settings-emoji-grid" id="settingsEmojiGrid"></div>
+        </div>
+
+        <!-- SECTION: Notificaciones -->
+        <div class="settings-section" id="settingsNotifSection" style="display:none;">
+            <div class="settings-section-title">Notificaciones</div>
+            <div class="settings-notif-row">
+                <div class="settings-notif-info">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <span>Recibir avisos de cambios</span>
+                </div>
+                <button class="settings-notif-toggle" id="settingsNotifBtn" onclick="toggleNotificationsFromSettings()">Activar</button>
+            </div>
+        </div>
+
+        <!-- SECTION: Datos -->
+        <div class="settings-section" id="settingsDatosSection" style="display:none;">
+            <div class="settings-section-title">Datos</div>
+            <div class="settings-data-row">
+                <button class="settings-data-btn" onclick="exportarDatos()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Exportar
+                </button>
+                <button class="settings-data-btn" onclick="document.getElementById('importFile').click()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Importar
+                </button>
+            </div>
+        </div>
+
         <button class="settings-save-btn" onclick="saveAvatarEmoji()">Guardar</button>
     </div>
 </div>
@@ -1371,7 +1489,7 @@
         <!-- Right: actions -->
         <div class="header-right">
             <span id="syncBadge" class="sync-badge sync-offline">offline</span>
-            <button id="btnNotif" class="btn-notif" onclick="toggleNotifications()" style="display:none;" title="Notificaciones">&#128276;</button>
+            <button id="btnNotif" class="btn-notif" onclick="toggleNotifications()" style="display:none;" title="Notificaciones" aria-hidden="true">&#128276;</button>
             <div class="header-divider"></div>
             <div class="header-user">
                 <div class="header-avatar" id="headerAvatar" onclick="openSettings()" style="cursor:pointer;" title="Configuración">A</div>
@@ -2139,13 +2257,19 @@
         badge.className = 'role-badge role-' + currentRole;
 
         // Pro sidebar footer + header avatar
-        const initial = currentUserDoc.avatarEmoji || (currentUserDoc.name || 'U')[0].toUpperCase();
         const sidebarName = document.getElementById('sidebarUserName');
         const sidebarAvatar = document.getElementById('sidebarAvatar');
         const headerAvatar = document.getElementById('headerAvatar');
         if (sidebarName) sidebarName.textContent = currentUserDoc.name;
-        if (sidebarAvatar) sidebarAvatar.textContent = initial;
-        if (headerAvatar) headerAvatar.textContent = initial;
+        if (currentUserDoc.avatarPhoto) {
+            const imgHtml = `<img src="${currentUserDoc.avatarPhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="avatar">`;
+            if (sidebarAvatar) sidebarAvatar.innerHTML = imgHtml;
+            if (headerAvatar) headerAvatar.innerHTML = imgHtml;
+        } else {
+            const initial = currentUserDoc.avatarEmoji || (currentUserDoc.name || 'U')[0].toUpperCase();
+            if (sidebarAvatar) sidebarAvatar.textContent = initial;
+            if (headerAvatar) headerAvatar.textContent = initial;
+        }
 
         // Role-based visibility
         document.getElementById('formSection').style.display = currentRole === 'customer' ? 'none' : 'block';
@@ -2576,15 +2700,37 @@
 
     window.openSettings = function() {
         selectedEmoji = currentUserDoc?.avatarEmoji || null;
-        // Build grid
+
+        // Avatar preview
+        const preview = document.getElementById('settingsAvatarPreview');
+        if (currentUserDoc?.avatarPhoto) {
+            preview.innerHTML = `<img src="${currentUserDoc.avatarPhoto}" alt="avatar">`;
+            document.getElementById('btnRemovePhoto').style.display = 'inline-flex';
+        } else {
+            preview.innerHTML = selectedEmoji || (currentUserDoc?.name || 'U')[0].toUpperCase();
+            document.getElementById('btnRemovePhoto').style.display = 'none';
+        }
+
+        // Emoji grid
         const grid = document.getElementById('settingsEmojiGrid');
         grid.innerHTML = AVATAR_EMOJIS.map(e =>
             `<button class="settings-emoji-btn${selectedEmoji === e ? ' selected' : ''}"
                 onclick="selectEmoji('${e}')">${e}</button>`
         ).join('');
-        // Preview
-        const preview = document.getElementById('settingsAvatarPreview');
-        preview.textContent = selectedEmoji || (currentUserDoc?.name || 'U')[0].toUpperCase();
+
+        // Notifications section — only show if supported
+        const notifSection = document.getElementById('settingsNotifSection');
+        if (notifSection && notifSupported()) {
+            notifSection.style.display = 'block';
+            updateNotifToggleUI();
+        }
+
+        // Datos section — only show for admin/worker
+        const datosSection = document.getElementById('settingsDatosSection');
+        if (datosSection) {
+            datosSection.style.display = (currentRole === 'admin' || currentRole === 'worker') ? 'block' : 'none';
+        }
+
         document.getElementById('settingsModal').style.display = 'flex';
     };
 
@@ -2595,26 +2741,102 @@
 
     window.selectEmoji = function(emoji) {
         selectedEmoji = emoji;
-        document.getElementById('settingsAvatarPreview').textContent = emoji;
+        const preview = document.getElementById('settingsAvatarPreview');
+        if (!currentUserDoc?.avatarPhoto) {
+            preview.innerHTML = emoji;
+        }
         document.querySelectorAll('.settings-emoji-btn').forEach(btn => {
             btn.classList.toggle('selected', btn.textContent === emoji);
         });
     };
 
+    window.handleAvatarPhoto = function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            // Resize to max 120px via canvas
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const size = 120;
+                canvas.width = size; canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                const min = Math.min(img.width, img.height);
+                const sx = (img.width - min) / 2;
+                const sy = (img.height - min) / 2;
+                ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+                // Preview
+                const preview = document.getElementById('settingsAvatarPreview');
+                preview.innerHTML = `<img src="${dataUrl}" alt="avatar">`;
+                document.getElementById('btnRemovePhoto').style.display = 'inline-flex';
+                // Store temporarily
+                currentUserDoc._pendingPhoto = dataUrl;
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+        event.target.value = '';
+    };
+
+    window.removeAvatarPhoto = function() {
+        currentUserDoc._pendingPhoto = null;
+        currentUserDoc._removePhoto = true;
+        const preview = document.getElementById('settingsAvatarPreview');
+        preview.innerHTML = selectedEmoji || (currentUserDoc?.name || 'U')[0].toUpperCase();
+        document.getElementById('btnRemovePhoto').style.display = 'none';
+    };
+
+    function updateNotifToggleUI() {
+        const btn = document.getElementById('settingsNotifBtn');
+        if (!btn) return;
+        const isOn = document.getElementById('btnNotif')?.classList.contains('active');
+        btn.textContent = isOn ? 'Activado ✓' : 'Activar';
+        btn.classList.toggle('on', !!isOn);
+    }
+
+    window.toggleNotificationsFromSettings = async function() {
+        await toggleNotifications();
+        updateNotifToggleUI();
+    };
+
     window.saveAvatarEmoji = async function() {
         try {
-            await updateDoc(doc(db, 'users', currentUser.uid), { avatarEmoji: selectedEmoji || '' });
-            currentUserDoc.avatarEmoji = selectedEmoji || '';
+            const updates = {};
+            if (currentUserDoc._pendingPhoto) {
+                updates.avatarPhoto = currentUserDoc._pendingPhoto;
+                updates.avatarEmoji = '';
+                currentUserDoc.avatarPhoto = currentUserDoc._pendingPhoto;
+                currentUserDoc.avatarEmoji = '';
+                delete currentUserDoc._pendingPhoto;
+            } else if (currentUserDoc._removePhoto) {
+                updates.avatarPhoto = '';
+                updates.avatarEmoji = selectedEmoji || '';
+                currentUserDoc.avatarPhoto = '';
+                currentUserDoc.avatarEmoji = selectedEmoji || '';
+                delete currentUserDoc._removePhoto;
+            } else {
+                updates.avatarEmoji = selectedEmoji || '';
+                currentUserDoc.avatarEmoji = selectedEmoji || '';
+            }
+            await updateDoc(doc(db, 'users', currentUser.uid), updates);
+
             // Update visible avatars
-            const display = selectedEmoji || (currentUserDoc.name || 'U')[0].toUpperCase();
+            const display = currentUserDoc.avatarPhoto
+                ? `<img src="${currentUserDoc.avatarPhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="avatar">`
+                : (selectedEmoji || (currentUserDoc.name || 'U')[0].toUpperCase());
+
             const ha = document.getElementById('headerAvatar');
             const sa = document.getElementById('sidebarAvatar');
-            if (ha) ha.textContent = display;
-            if (sa) sa.textContent = display;
+            if (ha) ha.innerHTML = display;
+            if (sa) sa.innerHTML = display;
+
             document.getElementById('settingsModal').style.display = 'none';
-            mostrarToast('Avatar actualizado ✓');
+            mostrarToast('Configuración guardada ✓');
             render();
         } catch(e) {
+            console.error(e);
             mostrarToast('Error al guardar');
         }
     };
