@@ -63,19 +63,19 @@
             border-bottom: 1px solid var(--pro-border);
             padding: env(safe-area-inset-top) 16px 0; position: sticky; top: 0; z-index: 100;
             display: flex; align-items: center; justify-content: space-between;
-            min-height: 52px; height: calc(52px + env(safe-area-inset-top)); gap: 8px;
+            min-height: 56px; height: calc(56px + env(safe-area-inset-top)); gap: 8px;
         }
         /* hide brand on mobile — only visible on desktop center column */
         .header-brand { display: none; }
         /* page title as main label on mobile */
         .header-page-title {
-            font-size: 15px; font-weight: 700; color: var(--pro-text);
-            letter-spacing: -0.01em; flex: 1; min-width: 0;
+            font-size: 17px; font-weight: 800; color: var(--pro-text);
+            letter-spacing: -0.02em; flex: 1; min-width: 0;
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
         /* right actions: compact on mobile */
         .header-right {
-            display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+            display: flex; align-items: center; gap: 4px; flex-shrink: 0;
         }
         /* hide user name + role on mobile */
         .header-user-info { display: none; }
@@ -88,8 +88,16 @@
         }
         /* settings gear button */
         .btn-settings {
-            background: none; border: none; font-size: 18px; line-height: 1;
-            cursor: pointer; padding: 4px; border-radius: var(--r-md);
+            background: none; border: none; font-size: 19px; line-height: 1;
+            cursor: pointer; padding: 5px; border-radius: var(--r-md);
+        }
+        /* logout button — minimal on mobile */
+        .btn-logout {
+            background: none; border: 1px solid var(--pro-border);
+            color: var(--pro-muted); padding: 5px 10px;
+            border-radius: 20px; font-size: 12px; font-weight: 600;
+            cursor: pointer; font-family: 'Inter', sans-serif;
+            transition: all 0.15s;
         }
 
         .header-top {
@@ -217,7 +225,7 @@
         .pro-table-head .sort-active { color: var(--pro-accent); }
         .pro-table-head {
             text-transform: uppercase; letter-spacing: 0.06em;
-            position: sticky; top: 52px; z-index: 10;
+            position: sticky; top: 56px; z-index: 10;
         }
         .pro-table-meta {
             display: flex; align-items: center; justify-content: space-between;
@@ -500,33 +508,64 @@
             .pro-detail-left { border-right: none; border-bottom: 1px solid var(--pro-border-subtle); }
         }
 
-        /* ===== Mobile: 2-col table — ESTATUS | PO# ===== */
+        /* ===== Mobile: Card Layout ===== */
         @media (max-width: 767px) {
-            /* Show header with only 2 cols */
-            .pro-table-head {
-                display: grid !important;
-                grid-template-columns: 1fr 130px;
-                padding: 9px 16px;
-                position: static;
-                font-size: 10px;
-            }
-            .pro-table-head > div:nth-child(1),
-            .pro-table-head > div:nth-child(2) { display: none; }
-            .pro-table-head > div:nth-child(4) { text-align: right; }
+            /* Hide table column header — cards are self-explanatory */
+            .pro-table-head { display: none !important; }
 
-            /* Row: 2 visible columns */
+            /* Card row — 2-column grid */
             .pro-row {
-                grid-template-columns: 1fr 130px;
-                grid-template-rows: auto;
-                gap: 0; padding: 11px 16px; align-items: center;
+                display: grid !important;
+                grid-template-columns: 1fr auto;
+                grid-template-rows: auto auto;
+                column-gap: 12px;
+                row-gap: 5px;
+                padding: 13px 16px;
+                align-items: start;
             }
-            .pro-row > div:nth-child(1) { display: none; }
-            .pro-row > div:nth-child(2) { display: none; }
-            .pro-row > div:nth-child(3) { grid-column: 1; grid-row: 1; }
-            .pro-row > div:nth-child(4) {
+
+            /* Left info column — spans both rows */
+            .pro-row > div:nth-child(1) {
+                display: flex !important;
+                flex-direction: column;
+                grid-column: 1; grid-row: 1 / 3;
+                gap: 3px; min-width: 0; overflow: hidden; justify-content: center;
+            }
+            /* Visually promote taller (sub) as the primary title */
+            .pro-row > div:nth-child(1) .pro-row-sub {
+                order: -1;
+                font-size: 15px !important; font-weight: 700 !important;
+                color: var(--pro-text) !important; margin-top: 0 !important;
+                white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            }
+            .pro-row > div:nth-child(1) .pro-row-title {
+                font-size: 12px !important; font-weight: 500 !important;
+                color: var(--pro-muted) !important;
+                white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            }
+            .pro-row-msg-preview { display: none !important; }
+
+            /* Fecha — hidden (available in detail panel) */
+            .pro-row > div:nth-child(2) { display: none !important; }
+
+            /* Status badge — top right */
+            .pro-row > div:nth-child(3) {
+                display: flex !important;
                 grid-column: 2; grid-row: 1;
-                display: flex; align-items: center; justify-content: flex-end;
-                gap: 4px; flex-wrap: nowrap; min-width: 0;
+                justify-content: flex-end; align-items: flex-start;
+            }
+
+            /* PO# chip — bottom right */
+            .pro-row > div:nth-child(4) {
+                display: flex !important;
+                grid-column: 2; grid-row: 2;
+                justify-content: flex-end; align-items: flex-end; min-width: 0;
+            }
+
+            /* Status badge — compact pill */
+            .pro-status {
+                font-size: 11px !important; padding: 4px 9px !important;
+                border-radius: 20px !important; white-space: nowrap;
             }
 
             /* PO# chip */
@@ -534,10 +573,40 @@
                 font-family: 'JetBrains Mono', monospace; font-size: 11px;
                 font-weight: 500; color: var(--pro-text);
                 background: #F0F1F3; border: 1px solid var(--pro-border);
-                border-radius: 6px; padding: 4px 7px;
-                white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-                min-width: 0; flex: 1;
+                border-radius: 6px; padding: 3px 8px;
+                white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px;
             }
+
+            /* Thicker left status border */
+            .pro-row-wrap { border-left-width: 4px; }
+        }
+
+        /* ===== Mobile Filter Strip ===== */
+        .mobile-filter-strip { display: none; }
+        @media (max-width: 767px) {
+            .mobile-filter-strip {
+                display: flex; gap: 7px;
+                padding: 0 16px 12px;
+                overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+            }
+            .mobile-filter-strip::-webkit-scrollbar { display: none; }
+            .mfs-chip {
+                display: inline-flex; align-items: center; gap: 5px;
+                padding: 6px 13px;
+                background: var(--pro-white); border: 1.5px solid var(--pro-border);
+                border-radius: 20px; font-size: 12px; font-weight: 600;
+                color: var(--pro-muted); white-space: nowrap; flex-shrink: 0;
+                cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s;
+            }
+            .mfs-chip.active {
+                background: var(--pro-accent); color: #fff;
+                border-color: var(--pro-accent);
+                box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+            }
+            .mfs-dot {
+                width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+            }
+            .mfs-chip.active .mfs-dot { background: rgba(255,255,255,0.7) !important; }
         }
 
         /* Entregadas section divider */
@@ -961,26 +1030,27 @@
         /* ===== Mobile layout ===== */
         .desktop-layout { display: block; }
         .sidebar { display: none; }
-        .main-content { display: block; padding: 12px 16px; background: var(--pro-bg); min-height: 60vh; }
+        .main-content { display: block; padding: 14px 16px; background: var(--pro-bg); min-height: 60vh; }
         #formSection { padding: 0; }
         #orderList { margin-top: 0; }
 
         /* Search bar — mobile */
         .pro-search-bar {
             display: flex; align-items: center; gap: 8px;
-            background: var(--pro-white); border: 1px solid var(--pro-border);
-            border-radius: var(--r-md); padding: 9px 12px;
-            margin-bottom: 12px;
+            background: var(--pro-white); border: 1.5px solid var(--pro-border);
+            border-radius: 12px; padding: 10px 14px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
         }
         .pro-search-bar svg { color: var(--pro-muted); flex-shrink: 0; }
         .pro-search-bar input {
-            flex: 1; border: none; outline: none; font-size: 14px;
+            flex: 1; border: none; outline: none; font-size: 15px;
             font-family: inherit; color: var(--pro-text); background: transparent;
         }
         .pro-search-bar input::placeholder { color: var(--pro-subtle); }
 
         /* Table container — mobile */
-        .pro-table { border-radius: var(--r-lg); overflow: hidden; margin-bottom: 16px; }
+        .pro-table { border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
         .pro-table-meta { padding: 10px 16px 8px; font-size: 12px; }
 
         /* Admin tab mobile: form moves to modal-only, show only user list */
@@ -1632,6 +1702,36 @@
                 <div class="pro-search-bar">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                     <input type="text" id="searchInput" placeholder="Buscar taller, pedido o PO..." oninput="render()">
+                </div>
+                <!-- Mobile filter strip (hidden on desktop) -->
+                <div class="mobile-filter-strip">
+                    <div class="pro-filter-item mfs-chip active" data-filter="Todos" onclick="setFilter('Todos')">
+                        <span class="mfs-dot" style="background:rgba(100,100,100,0.4)"></span>Todos
+                    </div>
+                    <div class="pro-filter-item mfs-chip" data-filter="Espera de Aprobacion" onclick="setFilter('Espera de Aprobacion')">
+                        <span class="mfs-dot" style="background:#A855F7"></span>Aprobación
+                    </div>
+                    <div class="pro-filter-item mfs-chip" data-filter="Ordenado" onclick="setFilter('Ordenado')">
+                        <span class="mfs-dot" style="background:#2563EB"></span>Ordenado
+                    </div>
+                    <div class="pro-filter-item mfs-chip" data-filter="Backorder" onclick="setFilter('Backorder')">
+                        <span class="mfs-dot" style="background:#DC2626"></span>Backorder
+                    </div>
+                    <div class="pro-filter-item mfs-chip" data-filter="Piezas en Tienda" onclick="setFilter('Piezas en Tienda')">
+                        <span class="mfs-dot" style="background:#EA580C"></span>Tienda
+                    </div>
+                    <div class="pro-filter-item mfs-chip" data-filter="En Tránsito" onclick="setFilter('En Tránsito')">
+                        <span class="mfs-dot" style="background:#7C3AED"></span>Tránsito
+                    </div>
+                    <div class="pro-filter-item mfs-chip" data-filter="Listo para Recoger" onclick="setFilter('Listo para Recoger')">
+                        <span class="mfs-dot" style="background:#0891B2"></span>Recoger
+                    </div>
+                    <div class="pro-filter-item mfs-chip" data-filter="Listo para Entrega" onclick="setFilter('Listo para Entrega')">
+                        <span class="mfs-dot" style="background:#0D9488"></span>Entrega
+                    </div>
+                    <div class="pro-filter-item mfs-chip" data-filter="Entregado" onclick="setFilter('Entregado')">
+                        <span class="mfs-dot" style="background:#9CA3AF"></span>Entregado
+                    </div>
                 </div>
                 <div id="orderList"></div>
                 <footer class="footer">v3.8.0 | PartsPilot</footer>
