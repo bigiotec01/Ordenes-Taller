@@ -1052,9 +1052,19 @@
         .pro-table { border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
         .pro-table-meta { padding: 10px 16px 8px; font-size: 12px; }
 
-        /* Admin tab mobile: form moves to modal-only, show only user list */
+        /* Admin tab mobile: sidebar hidden, button shown instead */
         #tabAdmin .sidebar { display: none; }
         #tabAdmin .main-content { padding: 12px 16px; }
+        .admin-mobile-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .admin-mobile-header .main-content-title { margin-bottom: 0; }
+        .btn-admin-nuevo {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: var(--pro-accent); color: #fff;
+            border: none; border-radius: 8px; padding: 8px 14px;
+            font-size: 13px; font-weight: 600; cursor: pointer;
+        }
+        /* On desktop, hide the + button (sidebar already shows the form) */
+        @media (min-width: 768px) { .btn-admin-nuevo { display: none; } }
 
         /* Inventario mobile search */
         #inventarioMobileSearch { display: flex !important; margin-bottom: 12px; }
@@ -1851,11 +1861,48 @@
             </aside>
 
             <main class="main-content">
-                <div class="main-content-title">&#128101; Usuarios Registrados</div>
+                <div class="admin-mobile-header">
+                    <div class="main-content-title">&#128101; Usuarios Registrados</div>
+                    <button class="btn-admin-nuevo" onclick="openNuevoUsuarioModal()">&#43; Agregar</button>
+                </div>
                 <div id="userList"></div>
                 <footer class="footer">v3.8.0 | PartsPilot</footer>
             </main>
 
+        </div>
+    </div>
+
+    <!-- ===== MODAL: NUEVO USUARIO (mobile) ===== -->
+    <div id="nuevoUsuarioModal" class="pro-modal-backdrop" onclick="closeNuevoUsuarioModal(event)" style="display:none;">
+        <div class="pro-modal">
+            <div class="pro-modal-header">
+                <span class="pro-modal-title">Nuevo Usuario</span>
+                <button class="pro-modal-close" onclick="closeNuevoUsuarioModal()">&times;</button>
+            </div>
+            <div class="pro-modal-body">
+                <div class="ios-group">
+                    <div class="ios-row"><label>Nombre</label><input type="text" id="m_newUserName" placeholder="Nombre completo"></div>
+                    <div class="ios-row"><label>ID Empleado</label><input type="text" id="m_newUserEmpId" placeholder="Ej. 2148"></div>
+                    <div class="ios-row"><label>Email</label><input type="text" id="m_newUserEmail" placeholder="Email" autocapitalize="none"></div>
+                    <div class="ios-row">
+                        <label>Rol</label>
+                        <select id="m_newUserRole" onchange="toggleTallerFieldModal()">
+                            <option value="worker">Worker</option>
+                            <option value="customer">Customer</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="ios-row" id="m_newUserTallerRow" style="display:none">
+                        <label>Taller</label>
+                        <input type="text" id="m_newUserTaller" placeholder="Nombre del taller">
+                    </div>
+                    <div class="ios-row"><label>Clave</label><input type="password" id="m_newUserPass" placeholder="Clave del usuario"></div>
+                </div>
+            </div>
+            <div class="pro-modal-footer">
+                <button class="pro-modal-btn-cancel" onclick="closeNuevoUsuarioModal()">Cancelar</button>
+                <button class="pro-modal-btn-save" onclick="crearUsuario('m_')">Crear Usuario</button>
+            </div>
         </div>
     </div>
 
@@ -3501,29 +3548,48 @@
         document.getElementById('newUserTallerRow').style.display = role === 'customer' ? 'flex' : 'none';
     };
 
+    window.toggleTallerFieldModal = function() {
+        const role = document.getElementById('m_newUserRole').value;
+        document.getElementById('m_newUserTallerRow').style.display = role === 'customer' ? 'flex' : 'none';
+    };
+
+    window.openNuevoUsuarioModal = function() {
+        document.getElementById('nuevoUsuarioModal').style.display = 'flex';
+    };
+
+    window.closeNuevoUsuarioModal = function(e) {
+        if (e && e.target !== document.getElementById('nuevoUsuarioModal')) return;
+        document.getElementById('nuevoUsuarioModal').style.display = 'none';
+    };
+
     // Auto-generate email from name
-    document.getElementById('newUserName')?.addEventListener('input', function() {
-        const emailField = document.getElementById('newUserEmail');
-        if (emailField && !emailField.dataset.manual) {
-            const name = this.value.trim().toLowerCase()
-                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                .replace(/\s+/g, '.').replace(/[^a-z.]/g, '');
-            emailField.value = name ? name + '@pedidos.local' : '';
-        }
-    });
-    document.getElementById('newUserEmail')?.addEventListener('input', function() {
-        this.dataset.manual = 'true';
-    });
+    function setupAutoEmail(nameId, emailId) {
+        document.getElementById(nameId)?.addEventListener('input', function() {
+            const emailField = document.getElementById(emailId);
+            if (emailField && !emailField.dataset.manual) {
+                const name = this.value.trim().toLowerCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                    .replace(/\s+/g, '.').replace(/[^a-z.]/g, '');
+                emailField.value = name ? name + '@pedidos.local' : '';
+            }
+        });
+        document.getElementById(emailId)?.addEventListener('input', function() {
+            this.dataset.manual = 'true';
+        });
+    }
+    setupAutoEmail('newUserName', 'newUserEmail');
+    setupAutoEmail('m_newUserName', 'm_newUserEmail');
 
-    window.crearUsuario = async function() {
+    window.crearUsuario = async function(prefix = '') {
         if (currentRole !== 'admin') return;
+        const p = prefix || '';
 
-        const name = document.getElementById('newUserName').value.trim();
-        const empId = document.getElementById('newUserEmpId').value.trim();
-        const email = document.getElementById('newUserEmail').value.trim();
-        const role = document.getElementById('newUserRole').value;
-        const taller = document.getElementById('newUserTaller')?.value.trim() || '';
-        const pass = document.getElementById('newUserPass').value;
+        const name  = document.getElementById(p + 'newUserName').value.trim();
+        const empId = document.getElementById(p + 'newUserEmpId').value.trim();
+        const email = document.getElementById(p + 'newUserEmail').value.trim();
+        const role  = document.getElementById(p + 'newUserRole').value;
+        const taller = document.getElementById(p + 'newUserTaller')?.value.trim() || '';
+        const pass  = document.getElementById(p + 'newUserPass').value;
 
         if (!name || !empId || !email || !pass) return alert('Llena Nombre, ID, Email y Clave');
 
@@ -3538,14 +3604,16 @@
 
             mostrarToast(`Usuario ${name} creado`);
 
-            document.getElementById('newUserName').value = '';
-            document.getElementById('newUserEmpId').value = '';
-            document.getElementById('newUserEmail').value = '';
-            delete document.getElementById('newUserEmail').dataset.manual;
-            document.getElementById('newUserRole').value = 'worker';
-            document.getElementById('newUserTaller').value = '';
-            document.getElementById('newUserTallerRow').style.display = 'none';
-            document.getElementById('newUserPass').value = '';
+            document.getElementById(p + 'newUserName').value = '';
+            document.getElementById(p + 'newUserEmpId').value = '';
+            document.getElementById(p + 'newUserEmail').value = '';
+            delete document.getElementById(p + 'newUserEmail').dataset.manual;
+            document.getElementById(p + 'newUserRole').value = 'worker';
+            document.getElementById(p + 'newUserTaller').value = '';
+            document.getElementById(p + 'newUserTallerRow').style.display = 'none';
+            document.getElementById(p + 'newUserPass').value = '';
+
+            if (p) document.getElementById('nuevoUsuarioModal').style.display = 'none';
         } catch (e) {
             if (e.code === 'auth/email-already-in-use') {
                 alert('Ese email ya esta registrado.');
