@@ -248,9 +248,11 @@
             display: flex; flex-direction: column; justify-content: space-between;
             min-height: 0;
         }
-        .pro-card-status {
-            margin-top: 7px;
-            font-size: 10px !important; padding: 3px 7px !important;
+        .pro-card-status-bar {
+            display: flex; align-items: center; gap: 6px;
+            padding: 5px 12px;
+            font-size: 11px; font-weight: 600;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
         }
         .pro-card-footer {
             display: flex; align-items: center;
@@ -3261,14 +3263,14 @@
         return `<div class="${wrapClasses}" id="wrap-${o.id}">
             <div class="pro-row" onclick="toggleOrderDetail('${o.id}')" ${esEditando ? 'style="outline:2px solid var(--ios-purple);"' : ''}>
                 <div class="pro-card-stripe"></div>
+                <div class="pro-card-status-bar" style="background:${pill.bg};color:${pill.color};">
+                    <span class="pro-status-dot" style="background:${pill.dot};"></span>
+                    ${esc(o.status)}
+                </div>
                 <div class="pro-card-body">
                     <div>
                         <div class="pro-row-sub">${esc(o.taller)}</div>
                         <div class="pro-row-title">${esc(o.pedido)}</div>
-                        <span class="pro-status pro-card-status" style="background:${pill.bg};color:${pill.color};">
-                            <span class="pro-status-dot" style="background:${pill.dot};"></span>
-                            ${esc(o.status)}
-                        </span>
                         ${msgPreview}
                     </div>
                     <div class="pro-card-footer">
