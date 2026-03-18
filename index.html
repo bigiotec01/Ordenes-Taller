@@ -221,8 +221,8 @@
         .pro-table-head { display: none !important; }
         .pro-cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 14px;
             padding: 4px 16px 16px;
         }
         .pro-table-meta {
@@ -239,7 +239,7 @@
         }
         .pro-row {
             display: flex; flex-direction: column;
-            cursor: pointer; min-height: 148px;
+            cursor: pointer; min-height: 175px;
         }
         .pro-row:hover { background: transparent; }
         .pro-card-stripe { height: 6px; flex-shrink: 0; }
@@ -255,8 +255,12 @@
             border-bottom: 1px solid rgba(0,0,0,0.06);
         }
         .pro-card-footer {
-            display: flex; align-items: center;
-            margin-top: 8px;
+            display: flex; align-items: center; justify-content: space-between;
+            margin-top: 8px; gap: 6px;
+        }
+        .pro-card-date {
+            font-size: 10px; font-weight: 500; color: var(--pro-muted);
+            display: flex; align-items: center; gap: 3px;
         }
         .pro-row-title { font-size: 11px; font-weight: 500; color: var(--pro-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .pro-row-sub   { font-size: 13px; font-weight: 700; color: var(--pro-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -3275,6 +3279,7 @@
                     </div>
                     <div class="pro-card-footer">
                         <span class="pro-id pro-id-chip">${esc(o.po || '—')}</span>
+                        ${o.fechaEntrega ? `<span class="pro-card-date">📅 ${fechaEs(o.fechaEntrega)}</span>` : ''}
                     </div>
                 </div>
             </div>
