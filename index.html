@@ -861,25 +861,72 @@
         .stat-row-name { font-size: 13px; font-weight: 500; color: var(--text-muted); }
         .stat-row-count { font-size: 13px; font-weight: 700; color: var(--accent-blue); }
 
+        /* ===== Admin panel ===== */
+        .admin-full { padding: 20px; }
+        .admin-topbar {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px; gap: 12px; flex-wrap: wrap;
+        }
+        .admin-stat-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+        .admin-stat-chip {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 6px 13px; border-radius: 20px;
+            font-size: 12px; font-weight: 700; border: 1.5px solid;
+        }
+        .user-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+            gap: 14px;
+        }
         .user-card {
-            background: var(--card-bg); border-radius: 14px; padding: 16px 18px;
-            margin-bottom: 10px; box-shadow: var(--shadow-soft);
-            border: 1px solid rgba(0,0,0,0.02);
+            background: var(--pro-white); border-radius: 14px; padding: 16px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04);
+            display: flex; flex-direction: column; gap: 12px;
+        }
+        .user-card-top { display: flex; align-items: flex-start; gap: 12px; }
+        .user-avatar {
+            width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 17px; font-weight: 800;
+        }
+        .user-avatar.role-admin    { background: #EDE9FE; color: #7C3AED; }
+        .user-avatar.role-worker   { background: #EEF2FF; color: #2563EB; }
+        .user-avatar.role-customer { background: #F0FDF4; color: #16A34A; }
+        .user-card-name { font-size: 14px; font-weight: 700; color: var(--pro-text); }
+        .user-card-email { font-size: 11px; color: var(--pro-muted); margin-top: 2px; }
+        .user-role-badge {
+            display: inline-flex; align-items: center; gap: 3px;
+            padding: 2px 8px; border-radius: 12px; margin-top: 5px;
+            font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .user-role-badge.role-admin    { background: #EDE9FE; color: #7C3AED; }
+        .user-role-badge.role-worker   { background: #EEF2FF; color: #2563EB; }
+        .user-role-badge.role-customer { background: #F0FDF4; color: #16A34A; }
+        .user-card-meta {
             display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 0; border-top: 1px solid var(--pro-border-subtle);
+            border-bottom: 1px solid var(--pro-border-subtle);
+            font-size: 11px;
         }
-        .user-card-info { flex: 1; }
-        .user-card-name { font-size: 14px; font-weight: 700; color: var(--text-main); }
-        .user-card-detail { font-size: 12px; color: var(--text-muted); margin-top: 3px; font-weight: 500; }
-        .user-card-role {
-            width: 110px; padding: 8px 10px; border-radius: 10px; border: 1px solid #E2E4E9;
-            background: #F8F9FB; font-size: 13px; font-weight: 600; color: var(--text-main);
-            font-family: 'Montserrat', sans-serif;
+        .user-meta-label { color: var(--pro-muted); }
+        .user-meta-val   { font-weight: 600; color: var(--pro-text); }
+        .user-taller-input {
+            width: 100%; padding: 7px 10px; border-radius: 8px;
+            border: 1px solid #C7D7F9; background: #EEF2FF;
+            font-size: 12px; color: #2563EB; font-weight: 600;
         }
-        .taller-input {
-            border: 1px solid #E2E4E9; border-radius: 8px; padding: 6px 10px;
-            font-size: 12px; width: 140px; margin-top: 4px; color: var(--accent-blue);
-            font-family: 'Montserrat', sans-serif;
+        .user-card-actions { display: flex; align-items: center; gap: 8px; }
+        .user-role-select {
+            flex: 1; padding: 7px 8px; border-radius: 8px;
+            border: 1px solid var(--pro-border); background: var(--pro-bg);
+            font-size: 12px; font-weight: 600; color: var(--pro-text); cursor: pointer;
         }
+        .btn-delete-user {
+            background: #FFF0F0; color: #DC2626; border: none;
+            border-radius: 8px; padding: 7px 11px; font-size: 14px; cursor: pointer;
+            flex-shrink: 0;
+        }
+        .btn-delete-user:hover { background: #FEE2E2; }
 
         /* ===== Attachments ===== */
         .attachment-section {
@@ -1063,18 +1110,14 @@
         .pro-table-meta { padding: 10px 16px 8px; font-size: 12px; }
 
         /* Admin tab mobile: sidebar hidden, button shown instead */
-        #tabAdmin .sidebar { display: none; }
-        #tabAdmin .main-content { padding: 12px 16px; }
-        .admin-mobile-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-        .admin-mobile-header .main-content-title { margin-bottom: 0; }
         .btn-admin-nuevo {
-            display: inline-flex; align-items: center; gap: 5px;
+            display: inline-flex; align-items: center; gap: 6px;
             background: var(--pro-accent); color: #fff;
-            border: none; border-radius: 8px; padding: 8px 14px;
-            font-size: 13px; font-weight: 600; cursor: pointer;
+            border: none; border-radius: 8px; padding: 9px 16px;
+            font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
         }
-        /* On desktop, hide the + button (sidebar already shows the form) */
-        @media (min-width: 768px) { .btn-admin-nuevo { display: none; } }
+        .btn-admin-nuevo:hover { background: var(--pro-accent-text); }
+        @media (max-width: 767px) { .admin-full { padding: 12px; } }
 
         /* Inventario mobile search */
         #inventarioMobileSearch { display: flex !important; margin-bottom: 12px; }
@@ -1853,42 +1896,13 @@
 
     <!-- ===== TAB: ADMIN ===== -->
     <div id="tabAdmin" style="display:none">
-        <div class="desktop-layout">
-
-            <aside class="sidebar">
-                <div class="sidebar-section">
-                    <div class="sidebar-section-title">Nuevo Usuario</div>
-                    <div class="ios-group">
-                        <div class="ios-row"><label>Nombre</label><input type="text" id="newUserName" placeholder="Nombre completo"></div>
-                        <div class="ios-row"><label>ID Empleado</label><input type="text" id="newUserEmpId" placeholder="Ej. 2148"></div>
-                        <div class="ios-row"><label>Email</label><input type="text" id="newUserEmail" placeholder="Email" autocapitalize="none"></div>
-                        <div class="ios-row">
-                            <label>Rol</label>
-                            <select id="newUserRole" onchange="toggleTallerField()">
-                                <option value="worker">Worker</option>
-                                <option value="customer">Customer</option>
-                                <option value="admin">Admin</option>
-                            </select>
-                        </div>
-                        <div class="ios-row" id="newUserTallerRow" style="display:none">
-                            <label>Taller</label>
-                            <input type="text" id="newUserTaller" placeholder="Nombre del taller">
-                        </div>
-                        <div class="ios-row"><label>Clave</label><input type="password" id="newUserPass" placeholder="Clave del usuario"></div>
-                    </div>
-                    <button class="main-btn btn-blue" onclick="crearUsuario()" style="margin-top:10px;">Crear Usuario</button>
-                </div>
-            </aside>
-
-            <main class="main-content">
-                <div class="admin-mobile-header">
-                    <div class="main-content-title">&#128101; Usuarios Registrados</div>
-                    <button class="btn-admin-nuevo" onclick="openNuevoUsuarioModal()">&#43; Agregar</button>
-                </div>
-                <div id="userList"></div>
-                <footer class="footer">v3.8.0 | PartsPilot</footer>
-            </main>
-
+        <div class="admin-full">
+            <div class="admin-topbar">
+                <div class="admin-stat-chips" id="adminUserStats"></div>
+                <button class="btn-admin-nuevo" onclick="openNuevoUsuarioModal()">&#43; Nuevo Usuario</button>
+            </div>
+            <div class="user-grid" id="userList"></div>
+            <footer class="footer">v3.8.0 | PartsPilot</footer>
         </div>
     </div>
 
@@ -3677,16 +3691,33 @@
 
     window.crearUsuario = async function(prefix = '') {
         if (currentRole !== 'admin') return;
-        const p = prefix || '';
+        const p = 'm_'; // always use modal form
 
-        const name  = document.getElementById(p + 'newUserName').value.trim();
-        const empId = document.getElementById(p + 'newUserEmpId').value.trim();
-        const email = document.getElementById(p + 'newUserEmail').value.trim();
-        const role  = document.getElementById(p + 'newUserRole').value;
-        const taller = document.getElementById(p + 'newUserTaller')?.value.trim() || '';
-        const pass  = document.getElementById(p + 'newUserPass').value;
+        const nameEl  = document.getElementById(p + 'newUserName');
+        const empIdEl = document.getElementById(p + 'newUserEmpId');
+        const emailEl = document.getElementById(p + 'newUserEmail');
+        const roleEl  = document.getElementById(p + 'newUserRole');
+        const tallerEl= document.getElementById(p + 'newUserTaller');
+        const passEl  = document.getElementById(p + 'newUserPass');
 
-        if (!name || !empId || !email || !pass) return alert('Llena Nombre, ID, Email y Clave');
+        if (!nameEl || !empIdEl || !emailEl || !roleEl || !passEl) {
+            mostrarToast('Error: formulario no encontrado'); return;
+        }
+
+        const name   = nameEl.value.trim();
+        const empId  = empIdEl.value.trim();
+        const email  = emailEl.value.trim();
+        const role   = roleEl.value;
+        const taller = tallerEl?.value.trim() || '';
+        const pass   = passEl.value;
+
+        if (!name)  return mostrarToast('Falta el nombre');
+        if (!empId) return mostrarToast('Falta el ID de empleado');
+        if (!email) return mostrarToast('Falta el email');
+        if (!pass)  return mostrarToast('Falta la clave');
+
+        const btnSave = document.querySelector('#nuevoUsuarioModal .pro-modal-btn-save');
+        if (btnSave) { btnSave.disabled = true; btnSave.textContent = 'Creando...'; }
 
         try {
             const secAuth = getSecondaryAuth();
@@ -3697,67 +3728,93 @@
             });
             await signOut(secAuth);
 
-            mostrarToast(`Usuario ${name} creado`);
+            mostrarToast(`✅ ${name} creado como ${role}`);
 
-            document.getElementById(p + 'newUserName').value = '';
-            document.getElementById(p + 'newUserEmpId').value = '';
-            document.getElementById(p + 'newUserEmail').value = '';
-            delete document.getElementById(p + 'newUserEmail').dataset.manual;
-            document.getElementById(p + 'newUserRole').value = 'worker';
-            document.getElementById(p + 'newUserTaller').value = '';
-            document.getElementById(p + 'newUserTallerRow').style.display = 'none';
-            document.getElementById(p + 'newUserPass').value = '';
+            // Reset form
+            nameEl.value = ''; empIdEl.value = ''; passEl.value = '';
+            emailEl.value = ''; delete emailEl.dataset.manual;
+            roleEl.value = 'worker';
+            if (tallerEl) tallerEl.value = '';
+            const tallerRow = document.getElementById(p + 'newUserTallerRow');
+            if (tallerRow) tallerRow.style.display = 'none';
 
-            if (p) document.getElementById('nuevoUsuarioModal').style.display = 'none';
+            document.getElementById('nuevoUsuarioModal').style.display = 'none';
         } catch (e) {
-            if (e.code === 'auth/email-already-in-use') {
-                alert('Ese email ya esta registrado.');
-            } else {
-                alert('Error: ' + e.message);
-            }
+            const msg = e.code === 'auth/email-already-in-use'
+                ? 'Ese email ya está registrado'
+                : e.code === 'auth/weak-password'
+                ? 'La clave debe tener al menos 6 caracteres'
+                : 'Error: ' + e.message;
+            mostrarToast('❌ ' + msg);
+        } finally {
+            if (btnSave) { btnSave.disabled = false; btnSave.textContent = 'Crear Usuario'; }
         }
     };
 
     function renderUsers() {
-        const list = document.getElementById('userList');
+        const list    = document.getElementById('userList');
+        const statsEl = document.getElementById('adminUserStats');
         if (!list || currentRole !== 'admin') return;
 
+        // Stats chips
+        const counts = { admin: 0, worker: 0, customer: 0 };
+        allUsers.forEach(u => { if (u.role in counts) counts[u.role]++; });
+        if (statsEl) statsEl.innerHTML = `
+            <span class="admin-stat-chip" style="background:#EDE9FE;color:#7C3AED;border-color:#DDD6FE;">👑 ${counts.admin} Admin${counts.admin !== 1 ? 's' : ''}</span>
+            <span class="admin-stat-chip" style="background:#EEF2FF;color:#2563EB;border-color:#C7D7F9;">🔧 ${counts.worker} Worker${counts.worker !== 1 ? 's' : ''}</span>
+            <span class="admin-stat-chip" style="background:#F0FDF4;color:#16A34A;border-color:#BBF7D0;">🏪 ${counts.customer} Cliente${counts.customer !== 1 ? 's' : ''}</span>`;
+
         if (allUsers.length === 0) {
-            list.innerHTML = '<p style="color:var(--ios-gray);font-size:13px;text-align:center;">No hay usuarios</p>';
+            list.innerHTML = '<p style="color:var(--pro-muted);font-size:13px;text-align:center;grid-column:1/-1;padding:40px 0;">No hay usuarios registrados</p>';
             return;
         }
 
         const sorted = [...allUsers].sort((a, b) => {
-            const roleOrder = { admin: 0, worker: 1, customer: 2 };
-            return (roleOrder[a.role] || 9) - (roleOrder[b.role] || 9);
+            const order = { admin: 0, worker: 1, customer: 2 };
+            return (order[a.role] ?? 9) - (order[b.role] ?? 9);
         });
 
+        const rClass = r => r === 'admin' ? 'role-admin' : r === 'worker' ? 'role-worker' : 'role-customer';
+        const rIcon  = r => r === 'admin' ? '👑' : r === 'worker' ? '🔧' : '🏪';
+        const rLabel = r => r === 'admin' ? 'Admin' : r === 'worker' ? 'Worker' : 'Cliente';
+
         list.innerHTML = sorted.map(u => {
-            const tallerHtml = u.role === 'customer'
-                ? `<div style="margin-top:4px;">
-                    <input type="text" class="taller-input" value="${esc(u.taller || '')}"
+            const isSelf   = u.uid === currentUser.uid;
+            const initial  = (u.name || '?')[0].toUpperCase();
+            const rc       = rClass(u.role);
+            const alta     = u.createdAt
+                ? new Date(u.createdAt).toLocaleDateString('es-AR', { day:'2-digit', month:'short', year:'numeric' })
+                : '—';
+
+            const tallerRow = u.role === 'customer' ? `
+                <div>
+                    <div style="font-size:10px;font-weight:700;color:var(--pro-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Taller asignado</div>
+                    <input class="user-taller-input" type="text" value="${esc(u.taller || '')}"
                         placeholder="Asignar taller..."
                         onchange="actualizarTaller('${u.uid}', this.value)">
-                   </div>`
-                : '';
-
-            const isSelf = u.uid === currentUser.uid;
-            const isOtherAdmin = !isSelf && u.role === 'admin';
-            const canDelete = !isSelf;
+                </div>` : '';
 
             return `<div class="user-card">
-                <div class="user-card-info">
-                    <div class="user-card-name">${esc(u.name)}${isSelf ? ' <span style="font-size:11px;color:var(--ios-gray);">(tu)</span>' : ''}</div>
-                    <div class="user-card-detail">ID: ${esc(u.empId || '---')} | ${esc(u.email || '---')}</div>
-                    ${tallerHtml}
+                <div class="user-card-top">
+                    <div class="user-avatar ${rc}">${initial}</div>
+                    <div style="flex:1;min-width:0;">
+                        <div class="user-card-name">${esc(u.name)}${isSelf ? ' <span style="font-size:10px;color:var(--pro-muted);">(vos)</span>' : ''}</div>
+                        <div class="user-card-email">${esc(u.email || '—')}</div>
+                        <span class="user-role-badge ${rc}">${rIcon(u.role)} ${rLabel(u.role)}</span>
+                    </div>
                 </div>
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <select class="user-card-role" onchange="cambiarRol('${u.uid}', this.value)"${isSelf ? ' disabled title="No puedes cambiar tu propio rol"' : ''}>
-                        <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
-                        <option value="worker" ${u.role === 'worker' ? 'selected' : ''}>Worker</option>
-                        <option value="customer" ${u.role === 'customer' ? 'selected' : ''}>Customer</option>
+                <div class="user-card-meta">
+                    <div><span class="user-meta-label">ID: </span><span class="user-meta-val">${esc(u.empId || '—')}</span></div>
+                    <div><span class="user-meta-label">Alta: </span><span class="user-meta-val">${alta}</span></div>
+                </div>
+                ${tallerRow}
+                <div class="user-card-actions">
+                    <select class="user-role-select" onchange="cambiarRol('${u.uid}', this.value)"${isSelf ? ' disabled' : ''}>
+                        <option value="admin"    ${u.role === 'admin'    ? 'selected' : ''}>Admin</option>
+                        <option value="worker"   ${u.role === 'worker'   ? 'selected' : ''}>Worker</option>
+                        <option value="customer" ${u.role === 'customer' ? 'selected' : ''}>Cliente</option>
                     </select>
-                    ${canDelete ? `<button onclick="eliminarUsuario('${u.uid}', '${esc(u.name)}')" style="background:#FFEBEB;color:var(--ios-danger);border:none;border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;white-space:nowrap;">&#128465;&#65039;</button>` : ''}
+                    ${!isSelf ? `<button class="btn-delete-user" onclick="eliminarUsuario('${u.uid}','${esc(u.name)}')">🗑️</button>` : ''}
                 </div>
             </div>`;
         }).join('');
