@@ -248,11 +248,14 @@
             display: flex; flex-direction: column; justify-content: space-between;
             min-height: 0;
         }
-        .pro-card-footer {
-            display: flex; align-items: center; justify-content: space-between;
-            flex-wrap: wrap; margin-top: 8px; gap: 5px;
+        .pro-card-status {
+            margin-top: 7px;
+            font-size: 10px !important; padding: 3px 7px !important;
         }
-        .pro-card-footer .pro-status { font-size: 10px !important; padding: 3px 6px !important; }
+        .pro-card-footer {
+            display: flex; align-items: center;
+            margin-top: 8px;
+        }
         .pro-row-title { font-size: 11px; font-weight: 500; color: var(--pro-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .pro-row-sub   { font-size: 13px; font-weight: 700; color: var(--pro-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .pro-row-msg-preview {
@@ -271,9 +274,9 @@
         @keyframes msg-pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.7); } }
         .pro-row-taller { font-size: 13px; color: var(--pro-text); }
         .pro-id {
-            font-family: 'JetBrains Mono', monospace; font-size: 11px;
+            font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
             background: #F6F8FA; border: 1px solid var(--pro-border);
-            color: var(--pro-muted); padding: 2px 7px; border-radius: var(--r-sm);
+            color: var(--pro-text); padding: 2px 7px; border-radius: var(--r-sm);
             display: inline-block;
         }
         .pro-status {
@@ -3262,14 +3265,14 @@
                     <div>
                         <div class="pro-row-sub">${esc(o.taller)}</div>
                         <div class="pro-row-title">${esc(o.pedido)}</div>
+                        <span class="pro-status pro-card-status" style="background:${pill.bg};color:${pill.color};">
+                            <span class="pro-status-dot" style="background:${pill.dot};"></span>
+                            ${esc(o.status)}
+                        </span>
                         ${msgPreview}
                     </div>
                     <div class="pro-card-footer">
                         <span class="pro-id pro-id-chip">${esc(o.po || '—')}</span>
-                        <span class="pro-status" style="background:${pill.bg};color:${pill.color};">
-                            <span class="pro-status-dot" style="background:${pill.dot};"></span>
-                            ${esc(o.status)}
-                        </span>
                     </div>
                 </div>
             </div>
