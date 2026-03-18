@@ -215,28 +215,19 @@
 
         /* ===== Pro Data Table ===== */
         .pro-table {
-            background: var(--pro-white); border: 1px solid var(--pro-border);
-            border-radius: var(--r-lg); overflow: hidden; margin-bottom: 20px;
+            background: var(--pro-bg);
+            margin-bottom: 20px;
         }
-        .pro-table-head {
-            display: grid; grid-template-columns: 1fr 150px 160px 100px;
-            padding: 13px 20px; background: #F6F8FA;
-            border-bottom: 1px solid var(--pro-border);
-            font-size: 11px; font-weight: 600; color: var(--pro-muted);
-        }
-        .pro-table-head .sortable {
-            cursor: pointer; user-select: none; transition: color 0.15s;
-        }
-        .pro-table-head .sortable:hover { color: var(--pro-text); }
-        .pro-table-head .sort-active { color: var(--pro-accent); }
-        .pro-table-head {
-            text-transform: uppercase; letter-spacing: 0.06em;
-            position: sticky; top: 56px; z-index: 10;
+        .pro-table-head { display: none !important; }
+        .pro-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+            gap: 12px;
+            padding: 4px 16px 16px;
         }
         .pro-table-meta {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 10px 20px 8px;
-            background: var(--pro-white);
+            padding: 10px 16px 8px;
             font-size: 12px; color: var(--pro-muted);
         }
         .pro-table-meta strong { color: var(--pro-text); font-weight: 600; }
@@ -247,14 +238,22 @@
             border-radius: 20px;
         }
         .pro-row {
-            display: grid; grid-template-columns: 1fr 150px 160px 100px;
-            padding: 20px 20px; border-bottom: 1px solid var(--pro-border-subtle);
-            align-items: center; cursor: pointer; transition: background 0.1s;
+            display: flex; flex-direction: column;
+            cursor: pointer; min-height: 148px;
         }
-        .pro-row:last-child { border-bottom: none; }
-        .pro-row:hover { background: #F6F8FA; }
-        .pro-row-title { font-size: 13px; font-weight: 600; color: var(--pro-text); }
-        .pro-row-sub   { font-size: 11px; color: var(--pro-muted); margin-top: 2px; }
+        .pro-row:hover { background: transparent; }
+        .pro-card-stripe { height: 6px; flex-shrink: 0; }
+        .pro-card-body {
+            flex: 1; padding: 11px 12px 10px;
+            display: flex; flex-direction: column; justify-content: space-between;
+            min-height: 0;
+        }
+        .pro-card-footer {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-top: 8px; gap: 6px;
+        }
+        .pro-row-title { font-size: 11px; font-weight: 500; color: var(--pro-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pro-row-sub   { font-size: 13px; font-weight: 700; color: var(--pro-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .pro-row-msg-preview {
             display: flex; align-items: center; gap: 5px; margin-top: 5px;
             font-size: 11px; color: #16A34A; font-weight: 500;
@@ -283,19 +282,26 @@
         }
         .pro-status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 
-        /* ===== Expandable row detail ===== */
-        .pro-row-wrap { border-bottom: 1px solid var(--pro-border-subtle); border-left: 3px solid transparent; }
-        .pro-table-head + .pro-row-wrap { margin-top: 10px; }
-        .pro-row-wrap.st-aprobacion   { border-left-color: #A855F7; }
-        .pro-row-wrap.st-aprobado     { border-left-color: #16A34A; }
-        .pro-row-wrap.st-ordenado     { border-left-color: #2563EB; }
-        .pro-row-wrap.st-backorder    { border-left-color: #DC2626; }
-        .pro-row-wrap.st-tienda       { border-left-color: #EA580C; }
-        .pro-row-wrap.st-transito     { border-left-color: #7C3AED; }
-        .pro-row-wrap.st-listo-recoger{ border-left-color: #0891B2; }
-        .pro-row-wrap.st-listo-entrega{ border-left-color: #0D9488; }
-        .pro-row-wrap.st-entregado    { border-left-color: #9CA3AF; opacity: 0.6; }
-        .pro-row-wrap:last-child { border-bottom: none; }
+        /* ===== Card tiles ===== */
+        .pro-row-wrap {
+            background: var(--pro-white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .pro-row-wrap:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.06); }
+        /* Stripe colors per status */
+        .pro-row-wrap.st-aprobacion   .pro-card-stripe { background: #A855F7; }
+        .pro-row-wrap.st-aprobado     .pro-card-stripe { background: #16A34A; }
+        .pro-row-wrap.st-ordenado     .pro-card-stripe { background: #2563EB; }
+        .pro-row-wrap.st-backorder    .pro-card-stripe { background: #DC2626; }
+        .pro-row-wrap.st-tienda       .pro-card-stripe { background: #EA580C; }
+        .pro-row-wrap.st-transito     .pro-card-stripe { background: #7C3AED; }
+        .pro-row-wrap.st-listo-recoger .pro-card-stripe { background: #0891B2; }
+        .pro-row-wrap.st-listo-entrega .pro-card-stripe { background: #0D9488; }
+        .pro-row-wrap.st-entregado    .pro-card-stripe { background: #9CA3AF; }
+        .pro-row-wrap.st-entregado    { opacity: 0.65; }
         .pro-row-wrap.has-note      { animation: note-pulse      1.2s ease-in-out infinite; }
         .pro-row-wrap.has-attention { animation: attention-pulse 1.2s ease-in-out infinite; }
         .pro-row-wrap.is-overdue    { animation: overdue-pulse   1s   ease-in-out infinite; }
@@ -517,75 +523,24 @@
 
         /* ===== Mobile: Card Layout ===== */
         @media (max-width: 767px) {
-            /* Hide table column header — cards are self-explanatory */
-            .pro-table-head { display: none !important; }
-
-            /* Card row — 2-column grid */
-            .pro-row {
-                display: grid !important;
-                grid-template-columns: 1fr auto;
-                grid-template-rows: auto auto;
-                column-gap: 12px;
-                row-gap: 5px;
-                padding: 13px 16px;
-                align-items: start;
+            .pro-cards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+                gap: 10px;
+                padding: 4px 12px 12px;
             }
-
-            /* Left info column — spans both rows */
-            .pro-row > div:nth-child(1) {
-                display: flex !important;
-                flex-direction: column;
-                grid-column: 1; grid-row: 1 / 3;
-                gap: 3px; min-width: 0; overflow: hidden; justify-content: center;
-            }
-            /* Visually promote taller (sub) as the primary title */
-            .pro-row > div:nth-child(1) .pro-row-sub {
-                order: -1;
-                font-size: 15px !important; font-weight: 700 !important;
-                color: var(--pro-text) !important; margin-top: 0 !important;
-                white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            }
-            .pro-row > div:nth-child(1) .pro-row-title {
-                font-size: 12px !important; font-weight: 500 !important;
-                color: var(--pro-muted) !important;
-                white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            }
-            .pro-row-msg-preview { display: none !important; }
-
-            /* Fecha — hidden (available in detail panel) */
-            .pro-row > div:nth-child(2) { display: none !important; }
-
-            /* Status badge — top right */
-            .pro-row > div:nth-child(3) {
-                display: flex !important;
-                grid-column: 2; grid-row: 1;
-                justify-content: flex-end; align-items: flex-start;
-            }
-
-            /* PO# chip — bottom right */
-            .pro-row > div:nth-child(4) {
-                display: flex !important;
-                grid-column: 2; grid-row: 2;
-                justify-content: flex-end; align-items: flex-end; min-width: 0;
-            }
-
             /* Status badge — compact pill */
             .pro-status {
-                font-size: 11px !important; padding: 4px 9px !important;
+                font-size: 10px !important; padding: 3px 7px !important;
                 border-radius: 20px !important; white-space: nowrap;
             }
-
             /* PO# chip */
             .pro-id-chip {
-                font-family: 'JetBrains Mono', monospace; font-size: 11px;
+                font-family: 'JetBrains Mono', monospace; font-size: 10px;
                 font-weight: 500; color: var(--pro-text);
                 background: #F0F1F3; border: 1px solid var(--pro-border);
-                border-radius: 6px; padding: 3px 8px;
-                white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px;
+                border-radius: 5px; padding: 2px 6px;
+                white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;
             }
-
-            /* Thicker left status border */
-            .pro-row-wrap { border-left-width: 4px; }
         }
 
         /* ===== Mobile Filter Strip ===== */
@@ -2840,13 +2795,7 @@
                     <span><strong>${filtradas.length}</strong> orden${filtradas.length !== 1 ? 'es' : ''} ${query ? `para "<strong>${query}</strong>"` : ''}</span>
                     ${filterLabel}
                 </div>
-                <div class="pro-table-head">
-                    <div onclick="setSortBy('fecha')" class="sortable${sortBy==='fecha'?' sort-active':''}">Orden / Taller ${sortBy==='fecha'?(sortDir==='asc'?'↑':'↓'):'↕'}</div>
-                    <div onclick="setSortBy('entrega')" class="sortable${sortBy==='entrega'?' sort-active':''}">Entrega ${sortBy==='entrega'?(sortDir==='asc'?'↑':'↓'):'↕'}</div>
-                    <div onclick="setSortBy('status')" class="sortable${sortBy==='status'?' sort-active':''}">Estatus ${sortBy==='status'?(sortDir==='asc'?'↑':'↓'):'↕'}</div>
-                    <div onclick="setSortBy('po')" class="sortable${sortBy==='po'?' sort-active':''}">PO# ${sortBy==='po'?(sortDir==='asc'?'↑':'↓'):'↕'}</div>
-                </div>
-                ${rows}
+                <div class="pro-cards-grid">${rows}</div>
             </div>`;
 
         // Restore any panels that were open before re-render
@@ -3227,20 +3176,20 @@
 
         return `<div class="${wrapClasses}" id="wrap-${o.id}">
             <div class="pro-row" onclick="toggleOrderDetail('${o.id}')" ${esEditando ? 'style="outline:2px solid var(--ios-purple);"' : ''}>
-                <div>
-                    <div class="pro-row-title">${esc(o.pedido)}</div>
-                    <div class="pro-row-sub">${esc(o.taller)}</div>
-                    ${msgPreview}
-                </div>
-                <div style="font-size:12px;color:var(--pro-muted);">${fechaDisplay}</div>
-                <div>
-                    <span class="pro-status" style="background:${pill.bg};color:${pill.color};">
-                        <span class="pro-status-dot" style="background:${pill.dot};"></span>
-                        ${esc(o.status)}
-                    </span>
-                </div>
-                <div>
-                    <span class="pro-id pro-id-chip">${esc(o.po || '—')}</span>
+                <div class="pro-card-stripe"></div>
+                <div class="pro-card-body">
+                    <div>
+                        <div class="pro-row-sub">${esc(o.taller)}</div>
+                        <div class="pro-row-title">${esc(o.pedido)}</div>
+                        ${msgPreview}
+                    </div>
+                    <div class="pro-card-footer">
+                        <span class="pro-id pro-id-chip">${esc(o.po || '—')}</span>
+                        <span class="pro-status" style="background:${pill.bg};color:${pill.color};">
+                            <span class="pro-status-dot" style="background:${pill.dot};"></span>
+                            ${esc(o.status)}
+                        </span>
+                    </div>
                 </div>
             </div>
             <div class="pro-row-detail" id="detail-${o.id}">
