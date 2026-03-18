@@ -1263,6 +1263,16 @@
                 z-index: 1000; display: flex; align-items: center; justify-content: center;
                 backdrop-filter: blur(2px);
             }
+            /* Order detail modal — wider to fit 2-column grid */
+            #orderDetailModal .pro-modal {
+                width: min(820px, 96vw);
+                max-height: 92vh;
+            }
+            #orderDetailModal .pro-modal-body { padding: 0; overflow-y: auto; }
+            #orderDetailModal .pro-modal-title { font-size: 15px; }
+            #orderDetailModal .pro-detail-modal-sub {
+                font-size: 12px; color: var(--pro-muted); font-weight: 400; margin-top: 1px;
+            }
             .pro-modal {
                 background: var(--pro-white); border-radius: var(--r-lg);
                 width: 460px; max-width: 95vw; max-height: 90vh;
@@ -1869,6 +1879,20 @@
                 <footer class="footer">v3.8.0 | PartsPilot</footer>
             </main>
 
+        </div>
+    </div>
+
+    <!-- ===== MODAL: DETALLE DE ORDEN ===== -->
+    <div id="orderDetailModal" class="pro-modal-backdrop" onclick="closeOrderDetailModal(event)" style="display:none;">
+        <div class="pro-modal">
+            <div class="pro-modal-header">
+                <div>
+                    <div class="pro-modal-title" id="orderDetailModalTitle"></div>
+                    <div class="pro-detail-modal-sub" id="orderDetailModalSub"></div>
+                </div>
+                <button class="pro-modal-close" onclick="closeOrderDetailModal()">&times;</button>
+            </div>
+            <div class="pro-modal-body" id="orderDetailModalBody"></div>
         </div>
     </div>
 
@@ -2845,17 +2869,26 @@
                 <div class="pro-cards-grid">${rows}</div>
             </div>`;
 
-        // Restore any panels that were open before re-render
-        openDetails.forEach(orderId => {
-            const detail = document.getElementById(`detail-${orderId}`);
-            if (detail) {
-                detail.style.display = 'block';
-                const thread = document.getElementById(`chat-thread-${orderId}`);
-                if (thread) thread.scrollTop = thread.scrollHeight;
+        // Restore modal if an order was open before re-render
+        if (openDetailOrderId) {
+            const freshDetail = document.getElementById(`detail-${openDetailOrderId}`);
+            const body = document.getElementById('orderDetailModalBody');
+            if (freshDetail && body) {
+                body.innerHTML = '';
+                body.appendChild(freshDetail);
+                freshDetail.style.display = 'block';
+                setTimeout(() => {
+                    const thread = document.getElementById(`chat-thread-${openDetailOrderId}`);
+                    if (thread) thread.scrollTop = thread.scrollHeight;
+                }, 50);
             } else {
-                openDetails.delete(orderId); // order no longer visible
+                // Order no longer visible, close modal
+                openDetails.delete(openDetailOrderId);
+                openDetailOrderId = null;
+                const modal = document.getElementById('orderDetailModal');
+                if (modal) modal.style.display = 'none';
             }
-        });
+        }
     }
     window.render = render;
 
@@ -3245,26 +3278,77 @@
         </div>`;
     }
 
-    window.toggleOrderDetail = function(orderId) {
-        const detail = document.getElementById(`detail-${orderId}`);
-        const wrap = document.getElementById(`wrap-${orderId}`);
-        if (!detail) return;
-        const isOpen = detail.style.display === 'block';
-        detail.style.display = isOpen ? 'none' : 'block';
-        if (isOpen) {
-            openDetails.delete(String(orderId));
-        } else {
-            openDetails.add(String(orderId));
-            // mark chat as seen
-            const order = orders.find(o => String(o.id) === String(orderId));
-            if (wrap) wrap.classList.remove('has-note');
-            const count = (order?.comments || []).length;
-            const seen = JSON.parse(localStorage.getItem('seenComments') || '{}');
-            seen[orderId] = count;
-            localStorage.setItem('seenComments', JSON.stringify(seen));
+    let openDetailOrderId = null;
+
+    function openDetailInModal(orderId) {
+        const modal    = document.getElementById('orderDetailModal');
+        const body     = document.getElementById('orderDetailModalBody');
+        const titleEl  = document.getElementById('orderDetailModalTitle');
+        const subEl    = document.getElementById('orderDetailModalSub');
+        const detail   = document.getElementById(`detail-${orderId}`);
+        const wrap     = document.getElementById(`wrap-${orderId}`);
+        if (!modal || !detail) return;
+
+        const order = orders.find(o => String(o.id) === String(orderId));
+        if (titleEl) titleEl.textContent = order?.taller || '';
+        if (subEl)   subEl.textContent   = order?.pedido || '';
+
+        // Move detail node into modal (no duplicate IDs)
+        body.innerHTML = '';
+        body.appendChild(detail);
+        detail.style.display = 'block';
+
+        modal.style.display = 'flex';
+        openDetailOrderId = String(orderId);
+        openDetails.add(String(orderId));
+
+        // Mark chat as seen
+        if (wrap) wrap.classList.remove('has-note');
+        const count = (order?.comments || []).length;
+        const seen = JSON.parse(localStorage.getItem('seenComments') || '{}');
+        seen[orderId] = count;
+        localStorage.setItem('seenComments', JSON.stringify(seen));
+        setTimeout(() => {
             const thread = document.getElementById(`chat-thread-${orderId}`);
             if (thread) thread.scrollTop = thread.scrollHeight;
+        }, 50);
+    }
+
+    window.toggleOrderDetail = function(orderId) {
+        if (openDetailOrderId === String(orderId)) {
+            closeOrderDetailModal();
+        } else {
+            // Move previous detail back to its card before opening new one
+            if (openDetailOrderId) {
+                const prevDetail = document.getElementById(`detail-${openDetailOrderId}`);
+                const prevWrap   = document.getElementById(`wrap-${openDetailOrderId}`);
+                if (prevDetail && prevWrap) {
+                    prevDetail.style.display = 'none';
+                    prevWrap.appendChild(prevDetail);
+                }
+                openDetails.delete(openDetailOrderId);
+                openDetailOrderId = null;
+            }
+            openDetailInModal(orderId);
         }
+    };
+
+    window.closeOrderDetailModal = function(e) {
+        if (e && e.target !== document.getElementById('orderDetailModal')) return;
+        const modal = document.getElementById('orderDetailModal');
+        if (!modal) return;
+        // Move detail back to its card
+        if (openDetailOrderId) {
+            const prevDetail = document.getElementById(`detail-${openDetailOrderId}`);
+            const prevWrap   = document.getElementById(`wrap-${openDetailOrderId}`);
+            if (prevDetail && prevWrap) {
+                prevDetail.style.display = 'none';
+                prevWrap.appendChild(prevDetail);
+            }
+            openDetails.delete(openDetailOrderId);
+            openDetailOrderId = null;
+        }
+        modal.style.display = 'none';
     };
 
     // --- Admin: All Orders ---
