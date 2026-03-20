@@ -2651,6 +2651,9 @@
         const o = orders.find(item => String(item.id) === String(id));
         if (!o) return;
 
+        // Cerrar el modal de detalle antes de abrir el de edición
+        closeOrderDetailModal();
+
         populateTallerDatalist();
         if (activeTab !== 'ordenes') switchTab('ordenes');
 
